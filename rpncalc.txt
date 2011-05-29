@@ -1,0 +1,119 @@
+RPN Calculator
+==============
+
+The GtkFortran rpncalc program is intended to be both a demonstration
+of some of the capabilities of GtkFortran and also a usable calculator
+application.
+
+It uses Reverse Polish logic (similar to calculators from HP) for 2
+reasons:
+1) It's easier to implement.
+2) I prefer RPN calculators when using a physical calculator.
+
+The stack is of (at least in theory) unlimited size.
+
+Usage
+-----
+
+Entering values:
+
+Values can be entered either using the keypad, or by typing into the
+entry box. Values entered from the keypad make sanity checks for 2
+decimal points or a decimal entered after the exponent has been started
+and the change-sign key works in a reasonably intelligent way.
+
+A value may be transferred from the entry to the stack by pressing the
+keyboard "Enter" key while focus is on the entry window, or by clicking
+the "Enter" key on the keypad. The "Dup" key copies the entry box to
+the stack without clearing the entry box. If the contents of the entry
+box are not a valid number (i.e. a Fortran "read" statement cannot
+convert it to a floating point value) a message is displayed in the
+status bar and you may edit the entry box to correct the problem.
+
+Operators:
+
+The operators (+, -, *, / and ** and the atan2 function) operate on the
+entry box and the top element on the stack if there is anything in the
+entry box. If the entry box is empty, then they operate on the top 2
+elements of the stack.
+
+The result is placed on the top of the stack, and displayed in the
+result window.
+
+Functions:
+
+The functions operate on a single value, which is taken from the entry
+box if that has content or from the top of the stack otherwise. The
+result is placed on the top of the stack, and displayed in the result
+window.
+
+If the "Inverse" checkbox is set, then functions are replaced by their
+inverses (e.g. "sin" becomes "asin"). The less-used functions in the
+pulldown are not affected by this.
+
+The "Rad", "Deg" and "Grad" radio buttons are used to select Radians,
+Degrees or Grads for the trigonometric functions.
+
+The "HMS" key is not a proper function, it doesn't remove or add
+anything to the stack. It displays the contents of the entry box or the
+top of the stack as if it were a number of hours converted to
+HH:MM:SS.sss format.
+
+Some less-used functions are in the "More>" pulldown. The "atan2"
+function computes atan(y/x) removing the quadrant ambiguities.
+ 
+Stack operations:
+
+"CE" clears the entry box, or if that is empty deletes the top entry on
+the stack.
+
+"CA" clears the entry box and all entries on the stack.
+
+The up button moves the selected item in the stack up one place. If the
+top item (or nothing) is selected then it is exchanges with the entry
+box.
+
+The down button moves the selected entry on the stack down one
+place.
+
+The roll down button, moves the last element of the stack to the top
+and all others down one place.
+
+Memory Registers:
+
+The calculator also has 10[*] memory registers (numbered 0-9).
+
+These can be accessed in one of two ways:
+1) Select a register in the registers tab, and then click a memory
+operation. In this case the value used will be the entry box or the top
+of the stack if the entry is empty.
+2) Enter a register number in the entry box and click the memory
+operation. The value used is the top of the stack.
+
+The operations are:
+"STO": Store the value in the selected register.
+"RCL": Copy the selected register to the top of the stack
+"M+": Add the value to the selected register
+"M-": Subtract the value from the selected register
+"MCL": Clear the selected register.
+
+Statistics:
+
+If the "Live stats" toggle is enabled, then a summary of the
+statistical properties of the contents of the stack is maintained in
+the "Statistics" tab of the display area. Clicking on a line of that
+display copies its value to the stack.
+
+Save & Restore:
+
+The stack, registers and entry box can be saved to and restored from a
+text file with the File->Save and File->Restore menu items.
+
+The file format is a plain text file with the floating point values
+written in hexadecimal -- this allows the retention of full-precision
+but is endian-independent. Obviously any machines that do not use IEEE
+floating point values will not be able to read files from other
+machines. Also any machine with a c_double that is not 8-bytes will not
+work.
+
+[*] This can be changed by editing the "maxreg" value in widgets.f90

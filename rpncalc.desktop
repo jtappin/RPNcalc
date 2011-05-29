@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=RPNCalc
+Exec=rpncalc
+Icon=accessories-calculator
+GenericName=RPN Scientific Calculator
+Terminal=false
+Type=Application
+X-KDE-StartupNotify=true
+Categories=Education;Math;
