@@ -82,6 +82,7 @@ contains
 
     call convert_c_string(ctext, nchars, itext)
     call c_f_pointer(ppos, ipos)
+    if (ipos == 0) itext=adjustl(itext)
 
     nentry = gtk_entry_get_text_length(widget)
     cetext = gtk_entry_get_text(widget)
@@ -477,37 +478,36 @@ contains
     character(len=80) :: iom
     integer :: ios
     real(kind=c_double) :: x, y
-    logical :: status
+    logical :: status, sflag
 
+    sflag = .true.
     if (stack_selected <= 0) then ! top element or none
        ! (swap with the entry box)
        nchars = int(gtk_entry_get_text_length(fentry), c_int)
        if (nchars == 0) then ! just pop the top of the stack to the box
           call pop_stack(x, status)
+          sflag=.false.
           if (.not. status) return
           write(ftext,*) x
-          call gtk_entry_set_text(fentry, trim(ftext)//cnull)
+          call gtk_entry_set_text(fentry, trim(adjustl(ftext))//cnull)
        else
-          ctext = gtk_entry_get_text(fentry)
-          call convert_c_string(ctext, nchars, ftext)
-          read(ftext, *, iostat=ios, iomsg=iom) x
-          if (ios /= 0) then
-             mid = gtk_statusbar_push(fstatus, 0, trim(iom)//cnull)
-             return
-          end if
+          call read_entry(x, status, push=.false.)
+          if (.not. status) return
           call pop_stack(y, status)
           if (.not. status) return
           call push_stack(x)
           write(ftext,*) y
-          call gtk_entry_set_text(fentry, trim(ftext)//cnull)
+          call gtk_entry_set_text(fentry, trim(adjustl(ftext))//cnull)
        end if
        call hl_gtk_listn_set_selection(fstack)
     else
        call hl_gtk_listn_swap_rows(fstack, stack_selected, stack_selected-1)
        stack_selected = stack_selected-1
     end if
-    call pop_stack(x, status, readonly=.true.)
-    if (status) call set_result(x)
+    if (sflag) then
+       call pop_stack(x, status, readonly=.true.)
+       if (status) call set_result(x)
+    end if
   end subroutine uppress
 
   subroutine downpress(widget, gdata) bind(c)
@@ -538,7 +538,7 @@ contains
        if (.not. status) return
        call push_stack(x)
        write(ftext,*) y
-       call gtk_entry_set_text(fentry, trim(ftext)//cnull)
+       call gtk_entry_set_text(fentry, trim(adjustl(ftext))//cnull)
        call hl_gtk_listn_set_selection(fstack)
     else
        nrows = hl_gtk_listn_get_n_rows(fstack)
