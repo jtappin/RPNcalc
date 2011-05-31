@@ -79,6 +79,7 @@ contains
     integer :: i, j, iloc
     integer(kind=c_int) :: mid
     logical :: dflag, eflag
+    integer(kind=c_int), target :: opcode
 
     call convert_c_string(ctext, nchars, itext)
     call c_f_pointer(ppos, ipos)
@@ -92,6 +93,7 @@ contains
     dflag=.false.
 
     j=1
+    opcode=OP_NONE
     do i = 1, nchars
        select case(itext(i:i))
        case('0':'9') ! A number, always OK
@@ -129,7 +131,15 @@ contains
           eflag = .true.
 
        case("+","-") ! A sign (OK at the start or immediately after
-          ! an exponent
+          ! an exponent, or at the very end when it's an operator.
+          if (i == nchars .and. ipos == nentry) then
+             if (itext(i:i) == '+') then
+                opcode = OP_PLUS
+             else
+                opcode = OP_MINUS
+             endif
+             exit
+          end if
           if (i > 1) then
              if (scan(itext(i-1:i-1), "EeDd") == 0) cycle
           else if (ipos == 0) then
@@ -142,6 +152,21 @@ contains
           otext(j:j) = itext(i:i)
           j = j+1
 
+       case("*","/","^") ! Operators other than + & -
+          if (i == nchars .and. ipos == nentry) then
+             select case(itext(i:i))
+             case("*")
+                opcode = OP_TIMES
+             case("/")
+                opcode = OP_DIVIDE
+             case("^")
+                opcode = OP_POWER
+             end select
+             exit
+          else
+             cycle
+          end if
+ 
        case default  ! Anything else is invalid
        end select
     end do
@@ -163,7 +188,8 @@ contains
        endif
        if (dflag) decimal_present = .true.
        if (eflag) exponent_present = .true.
-
+       if (opcode /= OP_NONE) call oppress(NULL, c_loc(opcode))
+    
        call g_signal_stop_emission_by_name(widget, "insert-text")
     else
        if (dflag) decimal_present = .true.

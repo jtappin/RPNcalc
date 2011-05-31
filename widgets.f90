@@ -8,6 +8,7 @@ module widgets
   ! Enumerators for operations and functions
 
   enum, bind(c)  ! Operator identifiers
+     enumerator :: OP_NONE
      enumerator :: OP_PLUS
      enumerator :: OP_MINUS
      enumerator :: OP_TIMES
