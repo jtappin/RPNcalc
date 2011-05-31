@@ -140,12 +140,19 @@ contains
     real(kind=c_double), optional :: val
 
     character(len=40) :: text
+    character(len=80) :: iom
+    integer :: ios
+    integer(kind=c_int) :: mid
 
     if (present(val)) then
        if (result_format == "") then
           write(text, *) val
        else
-          write(text, result_format) val
+          write(text, result_format, iostat=ios, iomsg=iom) val
+          if (ios /= 0) then
+             mid = gtk_statusbar_push(fstatus, 0, trim(iom)//cnull)
+             write(text, *) val
+          end if
        end if
        call gtk_entry_set_text(fresult, trim(text)//cnull)
     else

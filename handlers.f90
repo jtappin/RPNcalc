@@ -1266,7 +1266,8 @@ contains
     junk = gtk_label_new("Format:"//cnull)
     call hl_gtk_box_pack(jbb, junk, expand=FALSE)
     fmt_entry = hl_gtk_entry_new(activate=c_funloc(set_format_cb), &
-         & value=trim(result_format)//cnull, editable=TRUE)
+         & value=trim(result_format)//cnull, editable=TRUE, &
+         & tooltip="Enter a Fortran format code for result display"//cnull)
     call hl_gtk_box_pack(jbb, fmt_entry)
     jbb = hl_gtk_box_new(horizontal=TRUE)
     call hl_gtk_box_pack(jb, jbb)
@@ -1293,11 +1294,15 @@ contains
     else
        ctext = gtk_entry_get_text(fmt_entry)
        call convert_c_string(ctext, nchars, res_tmp)
-       idxo = index(res_tmp, "(")
-       idxc = index(res_tmp, ")", back=.true.)
-       if (idxc /= len_trim(res_tmp)) res_tmp = trim(res_tmp)//")"
-       if (idxo /= 1) res_tmp="("//res_tmp
-       result_format=res_tmp
+       if (res_tmp == "*") then
+          result_format = ''
+       else
+          idxo = index(res_tmp, "(")
+          idxc = index(res_tmp, ")", back=.true.)
+          if (idxc /= len_trim(res_tmp)) res_tmp = trim(res_tmp)//")"
+          if (idxo /= 1) res_tmp="("//res_tmp
+          result_format=res_tmp
+       end if
     end if
 
     call gtk_widget_destroy(fmt_window)
