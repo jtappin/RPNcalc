@@ -1,7 +1,29 @@
+! Copyright (C) 2011
+! James Tappin
+
+! This is free software; you can redistribute it and/or modify
+! it under the terms of the GNU General Public License as published by
+! the Free Software Foundation; either version 3, or (at your option)
+! any later version.
+
+! This software is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+
+! You should have received a copy of the GNU General Public License along with
+! this program; see the files COPYING3 and COPYING.RUNTIME respectively.
+! If not, see <http://www.gnu.org/licenses/>.
+
 module utils
+  ! This module contains "utility" functions for RPNcalc. These include
+  ! tools to convert numbers and text and to move values on and off
+  ! the stack and memories.
+
   use iso_c_binding
   use gtk, only: gtk_editable_insert_text, gtk_statusbar_push, &
-       & gtk_button_set_label
+       & gtk_button_set_label, gtk_widget_grab_focus, gtk_editable_set_position
+  use g, only:g_object_set_property
 
   use widgets
   use gtk_hl
@@ -349,5 +371,37 @@ contains
     call hl_gtk_listn_set_cell(fstats, 9, 1, dvalue=s4)
 
   end subroutine stack_stats
+
+  subroutine show_list(col, cell, model, iter, data) bind(c)
+    ! Display data in fortran list-directed default format, note that
+    ! passing the column index via the data argument looks clumsy, but right now
+    ! I can't see a better way. The only example I could find uses enums and so
+    ! can't be used for different columns in different lists.
+
+    type(c_ptr), value :: col, cell, model, iter, data
+
+    character(len=40) :: rstring
+    real(kind=c_double) :: val
+        type(gvalue), target :: cvalue, svalue
+    type(c_ptr) :: val_ptr
+    integer(kind=c_int), pointer :: colno
+
+    call c_f_pointer(data, colno)
+
+    call gtk_tree_model_get_value(model, iter, colno, c_loc(cvalue))
+    val = g_value_get_double(c_loc(cvalue))
+
+    write(rstring, *) val
+
+    val_ptr = c_loc(svalue)
+    val_ptr = g_value_init(val_ptr, G_TYPE_STRING)
+
+    call g_value_set_string(val_ptr, trim(rstring)//cnull)
+    call g_object_set_property(cell, "text"//cnull, val_ptr)
+    if (focus_entry) then
+       call gtk_widget_grab_focus(fentry)
+       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end.
+    end if
+  end subroutine show_list
 
 end module utils

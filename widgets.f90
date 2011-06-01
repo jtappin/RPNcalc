@@ -1,5 +1,23 @@
+! Copyright (C) 2011
+! James Tappin
+
+! This is free software; you can redistribute it and/or modify
+! it under the terms of the GNU General Public License as published by
+! the Free Software Foundation; either version 3, or (at your option)
+! any later version.
+
+! This software is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+
+! You should have received a copy of the GNU General Public License along with
+! this program; see the files COPYING3 and COPYING.RUNTIME respectively.
+! If not, see <http://www.gnu.org/licenses/>.
+
 module widgets
-  ! Global place to store the widget ids and other global values.
+  ! Global place to store the widget ids and other global values needed by RPNcalc.
+
   use iso_c_binding
   use gtk, only: NULL
 
@@ -46,10 +64,10 @@ module widgets
   ! Number of memory registers
   integer(kind=c_int), parameter :: maxreg = 9
 
-  ! number keys & their return flags
+  ! number keys
   type(c_ptr), dimension(10) :: knum
 
-  ! Other keys & their flags
+  ! Other keys
   type(c_ptr) :: kpoint, kplus, kminus, ktimes, kdivide, kce, &
        & kca, kquit, kenter, kchs, kup, kdown, kee, ksin, kcos, ktan, &
        & ksqrt, kinv, kdup, karc, kloge, klog10, kpi, ksinh, kcosh, &
@@ -58,26 +76,26 @@ module widgets
   ! The radians/degrees radio menu.
   type(c_ptr) :: krad, kdeg, kgrad, rdgrp
 
-  ! The pulldown menu for obscure functions
+  ! The pulldown menu for "obscure" functions
   type(c_ptr) :: menu, pull, kabs, kaint, kfrac, katan2, kfact
 
   ! Menubar
   type(c_ptr) :: fmenu, ffmenu, fhmenu, kabout, ksave, krestore, khelp, &
-       & kfabout, femenu, kfedit
+       & kfabout, femenu, kfedit, kefocus
 
   ! Entry & result windows and stack display
   type(c_ptr) :: fentry, fstack, sstack, fresult, sbar, fstatus, &
        & fmemory, smemory, fstats, sstats
 
   ! Windows & containers (and title label)
-  type(c_ptr) :: win, base, keybox, rlabel, mstabs, help_window, &
+  type(c_ptr) :: win, base, keybox, mstabs, help_window, &
        & jbase, junk, fmt_window, fmt_entry
 
   ! Memory keys
   type(c_ptr) :: kmsto, kmrcl, kmplus, kmminus, kmclr, kmcla
 
   ! Modes & flags
-  logical :: eemode=.false., ipush, ipop, iswap, isinv=.false.
+  logical ::  isinv=.false., focus_entry=.false.
   integer(kind=c_int) :: trigunit = 1
 
   ! Flags for "non-repeatable" elements in a number entry.

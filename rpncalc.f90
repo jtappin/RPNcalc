@@ -21,6 +21,8 @@ program rpncalc
   ! It's not that pretty, but it does show some of what it's possible
   ! Gtk-Fortran. Converted from an earlier pilib code.
 
+  ! This source file contains the main program that creates the widgets.
+
   use iso_c_binding !, only: c_ptr, c_null_ptr, c_loc
   use gtk, only: gtk_button_new, gtk_check_button_new, gtk_container_add, gtk_ent&
        &ry_new, gtk_expander_new, gtk_label_new, gtk_main, gtk_menu_item_new, gtk_menu&
@@ -78,6 +80,8 @@ program rpncalc
   femenu = hl_gtk_menu_submenu_new(fmenu, "Edit"//cnull)
   kfedit = hl_gtk_menu_item_new(femenu, "Result Format"//cnull, &
        & activate=c_funloc(set_format_make))
+  kefocus = hl_gtk_check_menu_item_new(femenu, "Hold entry focus"//cnull, &
+       & toggled = c_funloc(set_entry_focus))
 
   fhmenu = hl_gtk_menu_submenu_new(fmenu, "Help"//cnull)
   khelp = hl_gtk_menu_item_new(fhmenu, "Help"//cnull, &

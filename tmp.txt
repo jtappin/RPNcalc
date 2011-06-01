@@ -7,10 +7,11 @@
 & ''//c_new_line// &
 & 'It uses Reverse Polish logic (similar to calculators from HP) for 2'//c_new_line// &
 & 'reasons:'//c_new_line// &
-& '1) It''s easier to implement.'//c_new_line// &
+& '1) It's easier to implement.'//c_new_line// &
 & '2) I prefer RPN calculators when using a physical calculator.'//c_new_line// &
 & ''//c_new_line// &
-& 'The stack is of (at least in theory) unlimited size.'//c_new_line// &
+& 'The stack is of (at least in theory) unlimited size (there is probably'//c_new_line// &
+& 'a limit on the length of a TreeView in Gtk+).'//c_new_line// &
 & ''//c_new_line// &
 & 'Usage'//c_new_line// &
 & '-----'//c_new_line// &
@@ -20,7 +21,9 @@
 & 'Values can be entered either using the keypad, or by typing into the'//c_new_line// &
 & 'entry box. Values entered from the keypad make sanity checks for 2'//c_new_line// &
 & 'decimal points or a decimal entered after the exponent has been started'//c_new_line// &
-& 'and the change-sign key works in a reasonably intelligent way.'//c_new_line// &
+& 'and the change-sign key works in a reasonably intelligent way. When'//c_new_line// &
+& 'values are typed or pasted into the entry box, characters that cannot'//c_new_line// &
+& 'be part of a number are rejected with a warning.'//c_new_line// &
 & ''//c_new_line// &
 & 'A value may be transferred from the entry to the stack by pressing the'//c_new_line// &
 & 'keyboard "Enter" key while focus is on the entry window, or by clicking'//c_new_line// &
@@ -36,6 +39,13 @@
 & 'entry box and the top element on the stack if there is anything in the'//c_new_line// &
 & 'entry box. If the entry box is empty, then they operate on the top 2'//c_new_line// &
 & 'elements of the stack.'//c_new_line// &
+& ''//c_new_line// &
+& 'Operators may also be accessed by typing the operator into the entry'//c_new_line// &
+& 'window (N.B. The exponentiation operator is "^" rather than "**" for'//c_new_line// &
+& 'convenience of implementation). The addition amd subtraction operators'//c_new_line// &
+& 'will only work in this way if a sign would not be a valid part of a'//c_new_line// &
+& 'number where they are entered, notably "+" or "-" in an empty entry box'//c_new_line// &
+& 'is not treated as an operator. '//c_new_line// &
 & ''//c_new_line// &
 & 'The result is placed on the top of the stack, and displayed in the'//c_new_line// &
 & 'result window.'//c_new_line// &
@@ -54,7 +64,7 @@
 & 'The "Rad", "Deg" and "Grad" radio buttons are used to select Radians,'//c_new_line// &
 & 'Degrees or Grads for the trigonometric functions.'//c_new_line// &
 & ''//c_new_line// &
-& 'The "HMS" key is not a proper function, it doesn''t remove or add'//c_new_line// &
+& 'The "HMS" key is not a proper function, it doesn't remove or add'//c_new_line// &
 & 'anything to the stack. It displays the contents of the entry box or the'//c_new_line// &
 & 'top of the stack as if it were a number of hours converted to'//c_new_line// &
 & 'HH:MM:SS.sss format.'//c_new_line// &
@@ -115,5 +125,15 @@
 & 'floating point values will not be able to read files from other'//c_new_line// &
 & 'machines. Also any machine with a c_double that is not 8-bytes will not'//c_new_line// &
 & 'work.'//c_new_line// &
+& ''//c_new_line// &
+& 'Settings:'//c_new_line// &
+& 'In the current version, there are 2 user-definable settings accessed'//c_new_line// &
+& 'through the "Edit" menu:'//c_new_line// &
+& '"Result Format": Specify the format (using any Fortran formatting code'//c_new_line// &
+& 'valid for a REAL type) to use in the result box. Setting it to "*" or'//c_new_line// &
+& 'an empty string will use the default list-directed output (as will an'//c_new_line// &
+& 'invalid format).'//c_new_line// &
+& '"Hold Entry Focus": If this is enabled, then the input focus always'//c_new_line// &
+& 'snaps back to the entry window after any operation.'//c_new_line// &
 & ''//c_new_line// &
 & '[*] This can be changed by editing the "maxreg" value in widgets.f90'//cnull &

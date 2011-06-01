@@ -7,10 +7,11 @@ application.
 
 It uses Reverse Polish logic (similar to calculators from HP) for 2
 reasons:
-1) It's easier to implement.
-2) I prefer RPN calculators when using a physical calculator.
+1. It's easier to implement.
+2. I prefer RPN when using a physical calculator.
 
-The stack is of (at least in theory) unlimited size.
+The stack is of (at least in theory) unlimited size (there is probably
+a limit on the length of a TreeView in Gtk+).
 
 Usage
 -----
@@ -20,7 +21,9 @@ Entering values:
 Values can be entered either using the keypad, or by typing into the
 entry box. Values entered from the keypad make sanity checks for 2
 decimal points or a decimal entered after the exponent has been started
-and the change-sign key works in a reasonably intelligent way.
+and the change-sign key works in a reasonably intelligent way. When
+values are typed or pasted into the entry box, characters that cannot
+be part of a number are rejected with a warning.
 
 A value may be transferred from the entry to the stack by pressing the
 keyboard "Enter" key while focus is on the entry window, or by clicking
@@ -36,6 +39,13 @@ The operators (+, -, *, / and ** and the atan2 function) operate on the
 entry box and the top element on the stack if there is anything in the
 entry box. If the entry box is empty, then they operate on the top 2
 elements of the stack.
+
+Operators may also be accessed by typing the operator into the entry
+window (N.B. The exponentiation operator is "^" rather than "**" for
+convenience of implementation). The addition amd subtraction operators
+will only work in this way if a sign would not be a valid part of a
+number where they are entered, notably "+" or "-" in an empty entry box
+is not treated as an operator. 
 
 The result is placed on the top of the stack, and displayed in the
 result window.
@@ -115,5 +125,15 @@ but is endian-independent. Obviously any machines that do not use IEEE
 floating point values will not be able to read files from other
 machines. Also any machine with a c_double that is not 8-bytes will not
 work.
+
+Settings:
+In the current version, there are 2 user-definable settings accessed
+through the "Edit" menu:
+"Result Format": Specify the format (using any Fortran formatting code
+valid for a REAL type) to use in the result box. Setting it to "*" or
+an empty string will use the default list-directed output (as will an
+invalid format).
+"Hold Entry Focus": If this is enabled, then the input focus always
+snaps back to the entry window after any operation.
 
 [*] This can be changed by editing the "maxreg" value in widgets.f90
