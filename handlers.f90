@@ -1031,23 +1031,10 @@ contains
 
   subroutine save_values(widget, gdata) bind(c)
     ! Save the stack and registers
-    ! NOTE: We use a formatted file and write the reals in Hex to get
-    ! full precision and endianness invariance.
     type(c_ptr), value :: widget, gdata
 
     integer(kind=c_int) :: response
-    integer(kind=c_int) :: nrows, nchars
-    type(c_ptr) :: cetext
-    character(len=40) :: fetext
-    real(kind=c_double) :: val
     character(len=256), dimension(:), allocatable :: file
-    integer :: i
-    character(len=8) :: dformat
-
-    ! WARNING: This assumes that real kinds are the number of bytes
-    ! which may not be quite portable. (If your compiler has it, use the
-    ! C_SIZEOF function instead).
-    write(dformat, "('(Z',I0')')") 2*c_double
 
     response = hl_gtk_file_chooser_show(file, confirm_overwrite=TRUE, &
          & parent=win, filter=(/"*.rpn"/), &
@@ -1059,61 +1046,17 @@ contains
     end if
     if (response == FALSE) return
 
-    open(47, file=file(1), action="write", form="formatted")
+    call save_all(file(1))
     deallocate(file)
 
-    nchars=gtk_entry_get_text_length(fentry)
-    if (nchars > 0) then
-       cetext = gtk_entry_get_text(fentry)
-       call convert_c_string(cetext, nchars, fetext)
-       write(47, "(A/I0/A)") "Entry",nchars,fetext
-    else
-       write(47, "(A/I0)") "Entry",0
-    endif
-
-    nrows = hl_gtk_listn_get_n_rows(fstack)
-    write(47, "(A/I0)") "Stack", nrows
-    do i = 0, nrows-1
-       call hl_gtk_listn_get_cell(fstack, i, 0, dvalue=val)
-       write(47, dformat) val
-    end do
-
-    write(47, "(A/I0)") "Regs", maxreg
-    do i = 0, maxreg
-       call hl_gtk_listn_get_cell(fmemory, i, 1, dvalue=val)
-       write(47, dformat) val
-    end do
-
-    write(47, "(A)") "Stats"
-    do i = 0, 9
-       call hl_gtk_listn_get_cell(fstats, i, 1, dvalue=val)
-       write(47, dformat) val
-    end do
-
-    write(47, "(A/A)") "Form", result_format
-
-    close(47)
   end subroutine save_values
 
   subroutine restore_values(widget, gdata) bind(c)
     ! restore the stack and registers
-    ! NOTE: We use a formatted file and write the reals in Hex to getc
-    ! full precision and endianness invariance.
     type(c_ptr), value :: widget, gdata
 
     integer(kind=c_int) :: response
-    integer(kind=c_int) :: nrows, nchars, mid
-    character(len=40) :: etext
-    real(kind=c_double) :: val
     character(len=256), dimension(:), allocatable :: file
-    integer :: i, ios
-    character(len=5) :: tag
-    character(len=8) :: dformat
-
-    ! WARNING: This assumes that real kinds are the number of bytes
-    ! which may not be quite portable. (If your compiler has it, use the
-    ! C_SIZEOF function instead).
-    write(dformat, "('(Z',I0')')") 2*c_double
 
     response = hl_gtk_file_chooser_show(file, create=FALSE, &
          & parent=win, filter=(/"*.rpn"/), &
@@ -1125,55 +1068,10 @@ contains
     end if
     if (response == FALSE) return
 
-    open(47, file=file(1), action="read", form="formatted")
+    call restore_all(file(1))
+
     deallocate(file)
 
-    call hl_gtk_listn_rem(fstack)   ! clear the stack
-
-    do
-       read(47, "(A)", iostat=ios) tag
-       if (ios /= 0) exit
-
-       select case(tag)
-       case("Entry")
-          read(47, *) nchars
-          if (nchars > 0) then
-             read(47, "(A)") etext
-             call gtk_entry_set_text(fentry, trim(etext)//cnull)
-          else
-             call gtk_entry_set_text(fentry, cnull)
-          end if
-       case("Stack")
-          read(47, *) nrows
-          do i = 0, nrows-1
-             read(47, dformat) val
-             call hl_gtk_listn_ins(fstack)
-             call hl_gtk_listn_set_cell(fstack, i, 0, dvalue=val)
-             if (i == 0) call set_result(val)
-          end do
-       case("Stats")
-          do i = 0, 9
-             read(47, dformat) val
-             call hl_gtk_listn_set_cell(fstats, i, 1, dvalue=val)
-          end do
-       case("Regs")
-          read(47, *) nrows
-          if (nrows > maxreg) mid = gtk_statusbar_push(fstatus, 0, &
-               & "Too many registers"//cnull)
-          do i = 0, nrows
-             read(47, dformat) val
-             if (i > maxreg) cycle
-             call hl_gtk_listn_set_cell(fmemory, i, 1, dvalue=val)
-          end do
-       case("Form")
-          read(47,"(A)") result_format
-       case default
-          mid = gtk_statusbar_push(fstatus, 0, &
-               & "Unknown tag: "//tag//cnull)
-       end select
-    end do
-
-    close(47)
   end subroutine restore_values
 
   subroutine show_help(widget, gdata) bind(c)

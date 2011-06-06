@@ -21,6 +21,13 @@ program rpncalc
   ! It's not that pretty, but it does show some of what it's possible
   ! Gtk-Fortran. Converted from an earlier pilib code.
 
+  ! Usage:
+  !	rpncalc [-o|-open|-c|-closed] [{-r|--restore} <file>]
+  !
+  !	-o, --open: Start with the stack displays open (default)
+  !	-c, --closed: Start with the stack displays closed
+  !	-r, --restore: Restore the specified file.
+
   ! This source file contains the main program that creates the widgets.
 
   use iso_c_binding !, only: c_ptr, c_null_ptr, c_loc
@@ -55,14 +62,47 @@ program rpncalc
   integer :: ix, iy
   integer(kind=c_int) :: idx
 
-  ! Creating the interface
+  ! Command line argument handling
+  integer :: iarg, narg, status
+  character(len=80) :: arg
+  integer(kind=c_int) :: isopen = TRUE
+  character(len=200) :: restfile = ''
+
+  ! Check for command line arguments
+  
+  narg = command_argument_count()
+  iarg = 1
+  do 
+     call get_command_argument(iarg, arg)
+     select case(arg)
+     case("-o", "--open")         ! Start with the stack display open (default)
+        isopen = TRUE
+     case("-c", "--closed")       ! Start with the stack display closed
+        isopen = FALSE
+     case("-r", "--restore")      ! Restore a save file
+        if (iarg == narg) then
+           write(0, *) "RPNcalc: ",trim(arg)," option needs an argument"
+        else
+           call get_command_argument(iarg+1, restfile)
+           if (index(restfile,'-') == 1) then
+              write(0, *) "RPNcalc: ",trim(arg)," option needs an argument"
+           else
+              iarg = iarg+1
+           end if
+        end if
+     case default                 ! Bad option
+        write(0, *) "RPNcalc: Unknown option:", trim(arg)
+     end select
+     iarg = iarg+1
+     if (iarg > narg) exit
+  end do
 
   ! Initialise gtk
   call gtk_init()
 
   ! Create a window and put a vertical box into it
   win = hl_gtk_window_new("RPN Calculator", destroy=c_funloc(my_destroy), &
-       & resizable=TRUE)
+       & resizable=FALSE)
   base = hl_gtk_box_new()
   call gtk_container_add(win, base)
 
@@ -319,10 +359,15 @@ program rpncalc
        & tooltip="Clear all registers"//cnull, data=c_loc(pmcla))
   call hl_gtk_table_attach(keybox, kmcla, 5, 6)
 
+  ! AN expander to show/hide the displays
+  fexpand = gtk_expander_new("Displays"//cnull)
+  call hl_gtk_box_pack(base, fexpand)
+  call gtk_expander_set_expanded(fexpand, isopen)
+
   ! Notebook for stack & registers.
   mstabs = hl_gtk_notebook_new()
-  call hl_gtk_box_pack(base, mstabs)
-
+!  call hl_gtk_box_pack(base, mstabs)
+  call gtk_container_add(fexpand, mstabs)
   ! Stack display
 
   fstack = hl_gtk_listn_new(sstack, changed=c_funloc(stacksel), &
@@ -373,6 +418,9 @@ program rpncalc
 
   ! Realize
   call gtk_widget_show_all(win)
+
+  ! If a restore file was set, restore it now.
+  if (restfile /= '') call restore_all(restfile, status)
 
   ! End of interface creation
   ! Event loop
