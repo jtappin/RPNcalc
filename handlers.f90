@@ -1100,14 +1100,26 @@ contains
          & ''//c_new_line// &
          & 'It uses Reverse Polish logic (similar to calculators from HP) for 2'//c_new_line// &
          & 'reasons:'//c_new_line// &
-         & '1) It''s easier to implement.'//c_new_line// &
-         & '2) I prefer RPN calculators when using a physical calculator.'//c_new_line// &
+         & '1. It''s easier to implement.'//c_new_line// &
+         & '2. I prefer RPN when using a physical calculator.'//c_new_line// &
          & ''//c_new_line// &
          & 'The stack is of (at least in theory) unlimited size (there is probably'//c_new_line// &
          & 'a limit on the length of a TreeView in Gtk+).'//c_new_line// &
          & ''//c_new_line// &
          & 'Usage'//c_new_line// &
          & '-----'//c_new_line// &
+         & ''//c_new_line// &
+         & 'Invoking:'//c_new_line// &
+         & ''//c_new_line// &
+         & 'On most Linux/Unix desktops, when installed a menu item to start the'//c_new_line// &
+         & 'calculator will be added to the "Education" section of the start menu.'//c_new_line// &
+         & ''//c_new_line// &
+         & 'rpncalc can also be started from the command line:'//c_new_line// &
+         & '  rpncalc [-o|-open|-c|-closed] [{-r|--restore} <file>]'//c_new_line// &
+         & ''//c_new_line// &
+         & '  -o, --open: Start with the stack displays open (default)'//c_new_line// &
+         & '  -c, --closed: Start with the stack displays closed'//c_new_line// &
+         & '  -r, --restore: Restore the specified file.'//c_new_line// &
          & ''//c_new_line// &
          & 'Entering values:'//c_new_line// &
          & ''//c_new_line// &
@@ -1135,7 +1147,7 @@ contains
          & ''//c_new_line// &
          & 'Operators may also be accessed by typing the operator into the entry'//c_new_line// &
          & 'window (N.B. The exponentiation operator is "^" rather than "**" for'//c_new_line// &
-         & 'convenience of implementation). The addition amd subtraction operators'//c_new_line// &
+         & 'convenience of implementation). The addition and subtraction operators'//c_new_line// &
          & 'will only work in this way if a sign would not be a valid part of a'//c_new_line// &
          & 'number where they are entered, notably "+" or "-" in an empty entry box'//c_new_line// &
          & 'is not treated as an operator. '//c_new_line// &

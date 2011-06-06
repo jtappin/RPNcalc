@@ -16,6 +16,18 @@ a limit on the length of a TreeView in Gtk+).
 Usage
 -----
 
+Invoking:
+
+On most Linux/Unix desktops, when installed a menu item to start the
+calculator will be added to the "Education" section of the start menu.
+
+rpncalc can also be started from the command line:
+  rpncalc [-o|-open|-c|-closed] [{-r|--restore} <file>]
+
+  -o, --open: Start with the stack displays open (default)
+  -c, --closed: Start with the stack displays closed
+  -r, --restore: Restore the specified file.
+
 Entering values:
 
 Values can be entered either using the keypad, or by typing into the
@@ -42,7 +54,7 @@ elements of the stack.
 
 Operators may also be accessed by typing the operator into the entry
 window (N.B. The exponentiation operator is "^" rather than "**" for
-convenience of implementation). The addition amd subtraction operators
+convenience of implementation). The addition and subtraction operators
 will only work in this way if a sign would not be a valid part of a
 number where they are entered, notably "+" or "-" in an empty entry box
 is not treated as an operator. 
