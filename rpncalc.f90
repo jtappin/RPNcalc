@@ -69,11 +69,15 @@ program rpncalc
   character(len=200) :: restfile = ''
 
   ! Check for command line arguments
-  
+
   narg = command_argument_count()
   iarg = 1
-  do 
-     call get_command_argument(iarg, arg)
+  do
+     if (iarg > narg) exit
+     call get_command_argument(iarg, arg, status=status)
+     if (status > 0) exit
+     if (status < 0) write(0,*) "RPNcalc: Warning argument truncated"
+
      select case(arg)
      case("-o", "--open")         ! Start with the stack display open (default)
         isopen = TRUE
@@ -94,7 +98,6 @@ program rpncalc
         write(0, *) "RPNcalc: Unknown option:", trim(arg)
      end select
      iarg = iarg+1
-     if (iarg > narg) exit
   end do
 
   ! Initialise gtk

@@ -1235,9 +1235,23 @@ contains
          & 'In the current version, there are 2 user-definable settings accessed'//c_new_line// &
          & 'through the "Edit" menu:'//c_new_line// &
          & '"Result Format": Specify the format (using any Fortran formatting code'//c_new_line// &
-         & 'valid for a REAL type) to use in the result box. Setting it to "*" or'//c_new_line// &
-         & 'an empty string will use the default list-directed output (as will an'//c_new_line// &
-         & 'invalid format).'//c_new_line// &
+         & 'valid for a REAL type) to use in the result box. You have the'//c_new_line// &
+         & 'options to select one of the standard formats:'//c_new_line// &
+         & '  "Fixed": A fixed number of decimal places (set in the precision spin'//c_new_line// &
+         & '  box). The actual format used is "(F0.<n>)". WARNING: this may be a'//c_new_line// &
+         & '  GNU extension.'//c_new_line// &
+         & '  "Sci": Scientific format. Specify the number of decimals, and the'//c_new_line// &
+         & '  width of the exponent in the spin boxes. The total width is'//c_new_line// &
+         & '  calculated automatically.'//c_new_line// &
+         & '  "Eng": Similar to scientific, except that the exponent is always a'//c_new_line// &
+         & '  multiple of 3.'//c_new_line// &
+         & '  "Free": Use a list-directed write.'//c_new_line// &
+         & ''//c_new_line// &
+         & '  Alternatively you can type an explicit Fortran format statement into'//c_new_line// &
+         & '  the combo box (with or without the enclosing parentheses). Setting it'//c_new_line// &
+         & '  to "*" or an empty string will use the default list-directed output'//c_new_line// &
+         & '  (as will an invalid format).'//c_new_line// &
+         & ''//c_new_line// &
          & '"Hold Entry Focus": If this is enabled, then the input focus always'//c_new_line// &
          & 'snaps back to the entry window after any operation.'//c_new_line// &
          & ''//c_new_line// &
@@ -1340,8 +1354,8 @@ contains
     fmt_choose = hl_gtk_combo_box_new(has_entry=TRUE, &
          & changed=c_funloc(set_format_type_cb), &
          & initial_choices=(/"Fixed","Sci  ","Eng  ","Free "/), &
+         & active = fmt_type, &
          & tooltip="Choose a format type or give a Fortran format code"//cnull)
-    call gtk_combo_box_set_active(fmt_choose, fmt_type)
     call hl_gtk_box_pack(jbb, fmt_choose)
 
     jbb = hl_gtk_box_new(horizontal=TRUE)
@@ -1423,7 +1437,7 @@ contains
     case(3)                ! List-directed
        result_format = ''
     case(-1)               ! An explicit format
-       dummy = hl_gtk_combo_box_get_active(widget, ftext = res_tmp)
+       dummy = hl_gtk_combo_box_get_active(fmt_choose, ftext = res_tmp)
        if (res_tmp == "*") then
           result_format = ''
        else
