@@ -106,7 +106,7 @@ module widgets
 
   ! The display format
   type(c_ptr) :: fmt_window, fmt_choose, fmt_precision, fmt_expsize
-  integer(kind=c_int) :: fmt_type=3, fmt_decimal=5, fmt_expplaces=2
+  integer(kind=c_int) :: fmt_type=4, fmt_decimal=5, fmt_expplaces=2
   character(len=20) :: result_format=""
 
   ! Statistics
