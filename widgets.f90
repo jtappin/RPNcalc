@@ -89,7 +89,7 @@ module widgets
 
   ! Windows & containers (and title label)
   type(c_ptr) :: win, base, keybox, mstabs, help_window, &
-       & jbase, junk, fmt_window, fmt_entry
+       & jbase, junk
 
   ! Memory keys
   type(c_ptr) :: kmsto, kmrcl, kmplus, kmminus, kmclr, kmcla
@@ -105,6 +105,8 @@ module widgets
   integer(kind=c_int) :: stack_selected = -1, mem_selected = -1
 
   ! The display format
+  type(c_ptr) :: fmt_window, fmt_choose, fmt_precision, fmt_expsize
+  integer(kind=c_int) :: fmt_type=3, fmt_decimal=5, fmt_expplaces=2
   character(len=20) :: result_format=""
 
   ! Statistics

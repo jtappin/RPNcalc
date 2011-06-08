@@ -28,7 +28,7 @@ module handlers
        & gtk_about_dialog_set_authors, gtk_main,&
        & gtk_window_set_transient_for, gtk_about_dialog_set_website, &
        & gtk_check_menu_item_get_active, gtk_widget_grab_focus, &
-       & gtk_editable_set_position
+       & gtk_editable_set_position, gtk_combo_box_set_active
 
   use g, only:  g_signal_stop_emission_by_name
 
@@ -1235,9 +1235,23 @@ contains
          & 'In the current version, there are 2 user-definable settings accessed'//c_new_line// &
          & 'through the "Edit" menu:'//c_new_line// &
          & '"Result Format": Specify the format (using any Fortran formatting code'//c_new_line// &
-         & 'valid for a REAL type) to use in the result box. Setting it to "*" or'//c_new_line// &
-         & 'an empty string will use the default list-directed output (as will an'//c_new_line// &
-         & 'invalid format).'//c_new_line// &
+         & 'valid for a REAL type) to use in the result box. You have the'//c_new_line// &
+         & 'options to select one of the standard formats:'//c_new_line// &
+         & '  "Fixed": A fixed number of decimal places (set in the precision spin'//c_new_line// &
+         & '  box). The actual format used is "(F0.<n>)". WARNING: this may be a'//c_new_line// &
+         & '  GNU extension.'//c_new_line// &
+         & '  "Sci": Scientific format. Specify the number of decimals, and the'//c_new_line// &
+         & '  width of the exponent in the spin boxes. The total width is'//c_new_line// &
+         & '  calculated automatically.'//c_new_line// &
+         & '  "Eng": Similar to scientific, except that the exponent is always a'//c_new_line// &
+         & '  multiple of 3.'//c_new_line// &
+         & '  "Free": Use a list-directed write.'//c_new_line// &
+         & ''//c_new_line// &
+         & '  Alternatively you can type an explicit Fortran format statement into'//c_new_line// &
+         & '  the combo box (with or without the enclosing parentheses). Setting it'//c_new_line// &
+         & '  to "*" or an empty string will use the default list-directed output'//c_new_line// &
+         & '  (as will an invalid format).'//c_new_line// &
+         & ''//c_new_line// &
          & '"Hold Entry Focus": If this is enabled, then the input focus always'//c_new_line// &
          & 'snaps back to the entry window after any operation.'//c_new_line// &
          & ''//c_new_line// &
@@ -1320,20 +1334,53 @@ contains
     type(c_ptr), value :: widget, gdata
 
     type(c_ptr) :: jb, jbb, junk
+    integer(kind=c_int) :: issens
 
     fmt_window = hl_gtk_window_new("Set format"//cnull, above=TRUE, &
          & destroy=c_funloc(set_format_destroy), parent=win)
 
     jb = hl_gtk_box_new()
     call gtk_container_add(fmt_window, jb)
+
+    jbb = hl_gtk_box_new(horizontal=TRUE)
+    call hl_gtk_box_pack(jb, jbb)
+    junk = gtk_label_new("Current format = "//trim(result_format)//cnull)
+    call hl_gtk_box_pack(jbb, junk, expand=FALSE)
+
     jbb = hl_gtk_box_new(horizontal=TRUE)
     call hl_gtk_box_pack(jb, jbb)
     junk = gtk_label_new("Format:"//cnull)
     call hl_gtk_box_pack(jbb, junk, expand=FALSE)
-    fmt_entry = hl_gtk_entry_new(activate=c_funloc(set_format_cb), &
-         & value=trim(result_format)//cnull, editable=TRUE, &
-         & tooltip="Enter a Fortran format code for result display"//cnull)
-    call hl_gtk_box_pack(jbb, fmt_entry)
+    fmt_choose = hl_gtk_combo_box_new(has_entry=TRUE, &
+         & changed=c_funloc(set_format_type_cb), &
+         & initial_choices=(/"Fixed","Sci  ","Eng  ","Free "/), &
+         & active = fmt_type, &
+         & tooltip="Choose a format type or give a Fortran format code"//cnull)
+    call hl_gtk_box_pack(jbb, fmt_choose)
+
+    jbb = hl_gtk_box_new(horizontal=TRUE)
+    call hl_gtk_box_pack(jb, jbb)
+    junk = gtk_label_new("Precision:"//cnull)
+    call hl_gtk_box_pack(jbb, junk, expand=FALSE)
+    if (fmt_type >= 0 .and. fmt_type <= 2) then
+       issens = TRUE
+    else
+       issens=FALSE
+    end if
+    fmt_precision = hl_gtk_spin_button_new(1, 30, initial_value=fmt_decimal, &
+         & sensitive=issens, tooltip="Set the number of decimal places"//cnull)
+    call hl_gtk_box_pack(jbb, fmt_precision)
+    junk = gtk_label_new("Exponent:"//cnull)
+    call hl_gtk_box_pack(jbb, junk, expand=FALSE)
+    if (fmt_type >= 1 .and. fmt_type <= 2) then
+       issens = TRUE
+    else
+       issens=FALSE
+    end if
+    fmt_expsize = hl_gtk_spin_button_new(1, 3, initial_value=fmt_expplaces,&
+         & sensitive=issens, tooltip="Set the width of the exponent"//cnull)
+    call hl_gtk_box_pack(jbb, fmt_expsize)
+
     jbb = hl_gtk_box_new(horizontal=TRUE)
     call hl_gtk_box_pack(jb, jbb)
     junk = hl_gtk_button_new("Apply"//cnull, clicked=c_funloc(set_format_cb))
@@ -1344,21 +1391,53 @@ contains
     call gtk_widget_show_all(fmt_window)
   end subroutine set_format_make
 
+  subroutine set_format_type_cb(widget, gdata) bind(c)
+    ! Set the display format type
+    type(c_ptr), value :: widget, gdata
+
+    fmt_type = hl_gtk_combo_box_get_active(widget)
+
+    select case(fmt_type)
+    case(0)             ! Fixed
+       call gtk_widget_set_sensitive(fmt_precision, TRUE)
+       call gtk_widget_set_sensitive(fmt_expsize, FALSE)
+    case(1,2)           ! Sci, eng
+       call gtk_widget_set_sensitive(fmt_precision, TRUE)
+       call gtk_widget_set_sensitive(fmt_expsize, TRUE)
+    case(3,-1)          ! Free, explicit
+       call gtk_widget_set_sensitive(fmt_precision, FALSE)
+       call gtk_widget_set_sensitive(fmt_expsize, FALSE)
+    end select
+  end subroutine set_format_type_cb
+
   subroutine set_format_cb(widget, gdata) bind(c)
     ! Set the display format
     type(c_ptr), value :: widget, gdata
 
-    integer(kind=c_int) :: nchars
-    type(c_ptr) :: ctext
-    character(len=20) :: res_tmp
-    integer :: idxo, idxc
+    integer(kind=c_int) :: nchars, dummy
+    character(len=40) :: res_tmp
+    integer :: idxc, idxo
 
-    nchars = gtk_entry_get_text_length(fmt_entry)
-    if (nchars == 0) then
+    select case(fmt_type)
+    case(0)                ! Fixed
+       fmt_decimal = hl_gtk_spin_button_get_value(fmt_precision)
+       write(result_format,"('(F0.',i0')')") fmt_decimal
+    case(1)                ! Scientific
+       fmt_decimal = hl_gtk_spin_button_get_value(fmt_precision)
+       fmt_expplaces = hl_gtk_spin_button_get_value(fmt_expsize)
+       nchars = 5+fmt_decimal+fmt_expplaces
+       write(result_format, "('(ES',i0,'.',i0,'e',i0,')')") nchars, &
+            & fmt_decimal, fmt_expplaces
+    case(2)                ! Engineering
+       fmt_decimal = hl_gtk_spin_button_get_value(fmt_precision)
+       fmt_expplaces = hl_gtk_spin_button_get_value(fmt_expsize)
+       nchars = 7+fmt_decimal+fmt_expplaces
+       write(result_format, "('(EN',i0,'.',i0,'e',i0,')')") nchars, &
+            & fmt_decimal, fmt_expplaces
+    case(3)                ! List-directed
        result_format = ''
-    else
-       ctext = gtk_entry_get_text(fmt_entry)
-       call convert_c_string(ctext, nchars, res_tmp)
+    case(-1)               ! An explicit format
+       dummy = hl_gtk_combo_box_get_active(fmt_choose, ftext = res_tmp)
        if (res_tmp == "*") then
           result_format = ''
        else
@@ -1368,7 +1447,7 @@ contains
           if (idxo /= 1) res_tmp="("//res_tmp
           result_format=res_tmp
        end if
-    end if
+    end select
 
     call gtk_widget_destroy(fmt_window)
     if (focus_entry) then
