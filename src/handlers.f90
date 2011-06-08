@@ -229,7 +229,7 @@ contains
   end subroutine char_deleted
 
   subroutine numpress(widget, gdata) bind(c)
-    ! Keypad number entry -- gdata will contain the number
+    ! Keypad number entry -- gdata will be a pointer to the number
     type(c_ptr), value :: widget, gdata
 
     character, pointer :: fdata
@@ -421,7 +421,8 @@ contains
   end subroutine duppress
 
   subroutine oppress(widget, gdata) bind(c)
-    ! One of the operators (including ATAN2).
+    ! One of the operators (including ATAN2). Gdata is a pointer
+    ! to the operation code
 
     type(c_ptr), value :: widget, gdata
 
@@ -554,6 +555,7 @@ contains
     real(kind=c_double) :: x, y
     logical :: status, sflag
 
+    mid = gtk_statusbar_push(fstatus, 0, cnull)
     sflag = .true.
     if (focus_entry) then
        call gtk_widget_grab_focus(fentry)
@@ -601,6 +603,7 @@ contains
     integer(kind=c_int) :: isel, nrows
     logical :: status
 
+    mid = gtk_statusbar_push(fstatus, 0, cnull)
     if (focus_entry) then
        call gtk_widget_grab_focus(fentry)
        call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
@@ -645,8 +648,9 @@ contains
 
     integer(kind=c_int), dimension(:), allocatable :: idx
     integer :: i
-    integer(kind=c_int) :: nrows
+    integer(kind=c_int) :: nrows,mid
 
+    mid = gtk_statusbar_push(fstatus, 0, cnull)
     nrows = hl_gtk_listn_get_n_rows(fstack)
     if (nrows <= 1) return  ! Empty or 1 row can't roll
 
@@ -664,7 +668,8 @@ contains
   end subroutine rollpress
 
   subroutine funpress(widget, gdata) bind(c)
-    ! The 1-argument functions
+    ! The 1-argument functions. GDATA is a pointer to the
+    ! function identifier.
     type(c_ptr), value :: widget, gdata
 
     real(kind=c_double) :: x, z, acf
@@ -898,36 +903,6 @@ contains
        call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
     end if
   end subroutine stacksel
-
-  subroutine about_rpn(widget, gdata) bind(c)
-    ! Display an about dialogue
-    type(c_ptr), value :: widget, gdata
-
-    type(c_ptr) :: adialog
-    integer(kind=c_int) :: response
-    character(kind=c_char), dimension(:), allocatable, target :: au1
-    type(c_ptr), dimension(2) :: authors
-
-    call convert_f_string((/ "James Tappin" /), au1)
-    authors(1) = c_loc(au1)
-    authors(2) = NULL
-
-    adialog = gtk_about_dialog_new()
-    call gtk_window_set_transient_for(adialog, win)
-    call gtk_about_dialog_set_program_name(adialog, "RPN Calculator"//CNULL)
-    call gtk_about_dialog_set_license(adialog, "GNU GPL 3"//CNULL)
-    call gtk_about_dialog_set_comments(adialog, &
-         & "This RPN calculator is a demonstration"//c_new_line// &
-         & "of the capabilities of Gtk-fortran."//c_new_line//c_new_line// &
-         & "It is entirely written in Fortran 95/2003."//c_new_line// &
-         & "It should work with both Gtk+-2.24 and 3.0"//cnull)
-    call gtk_about_dialog_set_authors(adialog, authors)
-    call gtk_about_dialog_set_website(adialog, &
-         & "https://github.com/jtappin/RPNcalc/wiki"//CNULL)
-
-    response = gtk_dialog_run(adialog)
-    call gtk_widget_destroy(adialog)
-  end subroutine about_rpn
 
   subroutine mempress(widget, gdata) bind(c)
     ! A memory key.
@@ -1234,8 +1209,7 @@ contains
          & 'Settings:'//c_new_line// &
          & 'In the current version, there are 2 user-definable settings accessed'//c_new_line// &
          & 'through the "Edit" menu:'//c_new_line// &
-         & '"Result Format": Specify the format (using any Fortran formatting code'//c_new_line// &
-         & 'valid for a REAL type) to use in the result box. You have the'//c_new_line// &
+         & '"Result Format": Specify the format  to use in the result box. You have the'//c_new_line// &
          & 'options to select one of the standard formats:'//c_new_line// &
          & '  "Fixed": A fixed number of decimal places (set in the precision spin'//c_new_line// &
          & '  box). The actual format used is "(F0.<n>)". WARNING: this may be a'//c_new_line// &
@@ -1243,17 +1217,29 @@ contains
          & '  "Sci": Scientific format. Specify the number of decimals, and the'//c_new_line// &
          & '  width of the exponent in the spin boxes. The total width is'//c_new_line// &
          & '  calculated automatically.'//c_new_line// &
-         & '  "Eng": Similar to scientific, except that the exponent is always a'//c_new_line// &
-         & '  multiple of 3.'//c_new_line// &
-         & '  "Free": Use a list-directed write.'//c_new_line// &
+         & '  "Eng": Engineering format, similar to scientific, except that the'//c_new_line// &
+         & '  exponent is always a multiple of 3.'//c_new_line// &
+         & '  "Free": Use a list-directed write (the default).'//c_new_line// &
          & ''//c_new_line// &
          & '  Alternatively you can type an explicit Fortran format statement into'//c_new_line// &
-         & '  the combo box (with or without the enclosing parentheses). Setting it'//c_new_line// &
-         & '  to "*" or an empty string will use the default list-directed output'//c_new_line// &
-         & '  (as will an invalid format).'//c_new_line// &
+         & '  the combo box (with or without the enclosing parentheses). This may'//c_new_line// &
+         & '  be any Fortran formatting code valid for a REAL type. Setting it to'//c_new_line// &
+         & '  "*" or an empty string will use the default list-directed output (as'//c_new_line// &
+         & '  will an invalid format).'//c_new_line// &
          & ''//c_new_line// &
          & '"Hold Entry Focus": If this is enabled, then the input focus always'//c_new_line// &
          & 'snaps back to the entry window after any operation.'//c_new_line// &
+         & ''//c_new_line// &
+         & 'Accelerators:'//c_new_line// &
+         & ''//c_new_line// &
+         & 'The menu items have accerators to save mouse clicking:'//c_new_line// &
+         & 'Save -- ctrl-s'//c_new_line// &
+         & 'Restore -- ctrl-o'//c_new_line// &
+         & 'Quit -- ctrl-q'//c_new_line// &
+         & 'Set Format -- ctrl-f'//c_new_line// &
+         & 'Help -- ctrl-h'//c_new_line// &
+         & 'About -- ctrl-a'//c_new_line// &
+         & 'About gtk-fortran -- ctrl-shift-a'//c_new_line// &
          & ''//c_new_line// &
          & '[*] This can be changed by editing the "maxreg" value in widgets.f90'//cnull &
          & /) )
@@ -1280,6 +1266,36 @@ contains
     call gtk_widget_destroy(help_window)
   end subroutine help_del
 
+
+  subroutine about_rpn(widget, gdata) bind(c)
+    ! Display an about dialogue
+    type(c_ptr), value :: widget, gdata
+
+    type(c_ptr) :: adialog
+    integer(kind=c_int) :: response
+    character(kind=c_char), dimension(:), allocatable, target :: au1
+    type(c_ptr), dimension(2) :: authors
+
+    call convert_f_string((/ "James Tappin" /), au1)
+    authors(1) = c_loc(au1)
+    authors(2) = NULL
+
+    adialog = gtk_about_dialog_new()
+    call gtk_window_set_transient_for(adialog, win)
+    call gtk_about_dialog_set_program_name(adialog, "RPN Calculator"//CNULL)
+    call gtk_about_dialog_set_license(adialog, "GNU GPL 3"//CNULL)
+    call gtk_about_dialog_set_comments(adialog, &
+         & "This RPN calculator is a demonstration"//c_new_line// &
+         & "of the capabilities of Gtk-fortran."//c_new_line//c_new_line// &
+         & "It is entirely written in Fortran 95/2003."//c_new_line// &
+         & "It should work with both Gtk+-2.24 and 3.0"//cnull)
+    call gtk_about_dialog_set_authors(adialog, authors)
+    call gtk_about_dialog_set_website(adialog, &
+         & "https://github.com/jtappin/RPNcalc/wiki"//CNULL)
+
+    response = gtk_dialog_run(adialog)
+    call gtk_widget_destroy(adialog)
+  end subroutine about_rpn
 
   subroutine about_gtkfortran (widget, gdata )  bind(c)
     ! About Gtk Fortran info.
@@ -1353,7 +1369,8 @@ contains
     call hl_gtk_box_pack(jbb, junk, expand=FALSE)
     fmt_choose = hl_gtk_combo_box_new(has_entry=TRUE, &
          & changed=c_funloc(set_format_type_cb), &
-         & initial_choices=(/"Fixed","Sci  ","Eng  ","Free "/), &
+         & initial_choices=(/"Fixed   (F)", "Sci    (ES)", "Eng    (EN)", &
+         & "General (G)", "Free    (*)"/), &
          & active = fmt_type, &
          & tooltip="Choose a format type or give a Fortran format code"//cnull)
     call hl_gtk_box_pack(jbb, fmt_choose)
@@ -1362,7 +1379,7 @@ contains
     call hl_gtk_box_pack(jb, jbb)
     junk = gtk_label_new("Precision:"//cnull)
     call hl_gtk_box_pack(jbb, junk, expand=FALSE)
-    if (fmt_type >= 0 .and. fmt_type <= 2) then
+    if (fmt_type >= 0 .and. fmt_type <= 3) then
        issens = TRUE
     else
        issens=FALSE
@@ -1372,7 +1389,7 @@ contains
     call hl_gtk_box_pack(jbb, fmt_precision)
     junk = gtk_label_new("Exponent:"//cnull)
     call hl_gtk_box_pack(jbb, junk, expand=FALSE)
-    if (fmt_type >= 1 .and. fmt_type <= 2) then
+    if (fmt_type >= 1 .and. fmt_type <= 3) then
        issens = TRUE
     else
        issens=FALSE
@@ -1401,10 +1418,10 @@ contains
     case(0)             ! Fixed
        call gtk_widget_set_sensitive(fmt_precision, TRUE)
        call gtk_widget_set_sensitive(fmt_expsize, FALSE)
-    case(1,2)           ! Sci, eng
+    case(1,2,3)           ! Sci, eng, general
        call gtk_widget_set_sensitive(fmt_precision, TRUE)
        call gtk_widget_set_sensitive(fmt_expsize, TRUE)
-    case(3,-1)          ! Free, explicit
+    case(4,-1)          ! Free, explicit
        call gtk_widget_set_sensitive(fmt_precision, FALSE)
        call gtk_widget_set_sensitive(fmt_expsize, FALSE)
     end select
@@ -1434,7 +1451,13 @@ contains
        nchars = 7+fmt_decimal+fmt_expplaces
        write(result_format, "('(EN',i0,'.',i0,'e',i0,')')") nchars, &
             & fmt_decimal, fmt_expplaces
-    case(3)                ! List-directed
+    case(3)                ! General
+       fmt_decimal = hl_gtk_spin_button_get_value(fmt_precision)
+       fmt_expplaces = hl_gtk_spin_button_get_value(fmt_expsize)
+       nchars = 5+fmt_decimal+fmt_expplaces
+       write(result_format, "('(G',i0,'.',i0,'e',i0,')')") nchars, &
+            & fmt_decimal, fmt_expplaces
+    case(4)                ! List-directed
        result_format = ''
     case(-1)               ! An explicit format
        dummy = hl_gtk_combo_box_get_active(fmt_choose, ftext = res_tmp)

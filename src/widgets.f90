@@ -81,7 +81,7 @@ module widgets
 
   ! Menubar
   type(c_ptr) :: fmenu, ffmenu, fhmenu, kabout, ksave, krestore, khelp, &
-       & kfabout, femenu, kfedit, kefocus
+       & kfabout, femenu, kfedit, kefocus, accel
 
   ! Entry & result windows and stack display
   type(c_ptr) :: fentry, fstack, sstack, fresult, sbar, fstatus, &
@@ -106,7 +106,7 @@ module widgets
 
   ! The display format
   type(c_ptr) :: fmt_window, fmt_choose, fmt_precision, fmt_expsize
-  integer(kind=c_int) :: fmt_type=3, fmt_decimal=5, fmt_expplaces=2
+  integer(kind=c_int) :: fmt_type=4, fmt_decimal=5, fmt_expplaces=2
   character(len=20) :: result_format=""
 
   ! Statistics

@@ -461,7 +461,8 @@ contains
        write(47, dformat) val
     end do
 
-    write(47, "(A/A)") "Form", result_format
+    write(47, "(A/A/3I5)") "Fmt", result_format, fmt_type, &
+         & fmt_decimal, fmt_expplaces
 
     close(47)
 
@@ -515,6 +516,7 @@ contains
           else
              call gtk_entry_set_text(fentry, cnull)
           end if
+
        case("Stack")
           read(47, *, iostat=ios, iomsg=iom) nrows
           if (ios /= 0) exit
@@ -525,14 +527,16 @@ contains
              call hl_gtk_listn_set_cell(fstack, i, 0, dvalue=val)
              if (i == 0) call set_result(val)
           end do
-       case("Stats")
+ 
+      case("Stats")
           do i = 0, 9
              read(47, dformat, iostat=ios, iomsg=iom) val
              if (ios /= 0) exit
              call hl_gtk_listn_set_cell(fstats, i, 1, dvalue=val)
           end do
        case("Regs")
-          read(47, *, iostat=ios, iomsg=iom) nrows
+ 
+         read(47, *, iostat=ios, iomsg=iom) nrows
           if (ios /= 0) exit
           if (nrows > maxreg) mid = gtk_statusbar_push(fstatus, 0, &
                & "Too many registers"//cnull)
@@ -542,9 +546,18 @@ contains
              if (i > maxreg) cycle
              call hl_gtk_listn_set_cell(fmemory, i, 1, dvalue=val)
           end do
-       case("Form")
+
+       case("Form")  ! Old-style format
           read(47,"(A)", iostat=ios, iomsg=iom) result_format
           if (ios /= 0) exit
+
+       case("Fmt")  ! New-style format
+          read(47,"(A)", iostat=ios, iomsg=iom) result_format
+          if (ios /= 0) exit
+          read(47,*, iostat=ios, iomsg=iom) fmt_type, &
+               & fmt_decimal, fmt_expplaces
+          if (ios /= 0) exit
+
        case default
           mid = gtk_statusbar_push(fstatus, 0, &
                & "Unknown tag: "//tag//cnull)
