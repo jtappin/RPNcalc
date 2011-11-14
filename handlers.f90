@@ -1106,7 +1106,7 @@ contains
     call gtk_container_add(help_window, hbox)
 
 
-!!! To update help text cut the text constant here and inset tmp.txt (generated
+!!! To update help text cut the text constant here and insert tmp.txt (generated
 !!! from rpncalc.txt with process_help.pl
     hview = hl_gtk_text_view_new(hscroll, editable=FALSE, &
          & ssize=(/600, 600/), initial_text = (/ &
@@ -1212,6 +1212,12 @@ contains
          & ''//c_new_line// &
          & 'The roll down button, moves the last element of the stack to the top'//c_new_line// &
          & 'and all others down one place.'//c_new_line// &
+         & ''//c_new_line// &
+         & 'Constants:'//c_new_line// &
+         & ''//c_new_line// &
+         & 'There are a number of built in fundamental physics constants that are'//c_new_line// &
+         & 'build in to the calculator, these can be entered from the "Phys"'//c_new_line// &
+         & 'pull-down menu.'//c_new_line// &
          & ''//c_new_line// &
          & 'Memory Registers:'//c_new_line// &
          & ''//c_new_line// &

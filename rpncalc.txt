@@ -101,6 +101,12 @@ place.
 The roll down button, moves the last element of the stack to the top
 and all others down one place.
 
+Constants:
+
+There are a number of built in fundamental physics constants that are
+build in to the calculator, these can be entered from the "Phys"
+pull-down menu.
+
 Memory Registers:
 
 The calculator also has 10[*] memory registers (numbered 0-9).
