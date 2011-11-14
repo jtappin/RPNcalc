@@ -1,13 +1,14 @@
 RNPcalc -- building and installing
 ==================================
 
-Needs: Fortran 95/2003 (for gfortran version >= 4.6)
+Needs: Fortran 95/2003 (for gfortran: Version >= 4.6)
        GtkFortran, including gtk_hl
 
 Step 0:
      Get RPNcalc from https://github.com/jtappin/RPNcalc
 
 Step 1:
+     cd src
      Edit the Makefile. The lines you may need to edit are commented.
 
 Step 2:
@@ -16,10 +17,10 @@ Step 2:
      Possible problems:
      1) Can't find the gtk-fortran pkg-config file.
       a) pkg-config does not look in /usr/local, solution:
-export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
-b) GtkFortran is not installed, solution:
-Get GtkFortran from https://github.com/jerryd/gtk-fortran/
-      and build & install it, using the cmake build instructions.
+      	 export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+      b) GtkFortran is not installed, solution:
+      	 Get GtkFortran from https://github.com/jerryd/gtk-fortran/
+      	 and build & install it, using the cmake build instructions.
      2) gfortran has an internal error, solution:
       Make sure you have gfortran 4.6 or better.
 
@@ -29,7 +30,3 @@ Step 3:
      if you just want to try it out, run:
      ./rpncalc
      in the rpncalc directory.
-
-
-Dedicated Server Powered by the Dedicated Servers and
-Cloud Computing of Rackspace Hosting®

@@ -35,7 +35,8 @@ program rpncalc
        &ry_new, gtk_expander_new, gtk_label_new, gtk_main, gtk_menu_item_new, gtk_menu&
        &_new, gtk_radio_button_new, gtk_statusbar_new, gtk_table_attach, gtk_table_new&
        &, gtk_widget_show, gtk_widget_show_all, gtk_window_new, gtk_init,&
-       & gtk_expander_set_expanded, GTK_PACK_DIRECTION_LTR
+       & gtk_expander_set_expanded, GTK_PACK_DIRECTION_LTR, &
+       & GDK_CONTROL_MASK, GDK_SHIFT_MASK
   use gtk_hl
 
   use handlers
@@ -109,7 +110,7 @@ program rpncalc
 
   ! Create a window and put a vertical box into it
   win = hl_gtk_window_new("RPN Calculator", destroy=c_funloc(my_destroy), &
-       & resizable=FALSE)
+       & resizable=FALSE, accel_group=accel)
   base = hl_gtk_box_new()
   call gtk_container_add(win, base)
 
@@ -118,15 +119,19 @@ program rpncalc
   call hl_gtk_box_pack(base, fmenu)
   ffmenu = hl_gtk_menu_submenu_new(fmenu, "File"//cnull)
   ksave = hl_gtk_menu_item_new(ffmenu, "Save"//cnull, &
-       & activate=c_funloc(save_values))
+       & activate=c_funloc(save_values), accel_key="s"//cnull, &
+       & accel_group=accel)
   krestore = hl_gtk_menu_item_new(ffmenu, "Restore"//cnull, &
-       & activate=c_funloc(restore_values))
+       & activate=c_funloc(restore_values), accel_key="o"//cnull, &
+       & accel_group=accel)
   kquit = hl_gtk_menu_item_new(ffmenu, "Quit"//cnull, &
-       & activate=c_funloc(my_destroy))
+       & activate=c_funloc(my_destroy), accel_key="q"//cnull, &
+       & accel_group=accel)
 
   femenu = hl_gtk_menu_submenu_new(fmenu, "Edit"//cnull)
   kfedit = hl_gtk_menu_item_new(femenu, "Result Format"//cnull, &
-       & activate=c_funloc(set_format_make))
+       & activate=c_funloc(set_format_make), accel_key="f"//cnull, &
+       & accel_group=accel)
   kefocus = hl_gtk_check_menu_item_new(femenu, "Hold entry focus"//cnull, &
        & toggled = c_funloc(set_entry_focus))
   khrdeg = hl_gtk_check_menu_item_new(femenu, "Display degrees"//cnull, &
@@ -135,11 +140,14 @@ program rpncalc
 
   fhmenu = hl_gtk_menu_submenu_new(fmenu, "Help"//cnull)
   khelp = hl_gtk_menu_item_new(fhmenu, "Help"//cnull, &
-       & activate=c_funloc(show_help))
+       & activate=c_funloc(show_help), accel_key="h"//cnull, &
+       & accel_group=accel)
   kabout = hl_gtk_menu_item_new(fhmenu, "About: RPN Calculator"//cnull, &
-       & activate=c_funloc(about_rpn))
+       & activate=c_funloc(about_rpn), accel_key="a"//cnull, &
+       & accel_group=accel)
   kfabout = hl_gtk_menu_item_new(fhmenu, "About: Gtk-Fortran"//cnull, &
-       & activate=c_funloc(about_gtkfortran))
+       & activate=c_funloc(about_gtkfortran), accel_key="a"//cnull, &
+       & accel_group=accel, accel_mods=ior(GDK_CONTROL_MASK, GDK_SHIFT_MASK))
 
   ! Value entry window.
   jbase = hl_gtk_table_new(2, 2)

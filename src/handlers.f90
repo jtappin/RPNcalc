@@ -1259,8 +1259,7 @@ contains
          & 'Settings:'//c_new_line// &
          & 'In the current version, there are 2 user-definable settings accessed'//c_new_line// &
          & 'through the "Edit" menu:'//c_new_line// &
-         & '"Result Format": Specify the format (using any Fortran formatting code'//c_new_line// &
-         & 'valid for a REAL type) to use in the result box. You have the'//c_new_line// &
+         & '"Result Format": Specify the format  to use in the result box. You have the'//c_new_line// &
          & 'options to select one of the standard formats:'//c_new_line// &
          & '  "Fixed": A fixed number of decimal places (set in the precision spin'//c_new_line// &
          & '  box). The actual format used is "(F0.<n>)". WARNING: this may be a'//c_new_line// &
@@ -1268,17 +1267,29 @@ contains
          & '  "Sci": Scientific format. Specify the number of decimals, and the'//c_new_line// &
          & '  width of the exponent in the spin boxes. The total width is'//c_new_line// &
          & '  calculated automatically.'//c_new_line// &
-         & '  "Eng": Similar to scientific, except that the exponent is always a'//c_new_line// &
-         & '  multiple of 3.'//c_new_line// &
-         & '  "Free": Use a list-directed write.'//c_new_line// &
+         & '  "Eng": Engineering format, similar to scientific, except that the'//c_new_line// &
+         & '  exponent is always a multiple of 3.'//c_new_line// &
+         & '  "Free": Use a list-directed write (the default).'//c_new_line// &
          & ''//c_new_line// &
          & '  Alternatively you can type an explicit Fortran format statement into'//c_new_line// &
-         & '  the combo box (with or without the enclosing parentheses). Setting it'//c_new_line// &
-         & '  to "*" or an empty string will use the default list-directed output'//c_new_line// &
-         & '  (as will an invalid format).'//c_new_line// &
+         & '  the combo box (with or without the enclosing parentheses). This may'//c_new_line// &
+         & '  be any Fortran formatting code valid for a REAL type. Setting it to'//c_new_line// &
+         & '  "*" or an empty string will use the default list-directed output (as'//c_new_line// &
+         & '  will an invalid format).'//c_new_line// &
          & ''//c_new_line// &
          & '"Hold Entry Focus": If this is enabled, then the input focus always'//c_new_line// &
          & 'snaps back to the entry window after any operation.'//c_new_line// &
+         & ''//c_new_line// &
+         & 'Accelerators:'//c_new_line// &
+         & ''//c_new_line// &
+         & 'The menu items have accerators to save mouse clicking:'//c_new_line// &
+         & 'Save -- ctrl-s'//c_new_line// &
+         & 'Restore -- ctrl-o'//c_new_line// &
+         & 'Quit -- ctrl-q'//c_new_line// &
+         & 'Set Format -- ctrl-f'//c_new_line// &
+         & 'Help -- ctrl-h'//c_new_line// &
+         & 'About -- ctrl-a'//c_new_line// &
+         & 'About gtk-fortran -- ctrl-shift-a'//c_new_line// &
          & ''//c_new_line// &
          & '[*] This can be changed by editing the "maxreg" value in widgets.f90'//cnull &
          & /) )

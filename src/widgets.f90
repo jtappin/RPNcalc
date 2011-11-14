@@ -95,7 +95,7 @@ module widgets
 
   ! Menubar
   type(c_ptr) :: fmenu, ffmenu, fhmenu, kabout, ksave, krestore, khelp, &
-       & kfabout, femenu, kfedit, kefocus, khrdeg
+       & kfabout, femenu, kfedit, kefocus, khrdeg, accel
 
   ! Entry & result windows and stack display
   type(c_ptr) :: fentry, fstack, sstack, fresult, sbar, fstatus, &
