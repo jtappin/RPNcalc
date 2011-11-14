@@ -28,7 +28,8 @@ module handlers
        & gtk_about_dialog_set_authors, gtk_main,&
        & gtk_window_set_transient_for, gtk_about_dialog_set_website, &
        & gtk_check_menu_item_get_active, gtk_widget_grab_focus, &
-       & gtk_editable_set_position, gtk_combo_box_set_active
+       & gtk_editable_set_position, gtk_combo_box_set_active, &
+       & gtk_menu_item_set_label
 
   use g, only:  g_signal_stop_emission_by_name
 
@@ -364,6 +365,49 @@ contains
        call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
     end if
   end subroutine pipress
+
+  subroutine add_const(widget, gdata) bind(c)
+    ! Physics constants
+    type(c_ptr), value :: widget, gdata
+
+    real(kind=c_double), parameter :: c = 2.997925e8_c_double
+    real(kind=c_double), parameter :: e = 1.602192e-19_c_double
+    real(kind=c_double), parameter :: h = 6.6262e-34_c_double
+    real(kind=c_double), parameter :: k = 1.32062e-23_c_double
+    real(kind=c_double), parameter :: g = 6.673e-11_c_double
+!    real(kind=c_double), parameter :: e0 = 8.854e-12_c_double
+    real(kind=c_double), parameter :: m0 = 4.0e-7_c_double * pi
+
+    integer(kind=c_int), pointer :: opcode
+    real(kind=c_double) :: cval
+
+    call c_f_pointer(gdata, opcode)
+    select case(opcode)
+    case(CONST_C)
+       cval = c
+    case(CONST_E)
+       cval = e
+    case(CONST_H)
+       cval = h
+    case(CONST_HBAR)
+       cval = h / (2._c_double * pi)
+    case(CONST_K)
+       cval = k
+    case(CONST_G)
+       cval = g
+    case(CONST_E0)
+       cval = 1._c_double / (c**2 * m0)
+    case(CONST_M0)
+       cval = m0
+    end select
+
+    call push_stack(cval)
+    call gtk_entry_set_text(fentry, cnull)
+    if (focus_entry) then
+       call gtk_widget_grab_focus(fentry)
+       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    end if
+  end subroutine add_const
 
   subroutine delpress(widget, gdata) bind(c)
     ! The del key -- delete the last character in the entry window
@@ -1521,4 +1565,16 @@ contains
        call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
     end if
   end subroutine set_entry_focus
+
+  subroutine set_dms_hms(widget, gdata) bind(c)
+    ! Set format of degrees or hours minutes seconds display.
+    type(c_ptr), value :: widget, gdata
+    
+    dms_hms = c_f_logical(gtk_check_menu_item_get_active(widget))
+    if (dms_hms) then
+       call gtk_menu_item_set_label(khms, "DMS"//cnull)
+    else
+       call gtk_menu_item_set_label(khms, "HMS"//cnull)
+    end if
+  end subroutine set_dms_hms
 end module handlers

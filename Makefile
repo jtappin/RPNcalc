@@ -5,8 +5,8 @@ FFLAGS=-O3 `pkg-config --cflags gtk-fortran`
 # On some 64-bit systems when gfortran is from a binary snapshot, there is an 
 # error searching for libquadmath. If this happens to you, then uncomment the 
 # non-empty value and replace /opt with wherever you unpacked the tarball.
-#QUADLIB=-Xlinker -R/opt/gcc-trunk/lib64
-QUADLIB=
+QUADLIB=-Xlinker -R/opt/gcc-trunk/lib64
+#QUADLIB=
 
 # Installation prefix, i.e. the executable goes on $(PREFIX)/bin
 PREFIX=/usr/local

@@ -55,6 +55,10 @@ program rpncalc
   integer(kind=c_int), target :: pmsto=MEM_STO, pmrcl=MEM_RCL, &
        & pmplus=MEM_PLUS, pmminus=MEM_MINUS, pmclr=MEM_CLR, pmcla=MEM_CLA
 
+  integer(kind=c_int), target :: p_c=CONST_C, p_e=CONST_E, p_h=CONST_H, &
+       & p_hb=CONST_HBAR, p_k=CONST_K, p_g=CONST_G, p_e0=CONST_E0, &
+       & p_m0=CONST_M0
+
   integer(kind=c_int), target :: stackcol=0, memcol=1, statcol=1
 
   ! Workspace variables
@@ -125,6 +129,9 @@ program rpncalc
        & activate=c_funloc(set_format_make))
   kefocus = hl_gtk_check_menu_item_new(femenu, "Hold entry focus"//cnull, &
        & toggled = c_funloc(set_entry_focus))
+  khrdeg = hl_gtk_check_menu_item_new(femenu, "Display degrees"//cnull, &
+       & toggled = c_funloc(set_dms_hms), tooltip = &
+       & "Select angular or time format for HMS display"//cnull)
 
   fhmenu = hl_gtk_menu_submenu_new(fmenu, "Help"//cnull)
   khelp = hl_gtk_menu_item_new(fhmenu, "Help"//cnull, &
@@ -273,10 +280,43 @@ program rpncalc
        & data=c_loc(psqrt))
   call hl_gtk_table_attach(keybox, ksqrt, 6, 5)
 
-  khms= hl_gtk_button_new("HMS"//cnull, clicked=c_funloc(hmspress), &
-       & tooltip="Display entry or top of stack in H:M:S format"//cnull)
-  call hl_gtk_table_attach(keybox, khms, 6, 6)
+!!$  khms= hl_gtk_button_new("HMS"//cnull, clicked=c_funloc(hmspress), &
+!!$       & tooltip="Display entry or top of stack in H:M:S format"//cnull)
+!!$  call hl_gtk_table_attach(keybox, khms, 6, 6)
 
+
+  ! A Pulldown for fundamental physics constants
+
+  phys = hl_gtk_menu_new()
+  call hl_gtk_table_attach(keybox, phys, 6, 6)
+  fconst = hl_gtk_menu_submenu_new(phys, "Phys"//cnull, &
+       & tooltip="Fundamental physics constants (SI)"//cnull)
+
+  k_c = hl_gtk_menu_item_new(fconst, "c"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_c),&
+       & tooltip="Speed of light"//cnull)
+  k_e = hl_gtk_menu_item_new(fconst, "e"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_e), &
+       & tooltip="Electronic charge"//cnull)
+  k_h = hl_gtk_menu_item_new(fconst, "h"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_h), &
+       & tooltip="Planck's constant"//cnull)
+  k_hb = hl_gtk_menu_item_new(fconst, "ħ"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_hb), &
+       & tooltip="Planck's constant / 2π"//cnull)
+  k_k = hl_gtk_menu_item_new(fconst, "k"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_k), &
+       & tooltip="Boltzmann's constant"//cnull)
+  k_g = hl_gtk_menu_item_new(fconst, "G"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_g), &
+       & tooltip="Gravitational constant"//cnull)
+  k_e0 = hl_gtk_menu_item_new(fconst, "ε0"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_e0), &
+       & tooltip="Pemittivity of free space"//cnull)
+  k_m0 = hl_gtk_menu_item_new(fconst, "μ0"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_m0), &
+       & tooltip="Permeability of free space"//cnull)
+            
   ksinh = hl_gtk_button_new("sinh"//cnull, clicked=c_funloc(funpress), &
        & data=c_loc(psinh))
   call hl_gtk_table_attach(keybox, ksinh, 7, 1)
@@ -330,17 +370,24 @@ program rpncalc
   menu = hl_gtk_menu_new()
   call hl_gtk_table_attach(keybox, menu, 7, 6)
 
-  pull = hl_gtk_menu_submenu_new(menu, "More>"//cnull)
+  pull = hl_gtk_menu_submenu_new(menu, "More"//cnull, &
+       & tooltip="Less-used functions"//cnull)
   kabs = hl_gtk_menu_item_new(pull, "abs"//cnull, activate=c_funloc(funpress), &
-       & data=c_loc(pabs))
+       & data=c_loc(pabs), tooltip="Absolute value"//cnull)
   kaint = hl_gtk_menu_item_new(pull, "int"//cnull, &
-       & activate=c_funloc(funpress), data=c_loc(pint))
+       & activate=c_funloc(funpress), data=c_loc(pint), &
+       & tooltip="Integer part"//cnull)
   kfrac = hl_gtk_menu_item_new(pull, "frac"//cnull, &
-       &activate=c_funloc(funpress), data=c_loc(pfrac))
+       & activate=c_funloc(funpress), data=c_loc(pfrac), &
+       & tooltip="Fractional part"//cnull)
   katan2 = hl_gtk_menu_item_new(pull, "atan2"//cnull, &
-       & activate=c_funloc(oppress), data=c_loc(patan2))
+       & activate=c_funloc(oppress), data=c_loc(patan2), &
+       & tooltip="Arctan y/x with disambiguation"//cnull)
   kfact = hl_gtk_menu_item_new(pull, "factorial"//cnull, &
        & activate=c_funloc(funpress), data=c_loc(pfact))
+  khms= hl_gtk_menu_item_new(pull, "HMS"//cnull, &
+       & activate=c_funloc(hmspress), &
+       & tooltip="Display entry or top of stack in H:M:S format"//cnull)
 
   ! Memory registers
   kmsto = hl_gtk_button_new("STO"//cnull, clicked=c_funloc(mempress), &
@@ -369,13 +416,13 @@ program rpncalc
 
   ! Notebook for stack & registers.
   mstabs = hl_gtk_notebook_new()
-!  call hl_gtk_box_pack(base, mstabs)
   call gtk_container_add(fexpand, mstabs)
   ! Stack display
 
   fstack = hl_gtk_listn_new(sstack, changed=c_funloc(stacksel), &
        & height=350, titles=(/ "Stack"//cnull /), types= (/g_type_double/))
-  call hl_gtk_listn_set_cell_data_func(fstack, stackcol, func=c_funloc(show_list), &
+  call hl_gtk_listn_set_cell_data_func(fstack, stackcol, &
+       & func=c_funloc(show_list), &
        & data=c_loc(stackcol))
 
   idx = hl_gtk_notebook_add_page(mstabs, sstack, label="Stack"//cnull)
@@ -400,7 +447,8 @@ program rpncalc
   fstats = hl_gtk_listn_new(sstats, changed=c_funloc(statsel),&
        & height=350, titles=(/ "Statistic"//cnull, "Value"//cnull//"    " /), &
        & types = (/ g_type_string, g_type_double /))
-  call hl_gtk_listn_set_cell_data_func(fstats, statcol, func=c_funloc(show_list), &
+  call hl_gtk_listn_set_cell_data_func(fstats, statcol, &
+       & func=c_funloc(show_list), &
        & data=c_loc(statcol))
   idx = hl_gtk_notebook_add_page(mstabs, sstats, label="Statistics"//cnull)
 

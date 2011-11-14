@@ -61,6 +61,17 @@ module widgets
      enumerator :: MEM_CLA
   end enum
 
+  enum, bind(c) ! Constants
+     enumerator :: CONST_C
+     enumerator :: CONST_E
+     enumerator :: CONST_H
+     enumerator :: CONST_HBAR
+     enumerator :: CONST_K
+     enumerator :: CONST_G
+     enumerator :: CONST_E0
+     enumerator :: CONST_M0
+  end enum
+
   ! Number of memory registers
   integer(kind=c_int), parameter :: maxreg = 9
 
@@ -79,9 +90,12 @@ module widgets
   ! The pulldown menu for "obscure" functions
   type(c_ptr) :: menu, pull, kabs, kaint, kfrac, katan2, kfact
 
+  ! The physics constants pulldown
+  type(c_ptr) :: phys, fconst, k_c, k_e, k_h, k_hb, k_k, k_g, k_e0, k_m0
+
   ! Menubar
   type(c_ptr) :: fmenu, ffmenu, fhmenu, kabout, ksave, krestore, khelp, &
-       & kfabout, femenu, kfedit, kefocus
+       & kfabout, femenu, kfedit, kefocus, khrdeg
 
   ! Entry & result windows and stack display
   type(c_ptr) :: fentry, fstack, sstack, fresult, sbar, fstatus, &
@@ -95,7 +109,7 @@ module widgets
   type(c_ptr) :: kmsto, kmrcl, kmplus, kmminus, kmclr, kmcla
 
   ! Modes & flags
-  logical ::  isinv=.false., focus_entry=.false.
+  logical ::  isinv=.false., focus_entry=.false., dms_hms=.false.
   integer(kind=c_int) :: trigunit = 1
 
   ! Flags for "non-repeatable" elements in a number entry.

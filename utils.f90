@@ -67,7 +67,11 @@ contains
     end if
 
     if (x < 0) ih = -ih
-    write(hms, "(I0,':',I2.2,':',I2.2,f4.3)") ih, im, is, ms
+    if (dms_hms) then
+       write(hms, "(I0,'° ',I2.2,''' ',I2.2,f4.3,'""')") ih, im, is, ms
+    else
+       write(hms, "(I0,':',I2.2,':',I2.2,f4.3)") ih, im, is, ms
+    end if
     call gtk_entry_set_text(widget, trim(hms)//cnull)
 
   end subroutine show_hms
