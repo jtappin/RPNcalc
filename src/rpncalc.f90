@@ -22,21 +22,26 @@ program rpncalc
   ! Gtk-Fortran. Converted from an earlier pilib code.
 
   ! Usage:
-  !	rpncalc [-o|-open|-c|-closed] [{-r|--restore} <file>]
+  !	rpncalc [-o|-open|-c|-closed] [{-r|--restore} <file>] \
+  !	       [{-m|--registers} <n>] [-f|--focus] [-h|--help]
   !
   !	-o, --open: Start with the stack displays open (default)
   !	-c, --closed: Start with the stack displays closed
   !	-r, --restore: Restore the specified file.
+  !	-m, --registers: Set the number of registers to the specified value.
+  !	-f, --focus: Maintain keyboard focus in the input window.
+  !	-h, --help: Print help text and exit.
 
   ! This source file contains the main program that creates the widgets.
 
   use iso_c_binding !, only: c_ptr, c_null_ptr, c_loc
-  use gtk, only: gtk_button_new, gtk_check_button_new, gtk_container_add, gtk_ent&
-       &ry_new, gtk_expander_new, gtk_label_new, gtk_main, gtk_menu_item_new, gtk_menu&
-       &_new, gtk_radio_button_new, gtk_statusbar_new, gtk_table_attach, gtk_table_new&
-       &, gtk_widget_show, gtk_widget_show_all, gtk_window_new, gtk_init,&
-       & gtk_expander_set_expanded, GTK_PACK_DIRECTION_LTR, &
-       & GDK_CONTROL_MASK, GDK_SHIFT_MASK
+  use gtk, only: gtk_button_new, gtk_check_button_new,&
+       & gtk_container_add, gtk_entry_new, gtk_expander_new,&
+       & gtk_label_new, gtk_main, gtk_menu_item_new, gtk_menu_new,&
+       & gtk_radio_button_new, gtk_statusbar_new, gtk_table_attach,&
+       & gtk_table_new, gtk_widget_show, gtk_widget_show_all,&
+       & gtk_window_new, gtk_init, gtk_expander_set_expanded,&
+       & GTK_PACK_DIRECTION_LTR, GDK_CONTROL_MASK, GDK_SHIFT_MASK
   use gtk_hl
 
   use handlers
@@ -58,7 +63,7 @@ program rpncalc
 
   integer(kind=c_int), target :: p_c=CONST_C, p_e=CONST_E, p_h=CONST_H, &
        & p_hb=CONST_HBAR, p_k=CONST_K, p_g=CONST_G, p_e0=CONST_E0, &
-       & p_m0=CONST_M0
+       & p_m0=CONST_M0, p_na=CONST_NA, p_r=CONST_R
 
   integer(kind=c_int), target :: stackcol=0, memcol=1, statcol=1
 
@@ -69,9 +74,9 @@ program rpncalc
 
   ! Command line argument handling
   integer :: iarg, narg, status
-  character(len=80) :: arg
+  character(len=80) :: arg, msg
   integer(kind=c_int) :: isopen = TRUE
-  character(len=200) :: restfile = ''
+  character(len=200) :: restfile = '', smaxreg = ''
 
   ! Check for command line arguments
 
@@ -84,6 +89,18 @@ program rpncalc
      if (status < 0) write(0,*) "RPNcalc: Warning argument truncated"
 
      select case(arg)
+     case("-h", "--help")
+        print *, "Usage:"
+        print *, " rpncalc [-o|-open|-c|-closed] [{-r|--restore} <file>] \ "
+        print *, "       [{-m|--registers} <n>] [-f|--focus] [-h|--help]"
+        print *, " "
+        print *, " -o, --open: Start with the stack displays open (default)"
+        print *, " -c, --closed: Start with the stack displays closed"
+        print *, " -r, --restore: Restore the specified file."
+        print *, " -m, --registers: Set the number of registers to the specified value."
+        print *, " -f, --focus: Maintain keyboard focus in the input window."
+        print *, " -h, --help: Print help text and exit."
+        stop
      case("-o", "--open")         ! Start with the stack display open (default)
         isopen = TRUE
      case("-c", "--closed")       ! Start with the stack display closed
@@ -99,6 +116,29 @@ program rpncalc
               iarg = iarg+1
            end if
         end if
+     case("-m", "--registers")    ! Number of memory registers to allocate
+        if (iarg == narg) then
+           write(0, *) "RPNcalc: ",trim(arg)," option needs an argument"
+        else
+           call get_command_argument(iarg+1, smaxreg)
+           if (index(smaxreg,'-') == 1) then
+              write(0, *) "RPNcalc: ",trim(arg)," option needs an argument"
+           else
+              read(smaxreg, *, iostat=status, iomsg=msg) maxreg
+              if (status /= 0) then
+                 write(0, *) "RPNcalc: error reading register count: "
+                 write(0, *) "         ", msg
+                 write(0, *) "RPNcalc: ", trim(arg), " invalid count: ", &
+                      & trim(smaxreg)
+                 maxreg = 9    ! Reset to default
+              else
+                 maxreg = maxreg-1  ! The highest number is the count-1
+              end if
+              iarg = iarg+1
+            end if
+        end if
+     case("-f", "--focus")
+        focus_entry = .true.
      case default                 ! Bad option
         write(0, *) "RPNcalc: Unknown option:", trim(arg)
      end select
@@ -133,7 +173,9 @@ program rpncalc
        & activate=c_funloc(set_format_make), accel_key="f"//cnull, &
        & accel_group=accel)
   kefocus = hl_gtk_check_menu_item_new(femenu, "Hold entry focus"//cnull, &
-       & toggled = c_funloc(set_entry_focus))
+       & toggled = c_funloc(set_entry_focus), &
+       & initial_state=f_c_logical(focus_entry), &
+       & tooltip="Return entry focus to input window after button press"//cnull)
   khrdeg = hl_gtk_check_menu_item_new(femenu, "Display degrees"//cnull, &
        & toggled = c_funloc(set_dms_hms), tooltip = &
        & "Select angular or time format for HMS display"//cnull)
@@ -288,43 +330,6 @@ program rpncalc
        & data=c_loc(psqrt))
   call hl_gtk_table_attach(keybox, ksqrt, 6, 5)
 
-!!$  khms= hl_gtk_button_new("HMS"//cnull, clicked=c_funloc(hmspress), &
-!!$       & tooltip="Display entry or top of stack in H:M:S format"//cnull)
-!!$  call hl_gtk_table_attach(keybox, khms, 6, 6)
-
-
-  ! A Pulldown for fundamental physics constants
-
-  phys = hl_gtk_menu_new()
-  call hl_gtk_table_attach(keybox, phys, 6, 6)
-  fconst = hl_gtk_menu_submenu_new(phys, "Phys"//cnull, &
-       & tooltip="Fundamental physics constants (SI)"//cnull)
-
-  k_c = hl_gtk_menu_item_new(fconst, "c"//cnull, &
-       & activate=c_funloc(add_const), data=c_loc(p_c),&
-       & tooltip="Speed of light"//cnull)
-  k_e = hl_gtk_menu_item_new(fconst, "e"//cnull, &
-       & activate=c_funloc(add_const), data=c_loc(p_e), &
-       & tooltip="Electronic charge"//cnull)
-  k_h = hl_gtk_menu_item_new(fconst, "h"//cnull, &
-       & activate=c_funloc(add_const), data=c_loc(p_h), &
-       & tooltip="Planck's constant"//cnull)
-  k_hb = hl_gtk_menu_item_new(fconst, "ħ"//cnull, &
-       & activate=c_funloc(add_const), data=c_loc(p_hb), &
-       & tooltip="Planck's constant / 2π"//cnull)
-  k_k = hl_gtk_menu_item_new(fconst, "k"//cnull, &
-       & activate=c_funloc(add_const), data=c_loc(p_k), &
-       & tooltip="Boltzmann's constant"//cnull)
-  k_g = hl_gtk_menu_item_new(fconst, "G"//cnull, &
-       & activate=c_funloc(add_const), data=c_loc(p_g), &
-       & tooltip="Gravitational constant"//cnull)
-  k_e0 = hl_gtk_menu_item_new(fconst, "ε0"//cnull, &
-       & activate=c_funloc(add_const), data=c_loc(p_e0), &
-       & tooltip="Pemittivity of free space"//cnull)
-  k_m0 = hl_gtk_menu_item_new(fconst, "μ0"//cnull, &
-       & activate=c_funloc(add_const), data=c_loc(p_m0), &
-       & tooltip="Permeability of free space"//cnull)
-            
   ksinh = hl_gtk_button_new("sinh"//cnull, clicked=c_funloc(funpress), &
        & data=c_loc(psinh))
   call hl_gtk_table_attach(keybox, ksinh, 7, 1)
@@ -397,6 +402,44 @@ program rpncalc
        & activate=c_funloc(hmspress), &
        & tooltip="Display entry or top of stack in H:M:S format"//cnull)
 
+  ! A Pulldown for fundamental physics constants
+
+  phys = hl_gtk_menu_new()
+  call hl_gtk_table_attach(keybox, phys, 6, 6)
+  fconst = hl_gtk_menu_submenu_new(phys, "Phys"//cnull, &
+       & tooltip="Fundamental physics constants (SI)"//cnull)
+
+  k_c = hl_gtk_menu_item_new(fconst, "c"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_c),&
+       & tooltip="Speed of light"//cnull)
+  k_e = hl_gtk_menu_item_new(fconst, "e"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_e), &
+       & tooltip="Electronic charge"//cnull)
+  k_h = hl_gtk_menu_item_new(fconst, "h"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_h), &
+       & tooltip="Planck's constant"//cnull)
+  k_hb = hl_gtk_menu_item_new(fconst, "ħ"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_hb), &
+       & tooltip="Planck's constant / 2π"//cnull)
+  k_k = hl_gtk_menu_item_new(fconst, "k"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_k), &
+       & tooltip="Boltzmann's constant"//cnull)
+  k_g = hl_gtk_menu_item_new(fconst, "G"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_g), &
+       & tooltip="Gravitational constant"//cnull)
+  k_e0 = hl_gtk_menu_item_new(fconst, "ε0"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_e0), &
+       & tooltip="Pemittivity of free space"//cnull)
+  k_m0 = hl_gtk_menu_item_new(fconst, "μ0"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_m0), &
+       & tooltip="Permeability of free space"//cnull)
+  k_na = hl_gtk_menu_item_new(fconst, "Na"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_na), &
+       & tooltip="Avogadro's constant"//cnull)
+  k_r = hl_gtk_menu_item_new(fconst, "R"//cnull, &
+       & activate=c_funloc(add_const), data=c_loc(p_r), &
+       & tooltip="Gas constant"//cnull)
+
   ! Memory registers
   kmsto = hl_gtk_button_new("STO"//cnull, clicked=c_funloc(mempress), &
        & tooltip="Store to register"//cnull, data=c_loc(pmsto))
@@ -425,6 +468,7 @@ program rpncalc
   ! Notebook for stack & registers.
   mstabs = hl_gtk_notebook_new()
   call gtk_container_add(fexpand, mstabs)
+
   ! Stack display
 
   fstack = hl_gtk_listn_new(sstack, changed=c_funloc(stacksel), &
@@ -439,8 +483,8 @@ program rpncalc
   fmemory = hl_gtk_listn_new(smemory, changed=c_funloc(memsel), &
        & height=350, titles= (/ "Index"//cnull, "Value"//cnull /), &
        & types = (/ g_type_int, g_type_double /))
-  call hl_gtk_listn_set_cell_data_func(fmemory, memcol, func=c_funloc(show_list), &
-       & data=c_loc(memcol))
+  call hl_gtk_listn_set_cell_data_func(fmemory, memcol, &
+       & func=c_funloc(show_list), data=c_loc(memcol))
   idx = hl_gtk_notebook_add_page(mstabs, smemory, label="Registers"//cnull)
 
   ! Set up display of registers.

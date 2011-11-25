@@ -16,7 +16,8 @@
 ! If not, see <http://www.gnu.org/licenses/>.
 
 module widgets
-  ! Global place to store the widget ids and other global values needed by RPNcalc.
+  ! Global place to store the widget ids and other global values
+  ! needed by RPNcalc.
 
   use iso_c_binding
   use gtk, only: NULL
@@ -61,7 +62,7 @@ module widgets
      enumerator :: MEM_CLA
   end enum
 
-  enum, bind(c) ! Constants
+  enum, bind(c) ! Physics constants
      enumerator :: CONST_C
      enumerator :: CONST_E
      enumerator :: CONST_H
@@ -70,10 +71,12 @@ module widgets
      enumerator :: CONST_G
      enumerator :: CONST_E0
      enumerator :: CONST_M0
+     enumerator :: CONST_NA
+     enumerator :: CONST_R
   end enum
 
   ! Number of memory registers
-  integer(kind=c_int), parameter :: maxreg = 9
+  integer(kind=c_int) :: maxreg = 9
 
   ! number keys
   type(c_ptr), dimension(10) :: knum
@@ -91,7 +94,8 @@ module widgets
   type(c_ptr) :: menu, pull, kabs, kaint, kfrac, katan2, kfact
 
   ! The physics constants pulldown
-  type(c_ptr) :: phys, fconst, k_c, k_e, k_h, k_hb, k_k, k_g, k_e0, k_m0
+  type(c_ptr) :: phys, fconst, k_c, k_e, k_h, k_hb, k_k, k_g, k_e0, k_m0, &
+       & k_na, k_r
 
   ! Menubar
   type(c_ptr) :: fmenu, ffmenu, fhmenu, kabout, ksave, krestore, khelp, &
