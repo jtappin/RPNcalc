@@ -2,8 +2,8 @@
 GTKVER=3
 
 # Choose compile flags according to whether you want a debug or optimized build
-FFLAGS=-O3 `pkg-config --cflags gtk$(GTKVER)-fortran`
-#FFLAGS=-g -Wall -Wno-unused-dummy-argument `pkg-config --cflags gtk$(GTKVER)-fortran`
+FFLAGS_T=-O3
+#FFLAGST=-g -Wall -Wno-unused-dummy-argument 
 
 # On some 64-bit systems when gfortran is from a binary snapshot, there is an 
 # error searching for libquadmath. If this happens to you, then uncomment the 
@@ -23,7 +23,9 @@ FC=gfortran
 # You shouldn't normally need to change anything below here. #
 ##############################################################
 
-LDFLAGS= $(QUADLIB) `pkg-config --libs gtk$(GTKVER)-fortran`
+FFLAGS=$(FFLAGS_T) `pkg-config --cflags gtk-$(GTKVER)-fortran`
+LDFLAGS= $(QUADLIB) `pkg-config --libs gtk-$(GTKVER)-fortran`
+
 BINDIR=$(PREFIX)/bin
 SHRDIR=$(PREFIX)/share
 APPDIR=$(SHRDIR)/applications
