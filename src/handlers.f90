@@ -370,36 +370,9 @@ contains
     ! Physics constants
     type(c_ptr), value :: widget, gdata
 
-    real(kind=c_double), parameter :: c = 2.99792458e8_c_double
-    real(kind=c_double), parameter :: e = 1.60217646e-19_c_double
-    real(kind=c_double), parameter :: h = 6.626068e-34_c_double
-    real(kind=c_double), parameter :: k = 1.3806503e-23_c_double
-    real(kind=c_double), parameter :: g = 6.673e-11_c_double
-!    real(kind=c_double), parameter :: e0 = 8.854e-12_c_double
-    real(kind=c_double), parameter :: m0 = 4.0e-7_c_double * pi
+    real(kind=c_double), pointer :: cval
 
-    integer(kind=c_int), pointer :: opcode
-    real(kind=c_double) :: cval
-
-    call c_f_pointer(gdata, opcode)
-    select case(opcode)
-    case(CONST_C)
-       cval = c
-    case(CONST_E)
-       cval = e
-    case(CONST_H)
-       cval = h
-    case(CONST_HBAR)
-       cval = h / (2._c_double * pi)
-    case(CONST_K)
-       cval = k
-    case(CONST_G)
-       cval = g
-    case(CONST_E0)
-       cval = 1._c_double / (c**2 * m0)
-    case(CONST_M0)
-       cval = m0
-    end select
+    call c_f_pointer(gdata, cval)
 
     call push_stack(cval)
     call gtk_entry_set_text(fentry, cnull)
@@ -738,11 +711,11 @@ contains
     end if
 
     select case(trigunit)
-    case(0)
+    case(0)      ! Radians
        acf = 1._c_double
-    case(1)
+    case(1)      ! Degrees
        acf = pi/180._c_double
-    case(2)
+    case(2)      ! Grads
        acf = pi/200._c_double
     end select
 
@@ -848,7 +821,7 @@ contains
     case(FUN_INV)
        if (x == 0._c_double) then
           mid = gtk_statusbar_push(fstatus, 0, &
-               & "1/X argument out of range"//cnull)
+               & "Zero argument for 1/X in not permitted"//cnull)
           call push_stack(x, show_result=.false.)
           return
        end if
@@ -867,7 +840,7 @@ contains
           end do
        else
           mid = gtk_statusbar_push(fstatus, 0, &
-               & "Factorial argument out of range"//cnull)
+               & "Factorial argument out of range or not an integer"//cnull)
           call push_stack(x, show_result=.false.)
           return
        end if
