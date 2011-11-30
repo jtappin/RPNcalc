@@ -277,8 +277,9 @@ program rpncalc
   kdivide = hl_gtk_button_new("/"//cnull, clicked=c_funloc(oppress), &
        & data=c_loc(pdiv))
   call hl_gtk_table_attach(keybox, kdivide, 3, 4)
-  kpower = hl_gtk_button_new("**"//cnull, clicked=c_funloc(oppress), &
-       & data=c_loc(ppow))
+  kpower = hl_gtk_button_new("y<sup>x</sup>"//cnull, &
+       & clicked=c_funloc(oppress), &
+       & data=c_loc(ppow), is_markup=TRUE)
   call hl_gtk_table_attach(keybox, kpower, 3, 5)
 
   ! Clear entry
@@ -425,34 +426,34 @@ program rpncalc
   k_g = hl_gtk_menu_item_new(fconst, "G"//cnull, &
        & activate=c_funloc(add_const), data=c_loc(phys_g), &
        & tooltip="Gravitational constant"//cnull)
-  k_e0 = hl_gtk_menu_item_new(fconst, "ε0"//cnull, &
+  k_e0 = hl_gtk_menu_item_new(fconst, "ε<sub>0</sub>"//cnull, &
        & activate=c_funloc(add_const), data=c_loc(phys_e0), &
-       & tooltip="Pemittivity of free space"//cnull)
-  k_m0 = hl_gtk_menu_item_new(fconst, "μ0"//cnull, &
+       & tooltip="Pemittivity of free space"//cnull, is_markup=TRUE)
+  k_m0 = hl_gtk_menu_item_new(fconst, "μ<sub>0</sub>"//cnull, &
        & activate=c_funloc(add_const), data=c_loc(phys_m0), &
-       & tooltip="Permeability of free space"//cnull)
+       & tooltip="Permeability of free space"//cnull, is_markup=TRUE)
   k_sb = hl_gtk_menu_item_new(fconst, "σ"//cnull, &
        &activate=c_funloc(add_const), data=c_loc(phys_sb), &
        & tooltip="Stefan-Boltzmann constant"//cnull)
   k_sep = hl_gtk_menu_item_new(fconst)
 
-  k_me = hl_gtk_menu_item_new(fconst, 'me'//cnull, &
+  k_me = hl_gtk_menu_item_new(fconst, 'm<sub>e</sub>'//cnull, &
        & activate=c_funloc(add_const), data=c_loc(phys_me), &
-       & tooltip="Electron mass"//cnull)
-  k_mp = hl_gtk_menu_item_new(fconst, 'mp'//cnull, &
+       & tooltip="Electron mass"//cnull, is_markup=TRUE)
+  k_mp = hl_gtk_menu_item_new(fconst, 'm<sub>p</sub>'//cnull, &
        & activate=c_funloc(add_const), data=c_loc(phys_mp), &
-       & tooltip="Proton mass"//cnull)
-  k_mn = hl_gtk_menu_item_new(fconst, 'mn'//cnull, &
+       & tooltip="Proton mass"//cnull, is_markup=TRUE)
+  k_mn = hl_gtk_menu_item_new(fconst, 'm<sub>n</sub>'//cnull, &
        & activate=c_funloc(add_const), data=c_loc(phys_mn), &
-       & tooltip="Neutron mass"//cnull)
+       & tooltip="Neutron mass"//cnull, is_markup=TRUE)
   k_sep = hl_gtk_menu_item_new(fconst)
 
-  k_na = hl_gtk_menu_item_new(fconst, "Na"//cnull, &
+  k_na = hl_gtk_menu_item_new(fconst, "N<sub>a</sub>"//cnull, &
        & activate=c_funloc(add_const), data=c_loc(phys_na), &
-       & tooltip="Avogadro's constant"//cnull)
+       & tooltip="Avogadro's constant"//cnull, is_markup=TRUE)
   k_r = hl_gtk_menu_item_new(fconst, "R"//cnull, &
        & activate=c_funloc(add_const), data=c_loc(phys_r), &
-       & tooltip="Gas constant"//cnull)
+       & tooltip="Gas constant"//cnull, is_markup=TRUE)
 
   ! Memory registers
   kmsto = hl_gtk_button_new("STO"//cnull, clicked=c_funloc(mempress), &
