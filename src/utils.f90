@@ -194,9 +194,11 @@ contains
        call gtk_button_set_label(ksin, "asin"//cnull)
        call gtk_button_set_label(kcos, "acos"//cnull)
        call gtk_button_set_label(ktan, "atan"//cnull)
-       call gtk_button_set_label(ksqrt, "x**2"//cnull)
+       call hl_gtk_button_set_label(ksqrt, "x<sup>2</sup>"//cnull, &
+            & is_markup=TRUE)
        call gtk_button_set_label(kloge, "exp"//cnull)
-       call gtk_button_set_label(klog10, "10**x"//cnull)
+       call hl_gtk_button_set_label(klog10, "10<sup>x</sup>"//cnull, &
+            & is_markup=TRUE)
        call gtk_button_set_label(ksinh, "asinh"//cnull)
        call gtk_button_set_label(kcosh, "acosh"//cnull)
        call gtk_button_set_label(ktanh, "atanh"//cnull)

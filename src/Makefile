@@ -3,7 +3,7 @@ GTKVER=3
 
 # Choose compile flags according to whether you want a debug or optimized build
 FFLAGS_T=-O3
-#FFLAGST=-g -Wall -Wno-unused-dummy-argument 
+#FFLAGS_T=-g -Wall -Wno-unused-dummy-argument 
 
 # On some 64-bit systems when gfortran is from a binary snapshot, there is an 
 # error searching for libquadmath. If this happens to you, then uncomment the 
@@ -19,6 +19,10 @@ PREFIX=/usr/local
 # full path here.
 FC=gfortran
 
+# Name extension (the executable becomes rpncalc$(NAME_SUFFIX))
+# This would allow you to have both GTK2 & GTK3 versions to compare.
+NAME_SUFFIX=
+
 ##############################################################
 # You shouldn't normally need to change anything below here. #
 ##############################################################
@@ -31,7 +35,7 @@ SHRDIR=$(PREFIX)/share
 APPDIR=$(SHRDIR)/applications
 
 OBJS = rpncalc.o handlers.o widgets.o utils.o physics.o
-PROG = rpncalc
+PROG = rpncalc$(NAME_SUFFIX)
 DESKTOP=$(PROG).desktop
 
 all: $(PROG)
