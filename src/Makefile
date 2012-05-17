@@ -1,3 +1,6 @@
+# Normally the adjustable parameters are passed from the top-level 
+# Makefile.
+
 # Which GTK library to use (set this to 2 or 3)
 GTKVER=3
 
@@ -38,10 +41,13 @@ OBJS = rpncalc.o handlers.o widgets.o utils.o physics.o
 PROG = rpncalc$(NAME_SUFFIX)
 DESKTOP=$(PROG).desktop
 
+DOCDIR=$(SHRDIR)/doc/$(PROG)
+TEXTFILE=$(DOCDIR)/$(PROG).txt
+
 all: $(PROG)
 
 clean:
-	-rm -f *.o *.mod $(PROG) *~
+	-rm -f *.o *.mod $(PROG) *~ handlers.f90
 
 $(PROG): $(OBJS)
 	$(FC) -o $@ $(OBJS) $(LDFLAGS)
@@ -53,14 +59,14 @@ install: $(PROG) $(BINDIR) $(APPDIR)
 $(BINDIR):
 	mkdir -p $(BINDIR)
 
-$(APPDIR): $(SHRDIR)
+$(APPDIR): 
 	mkdir -p $(APPDIR)
 
-$(SHRDIR):
-	mkdir -p $(SHRDIR)
-
 uninstall:
-	rm $(BINDIR)/$(PROG) $(SHRDIR)/$(DESKTOP)
+	rm $(BINDIR)/$(PROG) $(APPDIR)/$(DESKTOP)
+
+handlers.f90: handlers-tmpl.f90
+	sed -e "s:@TEXTFILE@:$(TEXTFILE):"  handlers-tmpl.f90 > handlers.f90
 
 # Dependencies
 handlers.o:   widgets.o

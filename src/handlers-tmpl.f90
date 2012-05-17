@@ -31,7 +31,9 @@ module handlers
        & gtk_editable_set_position, gtk_combo_box_set_active, &
        & gtk_menu_item_set_label
 
-  use g, only:  g_signal_stop_emission_by_name
+  use g, only:  g_signal_stop_emission_by_name, g_utf8_validate
+
+  use iso_fortran_env, only: error_unit
 
   use gtk_sup
   use gtk_hl
@@ -64,10 +66,10 @@ contains
     logical :: status
     integer(kind=c_int) :: mid
 
-    mid = gtk_statusbar_push(fstatus, 0, cnull)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
     call read_entry(val, status, push=.true.)
     if (.not. status) return
-    call gtk_entry_set_text(fentry, cnull)
+    call gtk_entry_set_text(fentry, c_null_char)
     call set_result(val)
   end subroutine enter_value
 
@@ -180,7 +182,7 @@ contains
     if (j <= nchars) then ! We had to exclude some chars otherwise let the
        ! default handler do it.
        mid = gtk_statusbar_push(fstatus, 0, &
-            & "Entered text includes invalid characters -- excluded"//cnull)
+            & "Entered text includes invalid characters -- excluded"//c_null_char)
        if (j > 1) then
           if (ipos > 0) then
              wtext = etext(:ipos)//otext(:j-1)
@@ -190,7 +192,7 @@ contains
           if (ipos < nchars-1) then
              wtext = trim(wtext)//trim(etext(ipos+1:))
           end if
-          call gtk_entry_set_text(widget, trim(wtext)//cnull)
+          call gtk_entry_set_text(widget, trim(wtext)//c_null_char)
        endif
        if (dflag) decimal_present = .true.
        if (eflag) exponent_present = .true.
@@ -236,10 +238,10 @@ contains
     character, pointer :: fdata
     integer(kind=c_int) :: mid
 
-    mid = gtk_statusbar_push(fstatus, 0, cnull)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
     if (c_associated(gdata)) then
        call c_f_pointer(gdata, fdata)
-       call append_char_entry(fdata//cnull)
+       call append_char_entry(fdata//c_null_char)
     end if
     if (focus_entry) then
        call gtk_widget_grab_focus(fentry)
@@ -256,9 +258,9 @@ contains
 
     if (decimal_present .or. exponent_present) then
        mid = gtk_statusbar_push(fstatus, 0, &
-            & "Decimal point not permitted here"//cnull)
+            & "Decimal point not permitted here"//c_null_char)
     else
-       call append_char_entry("."//cnull)
+       call append_char_entry("."//c_null_char)
        decimal_present = .TRUE.
     end if
     if (focus_entry) then
@@ -280,7 +282,7 @@ contains
     real(kind=c_double) :: x
     logical :: status
 
-    mid = gtk_statusbar_push(fstatus, 0, cnull)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
     if (exponent_present) then
        ctext = gtk_entry_get_text(fentry)
@@ -288,7 +290,7 @@ contains
        idx = max(index(alltext, 'E'), index(alltext,'e'), &
             & index(alltext, 'D'), index(alltext, 'd'))
        if (idx == 0) then
-          mid = gtk_statusbar_push(fstatus, 0, "D'Oh"//cnull)
+          mid = gtk_statusbar_push(fstatus, 0, "D'Oh"//c_null_char)
        else
           idx=idx+1
           select case(alltext(idx:idx))
@@ -299,7 +301,7 @@ contains
           case default
              alltext = alltext(:idx-1)//'-'//alltext(idx:)
           end select
-          call gtk_entry_set_text(fentry, trim(alltext)//cnull)
+          call gtk_entry_set_text(fentry, trim(alltext)//c_null_char)
        end if
     else if (nchars > 0) then
        ctext = gtk_editable_get_chars(fentry, 0, 1)
@@ -308,11 +310,11 @@ contains
        select case(ftext)
        case ('+')
           call gtk_editable_delete_text(fentry, 0, 1)
-          call gtk_editable_insert_text(fentry, '-'//cnull, 1, c_loc(pos))
+          call gtk_editable_insert_text(fentry, '-'//c_null_char, 1, c_loc(pos))
        case ('-')
           call gtk_editable_delete_text(fentry, 0, 1)
        case default  ! no sign present
-          call gtk_editable_insert_text(fentry, '-'//cnull, 1, c_loc(pos))
+          call gtk_editable_insert_text(fentry, '-'//c_null_char, 1, c_loc(pos))
        end select
     else
        call set_result()
@@ -336,15 +338,15 @@ contains
     integer(kind=c_int), target :: pos
 
     if (exponent_present) then
-       mid = gtk_statusbar_push(fstatus, 0, "Exponent already present"//cnull)
+       mid = gtk_statusbar_push(fstatus, 0, "Exponent already present"//c_null_char)
     else
        nchars = int(gtk_entry_get_text_length(fentry), c_int)
        if (nchars == 0) then
           mid = gtk_statusbar_push(fstatus, 0, &
-               & "Must have a mantissa before an exponent."//cnull)
+               & "Must have a mantissa before an exponent."//c_null_char)
        else
           pos = nchars
-          call gtk_editable_insert_text(fentry, 'E'//cnull, 1, c_loc(pos))
+          call gtk_editable_insert_text(fentry, 'E'//c_null_char, 1, c_loc(pos))
           exponent_present = .true.
        end if
     end if
@@ -359,7 +361,7 @@ contains
     type(c_ptr), value :: widget, gdata
 
     call push_stack(pi)
-    call gtk_entry_set_text(fentry, cnull)
+    call gtk_entry_set_text(fentry, c_null_char)
     if (focus_entry) then
        call gtk_widget_grab_focus(fentry)
        call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
@@ -375,7 +377,7 @@ contains
     call c_f_pointer(gdata, cval)
 
     call push_stack(cval)
-    call gtk_entry_set_text(fentry, cnull)
+    call gtk_entry_set_text(fentry, c_null_char)
     if (focus_entry) then
        call gtk_widget_grab_focus(fentry)
        call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
@@ -420,7 +422,7 @@ contains
     real(kind=c_double) :: val
     logical :: status
 
-    mid = gtk_statusbar_push(fstatus, 0, cnull)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
     if (focus_entry) then
        call gtk_widget_grab_focus(fentry)
@@ -462,7 +464,7 @@ contains
        call pop_stack(y, status)
        if (.not. status) return
 
-       call gtk_entry_set_text(fentry, cnull)
+       call gtk_entry_set_text(fentry, c_null_char)
     else
        call pop_stack(x, status)
        if (.not. status) return
@@ -489,7 +491,7 @@ contains
 
        else if (y < 0._c_double) then ! real power of a negative value (not allowed)
           mid = gtk_statusbar_push(fstatus, 0, &
-               & "Cannot raise a negative value to a real power"//cnull)
+               & "Cannot raise a negative value to a real power"//c_null_char)
           call push_stack(y, show_result=.false.)
           call push_stack(x, show_result=.false.)
           return
@@ -508,7 +510,7 @@ contains
     end select
     call push_stack(z)
     call set_result(z)
-    mid = gtk_statusbar_push(fstatus, 0, cnull)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
   end subroutine oppress
 
   subroutine cepress(widget, gdata) bind(c)
@@ -522,13 +524,13 @@ contains
 
     nchars = gtk_entry_get_text_length(fentry)
     if (nchars > 0) then
-       call gtk_entry_set_text(fentry, cnull)
+       call gtk_entry_set_text(fentry, c_null_char)
        call clear_entry_flags
     else
        call pop_stack(xjunk, status)
     end if
     call set_result()
-    mid = gtk_statusbar_push(fstatus, 0, cnull)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
     if (focus_entry) then
        call gtk_widget_grab_focus(fentry)
        call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
@@ -546,12 +548,12 @@ contains
 
     nchars = gtk_entry_get_text_length(fentry)
     if (nchars > 0) then
-       call gtk_entry_set_text(fentry, cnull)
+       call gtk_entry_set_text(fentry, c_null_char)
        call clear_entry_flags
     endif
 
     call hl_gtk_listn_rem(fstack)
-    mid = gtk_statusbar_push(fstatus, 0, cnull)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
     if (dynamic_stats) call stack_stats(0._c_double, clear=.true.)
     if (focus_entry) then
        call gtk_widget_grab_focus(fentry)
@@ -572,7 +574,7 @@ contains
     real(kind=c_double) :: x, y
     logical :: status, sflag
 
-    mid = gtk_statusbar_push(fstatus, 0, cnull)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
     sflag = .true.
     if (focus_entry) then
        call gtk_widget_grab_focus(fentry)
@@ -586,7 +588,7 @@ contains
           sflag=.false.
           if (.not. status) return
           write(ftext,*) x
-          call gtk_entry_set_text(fentry, trim(adjustl(ftext))//cnull)
+          call gtk_entry_set_text(fentry, trim(adjustl(ftext))//c_null_char)
        else
           call read_entry(x, status, push=.false.)
           if (.not. status) return
@@ -594,7 +596,7 @@ contains
           if (.not. status) return
           call push_stack(x)
           write(ftext,*) y
-          call gtk_entry_set_text(fentry, trim(adjustl(ftext))//cnull)
+          call gtk_entry_set_text(fentry, trim(adjustl(ftext))//c_null_char)
        end if
        call hl_gtk_listn_set_selection(fstack)
     else
@@ -620,7 +622,7 @@ contains
     integer(kind=c_int) :: isel, nrows
     logical :: status
 
-    mid = gtk_statusbar_push(fstatus, 0, cnull)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
     if (focus_entry) then
        call gtk_widget_grab_focus(fentry)
        call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
@@ -633,14 +635,14 @@ contains
        call convert_c_string(ctext, nchars, ftext)
        read(ftext, *, iostat=ios, iomsg=iom) x
        if (ios /= 0) then
-          mid = gtk_statusbar_push(fstatus, 0, trim(iom)//cnull)
+          mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
           return
        end if
        call pop_stack(y, status)
        if (.not. status) return
        call push_stack(x)
        write(ftext,*) y
-       call gtk_entry_set_text(fentry, trim(adjustl(ftext))//cnull)
+       call gtk_entry_set_text(fentry, trim(adjustl(ftext))//c_null_char)
        call hl_gtk_listn_set_selection(fstack)
     else
        nrows = hl_gtk_listn_get_n_rows(fstack)
@@ -667,7 +669,7 @@ contains
     integer :: i
     integer(kind=c_int) :: nrows,mid
 
-    mid = gtk_statusbar_push(fstatus, 0, cnull)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
     nrows = hl_gtk_listn_get_n_rows(fstack)
     if (nrows <= 1) return  ! Empty or 1 row can't roll
 
@@ -704,7 +706,7 @@ contains
     if (nchars > 0) then
        call read_entry(x, status, push=.false.)
        if (.not. status) return
-       call gtk_entry_set_text(fentry, cnull)
+       call gtk_entry_set_text(fentry, c_null_char)
     else
        call pop_stack(x, status)
        if (.not. status) return
@@ -726,7 +728,7 @@ contains
        if (isinv) then
           if (abs(x) > 1._c_double) then
              mid = gtk_statusbar_push(fstatus, 0, &
-                  & "Asin argument out of range"//cnull)
+                  & "Asin argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
           end if
@@ -738,7 +740,7 @@ contains
        if (isinv) then
           if (abs(x) > 1._c_double) then
              mid = gtk_statusbar_push(fstatus, 0, &
-                  & "Acos argument out of range"//cnull)
+                  & "Acos argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
           end if
@@ -758,7 +760,7 @@ contains
        else
           if (x <= 0._c_double) then
              mid = gtk_statusbar_push(fstatus, 0, &
-                  & "Ln argument out of range"//cnull)
+                  & "Ln argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
           end if
@@ -770,7 +772,7 @@ contains
        else
           if (x <= 0._c_double) then
              mid = gtk_statusbar_push(fstatus, 0, &
-                  & "Sqrt argument out of range"//cnull)
+                  & "Sqrt argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
           end if
@@ -786,7 +788,7 @@ contains
        if (isinv) then
           if (x < 1._c_double) then
              mid = gtk_statusbar_push(fstatus, 0, &
-                  & "Acosh argument out of range"//cnull)
+                  & "Acosh argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
           end if
@@ -798,7 +800,7 @@ contains
        if (isinv) then
           if (abs(x) > 1._c_double) then
              mid = gtk_statusbar_push(fstatus, 0, &
-                  & "Atanh argument out of range"//cnull)
+                  & "Atanh argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
           end if
@@ -812,7 +814,7 @@ contains
        else
           if (x <= 0._c_double) then
              mid = gtk_statusbar_push(fstatus, 0, &
-                  & "Log10 argument out of range"//cnull)
+                  & "Log10 argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
           end if
@@ -821,7 +823,7 @@ contains
     case(FUN_INV)
        if (x == 0._c_double) then
           mid = gtk_statusbar_push(fstatus, 0, &
-               & "Zero argument for 1/X in not permitted"//cnull)
+               & "Zero argument for 1/X in not permitted"//c_null_char)
           call push_stack(x, show_result=.false.)
           return
        end if
@@ -840,13 +842,13 @@ contains
           end do
        else
           mid = gtk_statusbar_push(fstatus, 0, &
-               & "Factorial argument out of range or not an integer"//cnull)
+               & "Factorial argument out of range or not an integer"//c_null_char)
           call push_stack(x, show_result=.false.)
           return
        end if
     end select
     call push_stack(z)
-    mid = gtk_statusbar_push(fstatus, 0, cnull)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
     if (isinv) then
        call gtk_toggle_button_set_active(karc, FALSE)
        isinv = .FALSE.
@@ -875,7 +877,7 @@ contains
        if (.not. status) return
     end if
     call show_hms(val, fresult)
-    mid = gtk_statusbar_push(fstatus, 0, cnull)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
   end subroutine hmspress
 
   subroutine invtoggle(widget, gdata) bind(c)
@@ -958,13 +960,13 @@ contains
        else
           if (nchars == 0) then
              mid = gtk_statusbar_push(fstatus, 0, &
-                  & "No content in entry and no register selected"//cnull)
+                  & "No content in entry and no register selected"//c_null_char)
              return
           end if
           call read_entry(midx, status)
           if (.not. status .or. midx < 0 .or. midx > maxreg) then
              mid = gtk_statusbar_push(fstatus, 0, &
-                  & "Entry field is not a valid register"//cnull)
+                  & "Entry field is not a valid register"//c_null_char)
              return
           end if
           entry_index=.true.
@@ -997,8 +999,8 @@ contains
 
     call hl_gtk_listn_set_selection(fmemory)
     mem_selected = -1
-    if (entry_index) call gtk_entry_set_text(fentry, cnull)
-    mid = gtk_statusbar_push(fstatus, 0, cnull)
+    if (entry_index) call gtk_entry_set_text(fentry, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
   end subroutine mempress
 
   subroutine memsel(widget, gdata) bind(c)
@@ -1071,205 +1073,49 @@ contains
     type(c_ptr), value :: widget, gdata
 
     type(c_ptr) :: hscroll, hview, hquit, hbox
+    character(kind=c_char), dimension(:), allocatable, save :: text
+    character(len=*), parameter :: textfile="@TEXTFILE@"
+    integer :: unit, iostat, textlen
+    character(len=80) :: iomsg
+    integer(kind=c_int) :: isvalid
+    type(c_ptr) :: end_point
+    character(kind=c_char), pointer :: end_char
 
-    help_window = hl_gtk_window_new("RPN Calculator"//cnull, &
+    if (.not. allocated(text)) then
+       ! Note that the easiest way to read a whole file into an array
+       ! of CHAR*1 is to open it as an unformatted stream.
+       open(newunit=unit, file=textfile, access='stream', action='read', &
+            & iostat=iostat, iomsg=iomsg, form="unformatted")
+       if (iostat /= 0) then
+          write(error_unit, *) "rpncalc: Failed to open help file: ", &
+               & trim(textfile)
+          write(error_unit, *) "Reason: ", trim(iomsg)
+          return
+       end if
+       inquire(unit, size=textlen)
+       allocate(text(textlen))
+       read(unit, iostat=iostat, iomsg=iomsg) text
+       if (iostat /= 0) then
+          write(error_unit, *) "rpncalc: Failed to read help file: ", &
+               & trim(textfile)
+          write(error_unit, *) "Reason: ", trim(iomsg)
+          return
+       end if
+       close(unit)
+    end if
+
+    help_window = hl_gtk_window_new("RPN Calculator"//c_null_char, &
          & deletable=FALSE, above=TRUE, parent=win)
 
     hbox = hl_gtk_box_new()
     call gtk_container_add(help_window, hbox)
 
-
-!!! To update help text cut the text constant here and insert tmp.txt (generated
-!!! from rpncalc.txt with process_help.pl
     hview = hl_gtk_text_view_new(hscroll, editable=FALSE, &
-         & ssize=(/600, 600/), initial_text = (/ &
-         & 'RPN Calculator'//c_new_line// &
-         & '=============='//c_new_line// &
-         & ''//c_new_line// &
-         & 'The GtkFortran rpncalc program is intended to be both a demonstration'//c_new_line// &
-         & 'of some of the capabilities of GtkFortran and also a usable calculator'//c_new_line// &
-         & 'application.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'It uses Reverse Polish logic (similar to calculators from HP) for 2'//c_new_line// &
-         & 'reasons:'//c_new_line// &
-         & '1. It''s easier to implement.'//c_new_line// &
-         & '2. I prefer RPN when using a physical calculator.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'The stack is of (at least in theory) unlimited size (there is probably'//c_new_line// &
-         & 'a limit on the length of a TreeView in Gtk+).'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Usage'//c_new_line// &
-         & '-----'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Invoking:'//c_new_line// &
-         & ''//c_new_line// &
-         & 'On most Linux/Unix desktops, when installed a menu item to start the'//c_new_line// &
-         & 'calculator will be added to the "Education" section of the start menu.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'rpncalc can also be started from the command line:'//c_new_line// &
-         & '  rpncalc [-o|-open|-c|-closed] [{-r|--restore} <file>]'//c_new_line// &
-         & ''//c_new_line// &
-         & '  -o, --open: Start with the stack displays open (default)'//c_new_line// &
-         & '  -c, --closed: Start with the stack displays closed'//c_new_line// &
-         & '  -r, --restore: Restore the specified file.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Entering values:'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Values can be entered either using the keypad, or by typing into the'//c_new_line// &
-         & 'entry box. Values entered from the keypad make sanity checks for 2'//c_new_line// &
-         & 'decimal points or a decimal entered after the exponent has been started'//c_new_line// &
-         & 'and the change-sign key works in a reasonably intelligent way. When'//c_new_line// &
-         & 'values are typed or pasted into the entry box, characters that cannot'//c_new_line// &
-         & 'be part of a number are rejected with a warning.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'A value may be transferred from the entry to the stack by pressing the'//c_new_line// &
-         & 'keyboard "Enter" key while focus is on the entry window, or by clicking'//c_new_line// &
-         & 'the "Enter" key on the keypad. The "Dup" key copies the entry box to'//c_new_line// &
-         & 'the stack without clearing the entry box. If the contents of the entry'//c_new_line// &
-         & 'box are not a valid number (i.e. a Fortran "read" statement cannot'//c_new_line// &
-         & 'convert it to a floating point value) a message is displayed in the'//c_new_line// &
-         & 'status bar and you may edit the entry box to correct the problem.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Operators:'//c_new_line// &
-         & ''//c_new_line// &
-         & 'The operators (+, -, *, / and ** and the atan2 function) operate on the'//c_new_line// &
-         & 'entry box and the top element on the stack if there is anything in the'//c_new_line// &
-         & 'entry box. If the entry box is empty, then they operate on the top 2'//c_new_line// &
-         & 'elements of the stack.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Operators may also be accessed by typing the operator into the entry'//c_new_line// &
-         & 'window (N.B. The exponentiation operator is "^" rather than "**" for'//c_new_line// &
-         & 'convenience of implementation). The addition and subtraction operators'//c_new_line// &
-         & 'will only work in this way if a sign would not be a valid part of a'//c_new_line// &
-         & 'number where they are entered, notably "+" or "-" in an empty entry box'//c_new_line// &
-         & 'is not treated as an operator. '//c_new_line// &
-         & ''//c_new_line// &
-         & 'The result is placed on the top of the stack, and displayed in the'//c_new_line// &
-         & 'result window.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Functions:'//c_new_line// &
-         & ''//c_new_line// &
-         & 'The functions operate on a single value, which is taken from the entry'//c_new_line// &
-         & 'box if that has content or from the top of the stack otherwise. The'//c_new_line// &
-         & 'result is placed on the top of the stack, and displayed in the result'//c_new_line// &
-         & 'window.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'If the "Inverse" checkbox is set, then functions are replaced by their'//c_new_line// &
-         & 'inverses (e.g. "sin" becomes "asin"). The less-used functions in the'//c_new_line// &
-         & 'pulldown are not affected by this.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'The "Rad", "Deg" and "Grad" radio buttons are used to select Radians,'//c_new_line// &
-         & 'Degrees or Grads for the trigonometric functions.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'The "HMS" key is not a proper function, it doesn''t remove or add'//c_new_line// &
-         & 'anything to the stack. It displays the contents of the entry box or the'//c_new_line// &
-         & 'top of the stack as if it were a number of hours converted to'//c_new_line// &
-         & 'HH:MM:SS.sss format.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Some less-used functions are in the "More>" pulldown. The "atan2"'//c_new_line// &
-         & 'function computes atan(y/x) removing the quadrant ambiguities.'//c_new_line// &
-         & ' '//c_new_line// &
-         & 'Stack operations:'//c_new_line// &
-         & ''//c_new_line// &
-         & '"CE" clears the entry box, or if that is empty deletes the top entry on'//c_new_line// &
-         & 'the stack.'//c_new_line// &
-         & ''//c_new_line// &
-         & '"CA" clears the entry box and all entries on the stack.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'The up button moves the selected item in the stack up one place. If the'//c_new_line// &
-         & 'top item (or nothing) is selected then it is exchanges with the entry'//c_new_line// &
-         & 'box.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'The down button moves the selected entry on the stack down one'//c_new_line// &
-         & 'place.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'The roll down button, moves the last element of the stack to the top'//c_new_line// &
-         & 'and all others down one place.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Constants:'//c_new_line// &
-         & ''//c_new_line// &
-         & 'There are a number of built in fundamental physics constants that are'//c_new_line// &
-         & 'build in to the calculator, these can be entered from the "Phys"'//c_new_line// &
-         & 'pull-down menu.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Memory Registers:'//c_new_line// &
-         & ''//c_new_line// &
-         & 'The calculator also has 10[*] memory registers (numbered 0-9).'//c_new_line// &
-         & ''//c_new_line// &
-         & 'These can be accessed in one of two ways:'//c_new_line// &
-         & '1) Select a register in the registers tab, and then click a memory'//c_new_line// &
-         & 'operation. In this case the value used will be the entry box or the top'//c_new_line// &
-         & 'of the stack if the entry is empty.'//c_new_line// &
-         & '2) Enter a register number in the entry box and click the memory'//c_new_line// &
-         & 'operation. The value used is the top of the stack.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'The operations are:'//c_new_line// &
-         & '"STO": Store the value in the selected register.'//c_new_line// &
-         & '"RCL": Copy the selected register to the top of the stack'//c_new_line// &
-         & '"M+": Add the value to the selected register'//c_new_line// &
-         & '"M-": Subtract the value from the selected register'//c_new_line// &
-         & '"MCL": Clear the selected register.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Statistics:'//c_new_line// &
-         & ''//c_new_line// &
-         & 'If the "Live stats" toggle is enabled, then a summary of the'//c_new_line// &
-         & 'statistical properties of the contents of the stack is maintained in'//c_new_line// &
-         & 'the "Statistics" tab of the display area. Clicking on a line of that'//c_new_line// &
-         & 'display copies its value to the stack.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Save & Restore:'//c_new_line// &
-         & ''//c_new_line// &
-         & 'The stack, registers and entry box can be saved to and restored from a'//c_new_line// &
-         & 'text file with the File->Save and File->Restore menu items.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'The file format is a plain text file with the floating point values'//c_new_line// &
-         & 'written in hexadecimal -- this allows the retention of full-precision'//c_new_line// &
-         & 'but is endian-independent. Obviously any machines that do not use IEEE'//c_new_line// &
-         & 'floating point values will not be able to read files from other'//c_new_line// &
-         & 'machines. Also any machine with a c_double that is not 8-bytes will not'//c_new_line// &
-         & 'work.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Settings:'//c_new_line// &
-         & 'In the current version, there are 2 user-definable settings accessed'//c_new_line// &
-         & 'through the "Edit" menu:'//c_new_line// &
-         & '"Result Format": Specify the format  to use in the result box. You have the'//c_new_line// &
-         & 'options to select one of the standard formats:'//c_new_line// &
-         & '  "Fixed": A fixed number of decimal places (set in the precision spin'//c_new_line// &
-         & '  box). The actual format used is "(F0.<n>)". WARNING: this may be a'//c_new_line// &
-         & '  GNU extension.'//c_new_line// &
-         & '  "Sci": Scientific format. Specify the number of decimals, and the'//c_new_line// &
-         & '  width of the exponent in the spin boxes. The total width is'//c_new_line// &
-         & '  calculated automatically.'//c_new_line// &
-         & '  "Eng": Engineering format, similar to scientific, except that the'//c_new_line// &
-         & '  exponent is always a multiple of 3.'//c_new_line// &
-         & '  "Free": Use a list-directed write (the default).'//c_new_line// &
-         & ''//c_new_line// &
-         & '  Alternatively you can type an explicit Fortran format statement into'//c_new_line// &
-         & '  the combo box (with or without the enclosing parentheses). This may'//c_new_line// &
-         & '  be any Fortran formatting code valid for a REAL type. Setting it to'//c_new_line// &
-         & '  "*" or an empty string will use the default list-directed output (as'//c_new_line// &
-         & '  will an invalid format).'//c_new_line// &
-         & ''//c_new_line// &
-         & '"Hold Entry Focus": If this is enabled, then the input focus always'//c_new_line// &
-         & 'snaps back to the entry window after any operation.'//c_new_line// &
-         & ''//c_new_line// &
-         & 'Accelerators:'//c_new_line// &
-         & ''//c_new_line// &
-         & 'The menu items have accerators to save mouse clicking:'//c_new_line// &
-         & 'Save -- ctrl-s'//c_new_line// &
-         & 'Restore -- ctrl-o'//c_new_line// &
-         & 'Quit -- ctrl-q'//c_new_line// &
-         & 'Set Format -- ctrl-f'//c_new_line// &
-         & 'Help -- ctrl-h'//c_new_line// &
-         & 'About -- ctrl-a'//c_new_line// &
-         & 'About gtk-fortran -- ctrl-shift-a'//c_new_line// &
-         & ''//c_new_line// &
-         & '[*] This can be changed by editing the "maxreg" value in widgets.f90'//cnull &
-         & /) )
-
+         & ssize=(/700, 600/), initial_text = text)
     call hl_gtk_box_pack(hbox, hscroll)
 
-    hquit = hl_gtk_button_new("Dismiss"//cnull, clicked=c_funloc(help_del))
+    hquit = hl_gtk_button_new("Dismiss"//c_null_char, &
+         & clicked=c_funloc(help_del))
 
     call hl_gtk_box_pack(hbox, hquit)
 
@@ -1301,20 +1147,20 @@ contains
 
     call convert_f_string((/ "James Tappin" /), au1)
     authors(1) = c_loc(au1)
-    authors(2) = NULL
+    authors(2) = C_NULL_PTR
 
     adialog = gtk_about_dialog_new()
     call gtk_window_set_transient_for(adialog, win)
-    call gtk_about_dialog_set_program_name(adialog, "RPN Calculator"//CNULL)
-    call gtk_about_dialog_set_license(adialog, "GNU GPL 3"//CNULL)
+    call gtk_about_dialog_set_program_name(adialog, "RPN Calculator"//C_NULL_CHAR)
+    call gtk_about_dialog_set_license(adialog, "GNU GPL 3"//C_NULL_CHAR)
     call gtk_about_dialog_set_comments(adialog, &
          & "This RPN calculator is a demonstration"//c_new_line// &
          & "of the capabilities of Gtk-fortran."//c_new_line//c_new_line// &
          & "It is entirely written in Fortran 95/2003."//c_new_line// &
-         & "It should work with both Gtk+-2.24 and 3.0"//cnull)
+         & "It should work with both Gtk+-2.24 and 3.0"//c_null_char)
     call gtk_about_dialog_set_authors(adialog, authors)
     call gtk_about_dialog_set_website(adialog, &
-         & "https://github.com/jtappin/RPNcalc/wiki"//CNULL)
+         & "https://github.com/jtappin/RPNcalc/wiki"//C_NULL_CHAR)
 
     response = gtk_dialog_run(adialog)
     call gtk_widget_destroy(adialog)
@@ -1340,12 +1186,12 @@ contains
     authors(3) = c_loc(au3)
     authors(4) = c_loc(au4)
     authors(5) = c_loc(au5)
-    authors(6) = NULL
+    authors(6) = C_NULL_PTR
 
     dialog = gtk_about_dialog_new()
     call gtk_window_set_transient_for(dialog, win)
-    call gtk_about_dialog_set_program_name(dialog, "Gtk-fortran"//CNULL)
-    call gtk_about_dialog_set_license(dialog, "GNU GPL 3"//CNULL)
+    call gtk_about_dialog_set_program_name(dialog, "Gtk-fortran"//C_NULL_CHAR)
+    call gtk_about_dialog_set_license(dialog, "GNU GPL 3"//C_NULL_CHAR)
     call gtk_about_dialog_set_comments(dialog, &
          & "The gtk-fortran project aims to offer scientists programmi&
          &ng in Fortran a cross-platform library to build Graphical Us&
@@ -1355,9 +1201,9 @@ contains
          &perability between C and Fortran, which is a part of the For&
          &tran 2003 standard."//c_new_line// & 
          & " GTK+ is a free software cross-platform graphical library &
-         &available for Linux, Unix, Windows and MacOs X."//CNULL) 
+         &available for Linux, Unix, Windows and MacOs X."//C_NULL_CHAR) 
     call gtk_about_dialog_set_website(dialog, &
-         & "https://github.com/jerryd/gtk-fortran/wiki"//CNULL)
+         & "https://github.com/jerryd/gtk-fortran/wiki"//C_NULL_CHAR)
 
     call gtk_about_dialog_set_authors(dialog, authors)
     response_id =  gtk_dialog_run(dialog)
@@ -1375,7 +1221,7 @@ contains
     type(c_ptr) :: jb, jbb, junk
     integer(kind=c_int) :: issens
 
-    fmt_window = hl_gtk_window_new("Set format"//cnull, above=TRUE, &
+    fmt_window = hl_gtk_window_new("Set format"//c_null_char, above=TRUE, &
          & destroy=c_funloc(set_format_destroy), parent=win)
 
     jb = hl_gtk_box_new()
@@ -1383,24 +1229,24 @@ contains
 
     jbb = hl_gtk_box_new(horizontal=TRUE)
     call hl_gtk_box_pack(jb, jbb)
-    junk = gtk_label_new("Current format = "//trim(result_format)//cnull)
+    junk = gtk_label_new("Current format = "//trim(result_format)//c_null_char)
     call hl_gtk_box_pack(jbb, junk, expand=FALSE)
 
     jbb = hl_gtk_box_new(horizontal=TRUE)
     call hl_gtk_box_pack(jb, jbb)
-    junk = gtk_label_new("Format:"//cnull)
+    junk = gtk_label_new("Format:"//c_null_char)
     call hl_gtk_box_pack(jbb, junk, expand=FALSE)
     fmt_choose = hl_gtk_combo_box_new(has_entry=TRUE, &
          & changed=c_funloc(set_format_type_cb), &
          & initial_choices=(/"Fixed   (F)", "Sci    (ES)", "Eng    (EN)", &
          & "General (G)", "Free    (*)"/), &
          & active = fmt_type, &
-         & tooltip="Choose a format type or give a Fortran format code"//cnull)
+         & tooltip="Choose a format type or give a Fortran format code"//c_null_char)
     call hl_gtk_box_pack(jbb, fmt_choose)
 
     jbb = hl_gtk_box_new(horizontal=TRUE)
     call hl_gtk_box_pack(jb, jbb)
-    junk = gtk_label_new("Precision:"//cnull)
+    junk = gtk_label_new("Precision:"//c_null_char)
     call hl_gtk_box_pack(jbb, junk, expand=FALSE)
     if (fmt_type >= 0 .and. fmt_type <= 3) then
        issens = TRUE
@@ -1408,9 +1254,9 @@ contains
        issens=FALSE
     end if
     fmt_precision = hl_gtk_spin_button_new(1, 30, initial_value=fmt_decimal, &
-         & sensitive=issens, tooltip="Set the number of decimal places"//cnull)
+         & sensitive=issens, tooltip="Set the number of decimal places"//c_null_char)
     call hl_gtk_box_pack(jbb, fmt_precision)
-    junk = gtk_label_new("Exponent:"//cnull)
+    junk = gtk_label_new("Exponent:"//c_null_char)
     call hl_gtk_box_pack(jbb, junk, expand=FALSE)
     if (fmt_type >= 1 .and. fmt_type <= 3) then
        issens = TRUE
@@ -1418,14 +1264,14 @@ contains
        issens=FALSE
     end if
     fmt_expsize = hl_gtk_spin_button_new(1, 3, initial_value=fmt_expplaces,&
-         & sensitive=issens, tooltip="Set the width of the exponent"//cnull)
+         & sensitive=issens, tooltip="Set the width of the exponent"//c_null_char)
     call hl_gtk_box_pack(jbb, fmt_expsize)
 
     jbb = hl_gtk_box_new(horizontal=TRUE)
     call hl_gtk_box_pack(jb, jbb)
-    junk = hl_gtk_button_new("Apply"//cnull, clicked=c_funloc(set_format_cb))
+    junk = hl_gtk_button_new("Apply"//c_null_char, clicked=c_funloc(set_format_cb))
     call hl_gtk_box_pack(jbb, junk)
-    junk = hl_gtk_button_new("Cancel"//cnull, &
+    junk = hl_gtk_button_new("Cancel"//c_null_char, &
          & clicked=c_funloc(set_format_destroy))
     call hl_gtk_box_pack(jbb, junk)
     call gtk_widget_show_all(fmt_window)
@@ -1562,9 +1408,9 @@ contains
     
     dms_hms = c_f_logical(gtk_check_menu_item_get_active(widget))
     if (dms_hms) then
-       call gtk_menu_item_set_label(khms, "DMS"//cnull)
+       call gtk_menu_item_set_label(khms, "DMS"//c_null_char)
     else
-       call gtk_menu_item_set_label(khms, "HMS"//cnull)
+       call gtk_menu_item_set_label(khms, "HMS"//c_null_char)
     end if
   end subroutine set_dms_hms
 end module handlers

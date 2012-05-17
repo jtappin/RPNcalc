@@ -155,57 +155,57 @@ program rpncalc
   ! Menu bar
   fmenu = hl_gtk_menu_new(orientation=GTK_PACK_DIRECTION_LTR)
   call hl_gtk_box_pack(base, fmenu)
-  ffmenu = hl_gtk_menu_submenu_new(fmenu, "File"//cnull)
-  ksave = hl_gtk_menu_item_new(ffmenu, "Save"//cnull, &
-       & activate=c_funloc(save_values), accel_key="s"//cnull, &
+  ffmenu = hl_gtk_menu_submenu_new(fmenu, "File"//c_null_char)
+  ksave = hl_gtk_menu_item_new(ffmenu, "Save"//c_null_char, &
+       & activate=c_funloc(save_values), accel_key="s"//c_null_char, &
        & accel_group=accel)
-  krestore = hl_gtk_menu_item_new(ffmenu, "Restore"//cnull, &
-       & activate=c_funloc(restore_values), accel_key="o"//cnull, &
+  krestore = hl_gtk_menu_item_new(ffmenu, "Restore"//c_null_char, &
+       & activate=c_funloc(restore_values), accel_key="o"//c_null_char, &
        & accel_group=accel)
-  kquit = hl_gtk_menu_item_new(ffmenu, "Quit"//cnull, &
-       & activate=c_funloc(my_destroy), accel_key="q"//cnull, &
+  kquit = hl_gtk_menu_item_new(ffmenu, "Quit"//c_null_char, &
+       & activate=c_funloc(my_destroy), accel_key="q"//c_null_char, &
        & accel_group=accel)
 
-  femenu = hl_gtk_menu_submenu_new(fmenu, "Edit"//cnull)
-  kfedit = hl_gtk_menu_item_new(femenu, "Result Format"//cnull, &
-       & activate=c_funloc(set_format_make), accel_key="f"//cnull, &
+  femenu = hl_gtk_menu_submenu_new(fmenu, "Edit"//c_null_char)
+  kfedit = hl_gtk_menu_item_new(femenu, "Result Format"//c_null_char, &
+       & activate=c_funloc(set_format_make), accel_key="f"//c_null_char, &
        & accel_group=accel)
-  kefocus = hl_gtk_check_menu_item_new(femenu, "Hold entry focus"//cnull, &
+  kefocus = hl_gtk_check_menu_item_new(femenu, "Hold entry focus"//c_null_char, &
        & toggled = c_funloc(set_entry_focus), &
        & initial_state=f_c_logical(focus_entry), &
-       & tooltip="Return entry focus to input window after button press"//cnull)
-  khrdeg = hl_gtk_check_menu_item_new(femenu, "Display degrees"//cnull, &
+       & tooltip="Return entry focus to input window after button press"//c_null_char)
+  khrdeg = hl_gtk_check_menu_item_new(femenu, "Display degrees"//c_null_char, &
        & toggled = c_funloc(set_dms_hms), tooltip = &
-       & "Select angular or time format for HMS display"//cnull)
+       & "Select angular or time format for HMS display"//c_null_char)
 
-  fhmenu = hl_gtk_menu_submenu_new(fmenu, "Help"//cnull)
-  khelp = hl_gtk_menu_item_new(fhmenu, "Help"//cnull, &
-       & activate=c_funloc(show_help), accel_key="h"//cnull, &
+  fhmenu = hl_gtk_menu_submenu_new(fmenu, "Help"//c_null_char)
+  khelp = hl_gtk_menu_item_new(fhmenu, "Help"//c_null_char, &
+       & activate=c_funloc(show_help), accel_key="h"//c_null_char, &
        & accel_group=accel)
-  kabout = hl_gtk_menu_item_new(fhmenu, "About: RPN Calculator"//cnull, &
-       & activate=c_funloc(about_rpn), accel_key="a"//cnull, &
+  kabout = hl_gtk_menu_item_new(fhmenu, "About: RPN Calculator"//c_null_char, &
+       & activate=c_funloc(about_rpn), accel_key="a"//c_null_char, &
        & accel_group=accel)
-  kfabout = hl_gtk_menu_item_new(fhmenu, "About: Gtk-Fortran"//cnull, &
-       & activate=c_funloc(about_gtkfortran), accel_key="a"//cnull, &
+  kfabout = hl_gtk_menu_item_new(fhmenu, "About: Gtk-Fortran"//c_null_char, &
+       & activate=c_funloc(about_gtkfortran), accel_key="a"//c_null_char, &
        & accel_group=accel, accel_mods=ior(GDK_CONTROL_MASK, GDK_SHIFT_MASK))
 
   ! Value entry window.
   jbase = hl_gtk_table_new(2, 2)
   call hl_gtk_box_pack(base, jbase)
-  junk=gtk_label_new("Enter:"//cnull)
+  junk=gtk_label_new("Enter:"//c_null_char)
   call hl_gtk_table_attach(jbase, junk, 0, 0, xopts=0)
   fentry = hl_gtk_entry_new(editable=TRUE, activate=c_funloc(enter_value), &
-       & tooltip="Enter values here"//CNULL, &
+       & tooltip="Enter values here"//C_NULL_CHAR, &
        & insert_text=c_funloc(char_entered), &
        & delete_text=c_funloc(char_deleted), &
        & len=40)
   call hl_gtk_table_attach(jbase, fentry, 1, 0)
 
   ! result window. 
-  junk=gtk_label_new("Result:"//cnull)
+  junk=gtk_label_new("Result:"//c_null_char)
   call hl_gtk_table_attach(jbase, junk, 0, 1, xopts=0)
   fresult = hl_gtk_entry_new(editable=FALSE, &
-       & tooltip="Results displayed here"//CNULL)
+       & tooltip="Results displayed here"//C_NULL_CHAR)
   call hl_gtk_table_attach(jbase, fresult, 1, 1)
 
   ! A status message bar
@@ -222,7 +222,7 @@ program rpncalc
   do i=1,10
      write(ws,"('    ',I1)") i-1
      write(pnum(i),"(I1)") i-1
-     knum(i) = hl_gtk_button_new(ws//CNULL, clicked=c_funloc(numpress), &
+     knum(i) = hl_gtk_button_new(ws//C_NULL_CHAR, clicked=c_funloc(numpress), &
           & data=c_loc(pnum(i)))
      if (i == 1) then
         ix=0
@@ -234,145 +234,145 @@ program rpncalc
      call hl_gtk_table_attach(keybox, knum(i), ix,iy)
   end do
 
-  kpoint = hl_gtk_button_new("."//CNULL, clicked=c_funloc(dppress))
+  kpoint = hl_gtk_button_new("."//C_NULL_CHAR, clicked=c_funloc(dppress))
   call hl_gtk_table_attach(keybox, kpoint, 1,4)
 
-  kchs = hl_gtk_button_new("+/-"//CNULL, clicked=c_funloc(chspress), &
-       & tooltip="Change Sign"//CNULL)
+  kchs = hl_gtk_button_new("+/-"//C_NULL_CHAR, clicked=c_funloc(chspress), &
+       & tooltip="Change Sign"//C_NULL_CHAR)
   call hl_gtk_table_attach(keybox, kchs, 2, 4)
 
-  kee = hl_gtk_button_new("EE"//CNULL, clicked=c_funloc(eepress), &
-       & tooltip= "Enter Exponent"//CNULL)
+  kee = hl_gtk_button_new("EE"//C_NULL_CHAR, clicked=c_funloc(eepress), &
+       & tooltip= "Enter Exponent"//C_NULL_CHAR)
   call hl_gtk_table_attach(keybox, kee, 0, 5)
 
-  kpi = hl_gtk_button_new("π"//cnull, clicked=c_funloc(pipress),&
-       & tooltip="Enter π"//cnull)
+  kpi = hl_gtk_button_new("π"//c_null_char, clicked=c_funloc(pipress),&
+       & tooltip="Enter π"//c_null_char)
   call hl_gtk_table_attach(keybox, kpi, 1, 5)
 
   ! Delete character from entry box
-  kdel = hl_gtk_button_new("Del"//cnull, clicked=c_funloc(delpress), &
-       & tooltip="Delete last char"//cnull)
+  kdel = hl_gtk_button_new("Del"//c_null_char, clicked=c_funloc(delpress), &
+       & tooltip="Delete last char"//c_null_char)
   call hl_gtk_table_attach(keybox, kdel, 2, 5)
 
   ! Enter and duplicate entry
 
-  kenter = hl_gtk_button_new("Enter"//cnull, clicked=c_funloc(enter_value), &
-       & tooltip="Move entry to stack"//cnull)
+  kenter = hl_gtk_button_new("Enter"//c_null_char, clicked=c_funloc(enter_value), &
+       & tooltip="Move entry to stack"//c_null_char)
   call hl_gtk_table_attach(keybox, kenter, 0, 6, xspan=3)
-  kdup = hl_gtk_button_new("Duplicate"//cnull, clicked=c_funloc(duppress), &
-       & tooltip="Copy entry to stack"//cnull)
+  kdup = hl_gtk_button_new("Duplicate"//c_null_char, clicked=c_funloc(duppress), &
+       & tooltip="Copy entry to stack"//c_null_char)
   call hl_gtk_table_attach(keybox, kdup, 3, 6, xspan=2)
 
   ! Operations
 
-  kplus = hl_gtk_button_new("+"//cnull, clicked=c_funloc(oppress), &
+  kplus = hl_gtk_button_new("+"//c_null_char, clicked=c_funloc(oppress), &
        & data=c_loc(pplus))
   call hl_gtk_table_attach(keybox, kplus, 3, 1)
-  kminus = hl_gtk_button_new("-"//cnull, clicked=c_funloc(oppress), &
+  kminus = hl_gtk_button_new("-"//c_null_char, clicked=c_funloc(oppress), &
        & data=c_loc(pminus))
   call hl_gtk_table_attach(keybox, kminus, 3, 2)
-  ktimes = hl_gtk_button_new("*"//cnull, clicked=c_funloc(oppress), &
+  ktimes = hl_gtk_button_new("*"//c_null_char, clicked=c_funloc(oppress), &
        & data=c_loc(ptimes))
   call hl_gtk_table_attach(keybox, ktimes, 3, 3)
-  kdivide = hl_gtk_button_new("/"//cnull, clicked=c_funloc(oppress), &
+  kdivide = hl_gtk_button_new("/"//c_null_char, clicked=c_funloc(oppress), &
        & data=c_loc(pdiv))
   call hl_gtk_table_attach(keybox, kdivide, 3, 4)
-  kpower = hl_gtk_button_new("y<sup>x</sup>"//cnull, &
+  kpower = hl_gtk_button_new("y<sup>x</sup>"//c_null_char, &
        & clicked=c_funloc(oppress), &
        & data=c_loc(ppow), is_markup=TRUE)
   call hl_gtk_table_attach(keybox, kpower, 3, 5)
 
   ! Clear entry
-  kce = hl_gtk_button_new("CE"//cnull, clicked=c_funloc(cepress), &
-       & tooltip="Clear entry box or top of stack"//cnull)
+  kce = hl_gtk_button_new("CE"//c_null_char, clicked=c_funloc(cepress), &
+       & tooltip="Clear entry box or top of stack"//c_null_char)
   call hl_gtk_table_attach(keybox, kce, 4, 1)
 
   ! Clear all
-  kca = hl_gtk_button_new("CA"//cnull, clicked=c_funloc(capress), &
-       & tooltip="Clear everything"//cnull)
+  kca = hl_gtk_button_new("CA"//c_null_char, clicked=c_funloc(capress), &
+       & tooltip="Clear everything"//c_null_char)
   call hl_gtk_table_attach(keybox, kca, 4, 2)
 
   ! Move up
-  kup = hl_gtk_button_new("↑"//cnull, clicked=c_funloc(uppress), &
-       & tooltip="Move selected entry up stack"//cnull)
+  kup = hl_gtk_button_new("↑"//c_null_char, clicked=c_funloc(uppress), &
+       & tooltip="Move selected entry up stack"//c_null_char)
   call hl_gtk_table_attach(keybox, kup, 4, 3)
 
   ! Move down
-  kdown = hl_gtk_button_new("↓"//cnull, clicked=c_funloc(downpress), &
-       & tooltip="Move selected entry down stack"//cnull)
+  kdown = hl_gtk_button_new("↓"//c_null_char, clicked=c_funloc(downpress), &
+       & tooltip="Move selected entry down stack"//c_null_char)
   call hl_gtk_table_attach(keybox, kdown, 4, 4)
 
   ! Roll stack
-  kroll = hl_gtk_button_new("R↓"//cnull, clicked=c_funloc(rollpress), &
-       & tooltip="Roll stack down"//cnull)
+  kroll = hl_gtk_button_new("R↓"//c_null_char, clicked=c_funloc(rollpress), &
+       & tooltip="Roll stack down"//c_null_char)
   call hl_gtk_table_attach(keybox, kroll, 4, 5)
 
   ! Functions
 
-  ksin = hl_gtk_button_new("sin"//cnull, clicked=c_funloc(funpress), &
+  ksin = hl_gtk_button_new("sin"//c_null_char, clicked=c_funloc(funpress), &
        & data=c_loc(psin))
   call hl_gtk_table_attach(keybox, ksin, 6, 1)
 
-  kcos = hl_gtk_button_new("cos"//cnull, clicked=c_funloc(funpress), &
+  kcos = hl_gtk_button_new("cos"//c_null_char, clicked=c_funloc(funpress), &
        & data=c_loc(pcos))
   call hl_gtk_table_attach(keybox, kcos, 6, 2)
 
-  ktan = hl_gtk_button_new("tan"//cnull, clicked=c_funloc(funpress), &
+  ktan = hl_gtk_button_new("tan"//c_null_char, clicked=c_funloc(funpress), &
        & data=c_loc(ptan))
   call hl_gtk_table_attach(keybox, ktan, 6, 3)
 
-  kloge = hl_gtk_button_new("ln"//cnull, clicked=c_funloc(funpress), &
+  kloge = hl_gtk_button_new("ln"//c_null_char, clicked=c_funloc(funpress), &
        & data=c_loc(pln))
   call hl_gtk_table_attach(keybox, kloge, 6, 4)
 
-  ksqrt = hl_gtk_button_new("√x"//cnull, clicked=c_funloc(funpress), &
+  ksqrt = hl_gtk_button_new("√x"//c_null_char, clicked=c_funloc(funpress), &
        & data=c_loc(psqrt))
   call hl_gtk_table_attach(keybox, ksqrt, 6, 5)
 
-  ksinh = hl_gtk_button_new("sinh"//cnull, clicked=c_funloc(funpress), &
+  ksinh = hl_gtk_button_new("sinh"//c_null_char, clicked=c_funloc(funpress), &
        & data=c_loc(psinh))
   call hl_gtk_table_attach(keybox, ksinh, 7, 1)
 
-  kcosh = hl_gtk_button_new("cosh"//cnull, clicked=c_funloc(funpress), &
+  kcosh = hl_gtk_button_new("cosh"//c_null_char, clicked=c_funloc(funpress), &
        & data=c_loc(pcosh))
   call hl_gtk_table_attach(keybox, kcosh, 7, 2)
 
-  ktanh = hl_gtk_button_new("tanh"//cnull, clicked=c_funloc(funpress), &
+  ktanh = hl_gtk_button_new("tanh"//c_null_char, clicked=c_funloc(funpress), &
        & data=c_loc(ptanh))
   call hl_gtk_table_attach(keybox, ktanh, 7, 3)
 
-  klog10 = hl_gtk_button_new("log"//cnull, clicked=c_funloc(funpress), &
+  klog10 = hl_gtk_button_new("log"//c_null_char, clicked=c_funloc(funpress), &
        & data=c_loc(pl10))
   call hl_gtk_table_attach(keybox, klog10, 7, 4)
 
-  kinv = hl_gtk_button_new("1/X"//cnull, clicked=c_funloc(funpress), &
+  kinv = hl_gtk_button_new("1/X"//c_null_char, clicked=c_funloc(funpress), &
        & data=c_loc(pinv))
   call hl_gtk_table_attach(keybox, kinv, 7, 5)
 
   ! Mode selectors
 
-  karc = hl_gtk_check_button_new("Inverse"//cnull, &
+  karc = hl_gtk_check_button_new("Inverse"//c_null_char, &
        & toggled=c_funloc(invtoggle), &
-       & tooltip="Select/Deselect inverse functions"//cnull)
+       & tooltip="Select/Deselect inverse functions"//c_null_char)
   call hl_gtk_table_attach(keybox, karc, 6, 0, xspan=2)
 
-  kstats = hl_gtk_check_button_new("Live stats"//cnull, &
+  kstats = hl_gtk_check_button_new("Live stats"//c_null_char, &
        & toggled=c_funloc(set_stats), &
-       & tooltip="Select/Deselect live stack statistics"//cnull)
+       & tooltip="Select/Deselect live stack statistics"//c_null_char)
   call hl_gtk_table_attach(keybox, kstats, 4, 0, xspan=2)
 
   rdgrp=NULL
-  krad = hl_gtk_radio_button_new(rdgrp, "Rad"//cnull, &
+  krad = hl_gtk_radio_button_new(rdgrp, "Rad"//c_null_char, &
        & toggled=c_funloc(set_trigunit), &
-       & tooltip = "Select radians mode"//cnull)
+       & tooltip = "Select radians mode"//c_null_char)
   call hl_gtk_table_attach(keybox, krad, 0, 0)
-  kdeg = hl_gtk_radio_button_new(rdgrp, "Deg"//cnull, &
+  kdeg = hl_gtk_radio_button_new(rdgrp, "Deg"//c_null_char, &
        & toggled=c_funloc(set_trigunit), &
-       & tooltip = "Select degrees mode"//cnull)
+       & tooltip = "Select degrees mode"//c_null_char)
   call hl_gtk_table_attach(keybox, kdeg, 1, 0)
-  kgrad = hl_gtk_radio_button_new(rdgrp, "Grad"//cnull, &
+  kgrad = hl_gtk_radio_button_new(rdgrp, "Grad"//c_null_char, &
        & toggled=c_funloc(set_trigunit), &
-       & tooltip = "Select grads mode"//cnull)
+       & tooltip = "Select grads mode"//c_null_char)
   call hl_gtk_table_attach(keybox, kgrad, 2, 0)
 
   call hl_gtk_radio_group_set_select(rdgrp, trigunit)
@@ -382,101 +382,101 @@ program rpncalc
   menu = hl_gtk_menu_new()
   call hl_gtk_table_attach(keybox, menu, 7, 6)
 
-  pull = hl_gtk_menu_submenu_new(menu, "More"//cnull, &
-       & tooltip="Less-used functions"//cnull)
-  kabs = hl_gtk_menu_item_new(pull, "abs"//cnull, activate=c_funloc(funpress), &
-       & data=c_loc(pabs), tooltip="Absolute value"//cnull)
-  kaint = hl_gtk_menu_item_new(pull, "int"//cnull, &
+  pull = hl_gtk_menu_submenu_new(menu, "More"//c_null_char, &
+       & tooltip="Less-used functions"//c_null_char)
+  kabs = hl_gtk_menu_item_new(pull, "abs"//c_null_char, activate=c_funloc(funpress), &
+       & data=c_loc(pabs), tooltip="Absolute value"//c_null_char)
+  kaint = hl_gtk_menu_item_new(pull, "int"//c_null_char, &
        & activate=c_funloc(funpress), data=c_loc(pint), &
-       & tooltip="Integer part"//cnull)
-  kfrac = hl_gtk_menu_item_new(pull, "frac"//cnull, &
+       & tooltip="Integer part"//c_null_char)
+  kfrac = hl_gtk_menu_item_new(pull, "frac"//c_null_char, &
        & activate=c_funloc(funpress), data=c_loc(pfrac), &
-       & tooltip="Fractional part"//cnull)
-  katan2 = hl_gtk_menu_item_new(pull, "atan2"//cnull, &
+       & tooltip="Fractional part"//c_null_char)
+  katan2 = hl_gtk_menu_item_new(pull, "atan2"//c_null_char, &
        & activate=c_funloc(oppress), data=c_loc(patan2), &
-       & tooltip="Arctan y/x with disambiguation"//cnull)
-  kfact = hl_gtk_menu_item_new(pull, "factorial"//cnull, &
+       & tooltip="Arctan y/x with disambiguation"//c_null_char)
+  kfact = hl_gtk_menu_item_new(pull, "factorial"//c_null_char, &
        & activate=c_funloc(funpress), data=c_loc(pfact))
-  khms= hl_gtk_menu_item_new(pull, "HMS"//cnull, &
+  khms= hl_gtk_menu_item_new(pull, "HMS"//c_null_char, &
        & activate=c_funloc(hmspress), &
-       & tooltip="Display entry or top of stack in H:M:S format"//cnull)
+       & tooltip="Display entry or top of stack in H:M:S format"//c_null_char)
 
   ! A Pulldown for fundamental physics constants
 
   phys = hl_gtk_menu_new()
   call hl_gtk_table_attach(keybox, phys, 6, 6)
-  fconst = hl_gtk_menu_submenu_new(phys, "Phys"//cnull, &
-       & tooltip="Fundamental physics constants (SI)"//cnull)
+  fconst = hl_gtk_menu_submenu_new(phys, "Phys"//c_null_char, &
+       & tooltip="Fundamental physics constants (SI)"//c_null_char)
 
-  k_c = hl_gtk_menu_item_new(fconst, "c"//cnull, &
+  k_c = hl_gtk_menu_item_new(fconst, "c"//c_null_char, &
        & activate=c_funloc(add_const), data=c_loc(phys_c),&
-       & tooltip="Speed of light"//cnull)
-  k_e = hl_gtk_menu_item_new(fconst, "e"//cnull, &
+       & tooltip="Speed of light"//c_null_char)
+  k_e = hl_gtk_menu_item_new(fconst, "e"//c_null_char, &
        & activate=c_funloc(add_const), data=c_loc(phys_e), &
-       & tooltip="Electronic charge"//cnull)
-  k_h = hl_gtk_menu_item_new(fconst, "h"//cnull, &
+       & tooltip="Electronic charge"//c_null_char)
+  k_h = hl_gtk_menu_item_new(fconst, "h"//c_null_char, &
        & activate=c_funloc(add_const), data=c_loc(phys_h), &
-       & tooltip="Planck's constant"//cnull)
-  k_hb = hl_gtk_menu_item_new(fconst, "ħ"//cnull, &
+       & tooltip="Planck's constant"//c_null_char)
+  k_hb = hl_gtk_menu_item_new(fconst, "ħ"//c_null_char, &
        & activate=c_funloc(add_const), data=c_loc(phys_hbar), &
-       & tooltip="Planck's constant / 2π"//cnull)
-  k_k = hl_gtk_menu_item_new(fconst, "k"//cnull, &
+       & tooltip="Planck's constant / 2π"//c_null_char)
+  k_k = hl_gtk_menu_item_new(fconst, "k"//c_null_char, &
        & activate=c_funloc(add_const), data=c_loc(phys_k), &
-       & tooltip="Boltzmann's constant"//cnull)
-  k_g = hl_gtk_menu_item_new(fconst, "G"//cnull, &
+       & tooltip="Boltzmann's constant"//c_null_char)
+  k_g = hl_gtk_menu_item_new(fconst, "G"//c_null_char, &
        & activate=c_funloc(add_const), data=c_loc(phys_g), &
-       & tooltip="Gravitational constant"//cnull)
-  k_e0 = hl_gtk_menu_item_new(fconst, "ε<sub>0</sub>"//cnull, &
+       & tooltip="Gravitational constant"//c_null_char)
+  k_e0 = hl_gtk_menu_item_new(fconst, "ε<sub>0</sub>"//c_null_char, &
        & activate=c_funloc(add_const), data=c_loc(phys_e0), &
-       & tooltip="Pemittivity of free space"//cnull, is_markup=TRUE)
-  k_m0 = hl_gtk_menu_item_new(fconst, "μ<sub>0</sub>"//cnull, &
+       & tooltip="Pemittivity of free space"//c_null_char, is_markup=TRUE)
+  k_m0 = hl_gtk_menu_item_new(fconst, "μ<sub>0</sub>"//c_null_char, &
        & activate=c_funloc(add_const), data=c_loc(phys_m0), &
-       & tooltip="Permeability of free space"//cnull, is_markup=TRUE)
-  k_sb = hl_gtk_menu_item_new(fconst, "σ"//cnull, &
+       & tooltip="Permeability of free space"//c_null_char, is_markup=TRUE)
+  k_sb = hl_gtk_menu_item_new(fconst, "σ"//c_null_char, &
        &activate=c_funloc(add_const), data=c_loc(phys_sb), &
-       & tooltip="Stefan-Boltzmann constant"//cnull)
+       & tooltip="Stefan-Boltzmann constant"//c_null_char)
   k_sep = hl_gtk_menu_item_new(fconst)
 
-  k_me = hl_gtk_menu_item_new(fconst, 'm<sub>e</sub>'//cnull, &
+  k_me = hl_gtk_menu_item_new(fconst, 'm<sub>e</sub>'//c_null_char, &
        & activate=c_funloc(add_const), data=c_loc(phys_me), &
-       & tooltip="Electron mass"//cnull, is_markup=TRUE)
-  k_mp = hl_gtk_menu_item_new(fconst, 'm<sub>p</sub>'//cnull, &
+       & tooltip="Electron mass"//c_null_char, is_markup=TRUE)
+  k_mp = hl_gtk_menu_item_new(fconst, 'm<sub>p</sub>'//c_null_char, &
        & activate=c_funloc(add_const), data=c_loc(phys_mp), &
-       & tooltip="Proton mass"//cnull, is_markup=TRUE)
-  k_mn = hl_gtk_menu_item_new(fconst, 'm<sub>n</sub>'//cnull, &
+       & tooltip="Proton mass"//c_null_char, is_markup=TRUE)
+  k_mn = hl_gtk_menu_item_new(fconst, 'm<sub>n</sub>'//c_null_char, &
        & activate=c_funloc(add_const), data=c_loc(phys_mn), &
-       & tooltip="Neutron mass"//cnull, is_markup=TRUE)
+       & tooltip="Neutron mass"//c_null_char, is_markup=TRUE)
   k_sep = hl_gtk_menu_item_new(fconst)
 
-  k_na = hl_gtk_menu_item_new(fconst, "N<sub>a</sub>"//cnull, &
+  k_na = hl_gtk_menu_item_new(fconst, "N<sub>a</sub>"//c_null_char, &
        & activate=c_funloc(add_const), data=c_loc(phys_na), &
-       & tooltip="Avogadro's constant"//cnull, is_markup=TRUE)
-  k_r = hl_gtk_menu_item_new(fconst, "R"//cnull, &
+       & tooltip="Avogadro's constant"//c_null_char, is_markup=TRUE)
+  k_r = hl_gtk_menu_item_new(fconst, "R"//c_null_char, &
        & activate=c_funloc(add_const), data=c_loc(phys_r), &
-       & tooltip="Gas constant"//cnull, is_markup=TRUE)
+       & tooltip="Gas constant"//c_null_char, is_markup=TRUE)
 
   ! Memory registers
-  kmsto = hl_gtk_button_new("STO"//cnull, clicked=c_funloc(mempress), &
-       & tooltip="Store to register"//cnull, data=c_loc(pmsto))
+  kmsto = hl_gtk_button_new("STO"//c_null_char, clicked=c_funloc(mempress), &
+       & tooltip="Store to register"//c_null_char, data=c_loc(pmsto))
   call hl_gtk_table_attach(keybox, kmsto, 5, 1)
-  kmrcl = hl_gtk_button_new("RCL"//cnull, clicked=c_funloc(mempress), &
-       & tooltip="Recall register"//cnull, data=c_loc(pmrcl))
+  kmrcl = hl_gtk_button_new("RCL"//c_null_char, clicked=c_funloc(mempress), &
+       & tooltip="Recall register"//c_null_char, data=c_loc(pmrcl))
   call hl_gtk_table_attach(keybox, kmrcl, 5, 2)
-  kmplus = hl_gtk_button_new("M+"//cnull, clicked=c_funloc(mempress), &
-       & tooltip="Add to register"//cnull, data=c_loc(pmplus))
+  kmplus = hl_gtk_button_new("M+"//c_null_char, clicked=c_funloc(mempress), &
+       & tooltip="Add to register"//c_null_char, data=c_loc(pmplus))
   call hl_gtk_table_attach(keybox, kmplus, 5, 3)
-  kmminus = hl_gtk_button_new("M-"//cnull, clicked=c_funloc(mempress), &
-       & tooltip="Subtract from register"//cnull, data=c_loc(pmminus))
+  kmminus = hl_gtk_button_new("M-"//c_null_char, clicked=c_funloc(mempress), &
+       & tooltip="Subtract from register"//c_null_char, data=c_loc(pmminus))
   call hl_gtk_table_attach(keybox, kmminus, 5, 4)
-  kmclr = hl_gtk_button_new("MCL"//cnull, clicked=c_funloc(mempress), &
-       & tooltip="Clear register"//cnull, data=c_loc(pmclr))
+  kmclr = hl_gtk_button_new("MCL"//c_null_char, clicked=c_funloc(mempress), &
+       & tooltip="Clear register"//c_null_char, data=c_loc(pmclr))
   call hl_gtk_table_attach(keybox, kmclr, 5, 5)
-  kmcla = hl_gtk_button_new("MCA"//cnull, clicked=c_funloc(mempress), &
-       & tooltip="Clear all registers"//cnull, data=c_loc(pmcla))
+  kmcla = hl_gtk_button_new("MCA"//c_null_char, clicked=c_funloc(mempress), &
+       & tooltip="Clear all registers"//c_null_char, data=c_loc(pmcla))
   call hl_gtk_table_attach(keybox, kmcla, 5, 6)
 
   ! AN expander to show/hide the displays
-  fexpand = gtk_expander_new("Displays"//cnull)
+  fexpand = gtk_expander_new("Displays"//c_null_char)
   call hl_gtk_box_pack(base, fexpand)
   call gtk_expander_set_expanded(fexpand, isopen)
 
@@ -487,20 +487,20 @@ program rpncalc
   ! Stack display
 
   fstack = hl_gtk_listn_new(sstack, changed=c_funloc(stacksel), &
-       & height=350, titles=(/ "Stack"//cnull /), types= (/g_type_double/))
+       & height=350, titles=(/ "Stack"//c_null_char /), types= (/g_type_double/))
   call hl_gtk_listn_set_cell_data_func(fstack, stackcol, &
        & func=c_funloc(show_list), &
        & data=c_loc(stackcol))
 
-  idx = hl_gtk_notebook_add_page(mstabs, sstack, label="Stack"//cnull)
+  idx = hl_gtk_notebook_add_page(mstabs, sstack, label="Stack"//c_null_char)
 
   ! Registers.
   fmemory = hl_gtk_listn_new(smemory, changed=c_funloc(memsel), &
-       & height=350, titles= (/ "Index"//cnull, "Value"//cnull /), &
+       & height=350, titles= (/ "Index"//c_null_char, "Value"//c_null_char /), &
        & types = (/ g_type_int, g_type_double /))
   call hl_gtk_listn_set_cell_data_func(fmemory, memcol, &
        & func=c_funloc(show_list), data=c_loc(memcol))
-  idx = hl_gtk_notebook_add_page(mstabs, smemory, label="Registers"//cnull)
+  idx = hl_gtk_notebook_add_page(mstabs, smemory, label="Registers"//c_null_char)
 
   ! Set up display of registers.
 
@@ -512,27 +512,27 @@ program rpncalc
 
   ! Statistics
   fstats = hl_gtk_listn_new(sstats, changed=c_funloc(statsel),&
-       & height=350, titles=(/ "Statistic"//cnull, "Value"//cnull//"    " /), &
+       & height=350, titles=(/ "Statistic"//c_null_char, "Value"//c_null_char//"    " /), &
        & types = (/ g_type_string, g_type_double /))
   call hl_gtk_listn_set_cell_data_func(fstats, statcol, &
        & func=c_funloc(show_list), &
        & data=c_loc(statcol))
-  idx = hl_gtk_notebook_add_page(mstabs, sstats, label="Statistics"//cnull)
+  idx = hl_gtk_notebook_add_page(mstabs, sstats, label="Statistics"//c_null_char)
 
   do i = 0, 9
      call hl_gtk_listn_ins(fstats)
      call hl_gtk_listn_set_cell(fstats, i, 1, dvalue=0._c_double)
   end do
-  call hl_gtk_listn_set_cell(fstats, 0, 0, svalue="N vals"//cnull)
-  call hl_gtk_listn_set_cell(fstats, 1, 0, svalue="Mean"//cnull)
-  call hl_gtk_listn_set_cell(fstats, 2, 0, svalue="Variance"//cnull)
-  call hl_gtk_listn_set_cell(fstats, 3, 0, svalue="Std Dev"//cnull)
-  call hl_gtk_listn_set_cell(fstats, 4, 0, svalue="Skew"//cnull)
-  call hl_gtk_listn_set_cell(fstats, 5, 0, svalue="Kurtosis"//cnull)
-  call hl_gtk_listn_set_cell(fstats, 6, 0, svalue="∑ x"//cnull)
-  call hl_gtk_listn_set_cell(fstats, 7, 0, svalue="∑ x**2"//cnull)
-  call hl_gtk_listn_set_cell(fstats, 8, 0, svalue="∑ x**3"//cnull)
-  call hl_gtk_listn_set_cell(fstats, 9, 0, svalue="∑ x**4"//cnull)
+  call hl_gtk_listn_set_cell(fstats, 0, 0, svalue="N vals"//c_null_char)
+  call hl_gtk_listn_set_cell(fstats, 1, 0, svalue="Mean"//c_null_char)
+  call hl_gtk_listn_set_cell(fstats, 2, 0, svalue="Variance"//c_null_char)
+  call hl_gtk_listn_set_cell(fstats, 3, 0, svalue="Std Dev"//c_null_char)
+  call hl_gtk_listn_set_cell(fstats, 4, 0, svalue="Skew"//c_null_char)
+  call hl_gtk_listn_set_cell(fstats, 5, 0, svalue="Kurtosis"//c_null_char)
+  call hl_gtk_listn_set_cell(fstats, 6, 0, svalue="∑ x"//c_null_char)
+  call hl_gtk_listn_set_cell(fstats, 7, 0, svalue="∑ x**2"//c_null_char)
+  call hl_gtk_listn_set_cell(fstats, 8, 0, svalue="∑ x**3"//c_null_char)
+  call hl_gtk_listn_set_cell(fstats, 9, 0, svalue="∑ x**4"//c_null_char)
 
   ! Realize
   call gtk_widget_show_all(win)

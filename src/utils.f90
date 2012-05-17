@@ -72,7 +72,7 @@ contains
     else
        write(hms, "(I0,':',I2.2,':',I2.2,f4.3)") ih, im, is, ms
     end if
-    call gtk_entry_set_text(widget, trim(hms)//cnull)
+    call gtk_entry_set_text(widget, trim(hms)//c_null_char)
 
   end subroutine show_hms
 
@@ -83,7 +83,7 @@ contains
     integer(kind=c_int), target :: flen
 
     flen = int(gtk_entry_get_text_length(fentry), c_int)
-    call gtk_editable_insert_text(fentry, chr//cnull, -1, c_loc(flen))
+    call gtk_editable_insert_text(fentry, chr//c_null_char, -1, c_loc(flen))
 
   end subroutine append_char_entry
 
@@ -108,7 +108,7 @@ contains
 
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
     if (nchars == 0) then
-       mid = gtk_statusbar_push(fstatus, 0, "Entry field is empty"//cnull)
+       mid = gtk_statusbar_push(fstatus, 0, "Entry field is empty"//c_null_char)
        status = .FALSE.
        return
     end if
@@ -118,7 +118,7 @@ contains
 
     read(ftext,*, iostat=ios, iomsg=iom) val
     if (ios /= 0) then
-       mid = gtk_statusbar_push(fstatus, 0, trim(iom)//cnull)
+       mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
        status=.FALSE.
     else
        status=.TRUE.
@@ -144,7 +144,7 @@ contains
 
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
     if (nchars == 0) then
-       mid = gtk_statusbar_push(fstatus, 0, "Entry field is empty"//cnull)
+       mid = gtk_statusbar_push(fstatus, 0, "Entry field is empty"//c_null_char)
        status = .FALSE.
        return
     end if
@@ -154,11 +154,11 @@ contains
 
     read(ftext,*, iostat=ios, iomsg=iom) val
     if (ios /= 0) then
-       mid = gtk_statusbar_push(fstatus, 0, trim(iom)//cnull)
+       mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
        status=.FALSE.
     else
        status=.TRUE.
-       call gtk_entry_set_text(fentry, cnull)
+       call gtk_entry_set_text(fentry, c_null_char)
     end if
   end subroutine read_entry_int
 
@@ -177,13 +177,13 @@ contains
        else
           write(text, result_format, iostat=ios, iomsg=iom) val
           if (ios /= 0) then
-             mid = gtk_statusbar_push(fstatus, 0, trim(iom)//cnull)
+             mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
              write(text, *) val
           end if
        end if
-       call gtk_entry_set_text(fresult, trim(text)//cnull)
+       call gtk_entry_set_text(fresult, trim(text)//c_null_char)
     else
-       call gtk_entry_set_text(fresult, cnull)
+       call gtk_entry_set_text(fresult, c_null_char)
     end if
   end subroutine set_result
 
@@ -191,27 +191,27 @@ contains
     ! Set the labels of functions with inverses according to the isinv value
 
     if (isinv) then
-       call gtk_button_set_label(ksin, "asin"//cnull)
-       call gtk_button_set_label(kcos, "acos"//cnull)
-       call gtk_button_set_label(ktan, "atan"//cnull)
-       call hl_gtk_button_set_label(ksqrt, "x<sup>2</sup>"//cnull, &
+       call gtk_button_set_label(ksin, "asin"//c_null_char)
+       call gtk_button_set_label(kcos, "acos"//c_null_char)
+       call gtk_button_set_label(ktan, "atan"//c_null_char)
+       call hl_gtk_button_set_label(ksqrt, "x<sup>2</sup>"//c_null_char, &
             & is_markup=TRUE)
-       call gtk_button_set_label(kloge, "exp"//cnull)
-       call hl_gtk_button_set_label(klog10, "10<sup>x</sup>"//cnull, &
+       call gtk_button_set_label(kloge, "exp"//c_null_char)
+       call hl_gtk_button_set_label(klog10, "10<sup>x</sup>"//c_null_char, &
             & is_markup=TRUE)
-       call gtk_button_set_label(ksinh, "asinh"//cnull)
-       call gtk_button_set_label(kcosh, "acosh"//cnull)
-       call gtk_button_set_label(ktanh, "atanh"//cnull)
+       call gtk_button_set_label(ksinh, "asinh"//c_null_char)
+       call gtk_button_set_label(kcosh, "acosh"//c_null_char)
+       call gtk_button_set_label(ktanh, "atanh"//c_null_char)
     else
-       call gtk_button_set_label(ksin, "sin"//cnull)
-       call gtk_button_set_label(kcos, "cos"//cnull)
-       call gtk_button_set_label(ktan, "tan"//cnull)
-       call gtk_button_set_label(ksqrt, "√x"//cnull)
-       call gtk_button_set_label(kloge, "ln"//cnull)
-       call gtk_button_set_label(klog10, "log"//cnull)
-       call gtk_button_set_label(ksinh, "sinh"//cnull)
-       call gtk_button_set_label(kcosh, "cosh"//cnull)
-       call gtk_button_set_label(ktanh, "tanh"//cnull)
+       call gtk_button_set_label(ksin, "sin"//c_null_char)
+       call gtk_button_set_label(kcos, "cos"//c_null_char)
+       call gtk_button_set_label(ktan, "tan"//c_null_char)
+       call gtk_button_set_label(ksqrt, "√x"//c_null_char)
+       call gtk_button_set_label(kloge, "ln"//c_null_char)
+       call gtk_button_set_label(klog10, "log"//c_null_char)
+       call gtk_button_set_label(ksinh, "sinh"//c_null_char)
+       call gtk_button_set_label(kcosh, "cosh"//c_null_char)
+       call gtk_button_set_label(ktanh, "tanh"//c_null_char)
     end if
   end subroutine set_labels
 
@@ -259,7 +259,7 @@ contains
     shwm = hl_gtk_listn_get_n_rows(fstack)
     if (shwm == 0) then
        mid = gtk_statusbar_push(fstatus, 0, &
-            & "No values left on stack: cannot get a value"//cnull)
+            & "No values left on stack: cannot get a value"//c_null_char)
        status = .FALSE.
        return
     end if
@@ -302,7 +302,7 @@ contains
     nrows = hl_gtk_listn_get_n_rows(fstack)
     if (iclr .or. nrows == 0) then
        if (nrows /= 0) mid = gtk_statusbar_push(fstatus, 0, &
-            & "Clearing statistics while stack not empty"//cnull)
+            & "Clearing statistics while stack not empty"//c_null_char)
 
        s1 = 0._c_double
        s2 = 0._c_double
@@ -403,8 +403,8 @@ contains
     val_ptr = c_loc(svalue)
     val_ptr = g_value_init(val_ptr, G_TYPE_STRING)
 
-    call g_value_set_string(val_ptr, trim(rstring)//cnull)
-    call g_object_set_property(cell, "text"//cnull, val_ptr)
+    call g_value_set_string(val_ptr, trim(rstring)//c_null_char)
+    call g_object_set_property(cell, "text"//c_null_char, val_ptr)
     if (focus_entry) then
        call gtk_widget_grab_focus(fentry)
        call gtk_editable_set_position(fentry, -1)   ! Put cursor at end.
@@ -435,7 +435,7 @@ contains
          & iostat=ios, iomsg=iom)
     if (present(status)) status=ios
     if (ios /= 0) then
-       mid = gtk_statusbar_push(fstatus, 0, trim(iom)//cnull)
+       mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
        return
     end if
 
@@ -497,7 +497,7 @@ contains
     open(47, file=file, action="read", status='old', form="formatted", &
          & iostat=ios, iomsg=iom)
     if (ios /= 0) then
-       mid = gtk_statusbar_push(fstatus, 0, trim(iom)//cnull)
+       mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
        if (present(status)) status=ios
        return
     end if
@@ -518,9 +518,9 @@ contains
           if (nchars > 0) then
              read(47, "(A)", iostat=ios, iomsg=iom) etext
              if (ios /= 0) exit
-             call gtk_entry_set_text(fentry, trim(etext)//cnull)
+             call gtk_entry_set_text(fentry, trim(etext)//c_null_char)
           else
-             call gtk_entry_set_text(fentry, cnull)
+             call gtk_entry_set_text(fentry, c_null_char)
           end if
 
        case("Stack")
@@ -545,7 +545,7 @@ contains
          read(47, *, iostat=ios, iomsg=iom) nrows
           if (ios /= 0) exit
           if (nrows > maxreg) mid = gtk_statusbar_push(fstatus, 0, &
-               & "Too many registers"//cnull)
+               & "Too many registers"//c_null_char)
           do i = 0, nrows
              read(47, dformat, iostat=ios, iomsg=iom) val
              if (ios /= 0) exit
@@ -566,11 +566,11 @@ contains
 
        case default
           mid = gtk_statusbar_push(fstatus, 0, &
-               & "Unknown tag: "//tag//cnull)
+               & "Unknown tag: "//tag//c_null_char)
        end select
     end do
 
-    if (ios /= 0) mid = gtk_statusbar_push(fstatus, 0, trim(iom)//cnull)
+    if (ios /= 0) mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
     if (present(status)) status=ios
 
     close(47)
