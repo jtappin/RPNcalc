@@ -22,8 +22,8 @@ $(MAN): $(SOURCE)
 $(TEXT): $(MAN)
 	man ./$(MAN) > $(TEXT)
 
-$(PDF): $(MAN)
-	man -t ./$(MAN) | ps2pdf - $(PDF)
+$(PDF): $(SOURCE)
+	pdflatex $(SOURCE)
 
 install: $(MAN) $(TEXT) $(PDF) $(DOCDIR) $(MANDIR)
 	install $(MAN) $(MANDIR)

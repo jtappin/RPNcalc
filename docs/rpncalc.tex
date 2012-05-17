@@ -1,41 +1,45 @@
-% Note that though this looks like a LaTeX file, it won't actually
-% build properly with normal latex or pdflatex. To produce a PostScript
-% or PDF version, run:
-%    latex2man rpncalc.tex rpncalc.1
-% and then:
-%    man -t ./rpncalc.1 | ps2pdf - - > rpncalc.pdf
 \documentclass{article}
+\usepackage{times}
+\usepackage[fancy]{latex2man}
 
-\usepackage{latex2man}
+\begin{document}
+\setVersion{0.1}
+\begin{Name}{1}{rpncalc}{James Tappin}{RPN Scientific Calculator}{RPNcalc\\--\\A Reverse-Polish notation scientific calculator}
 
-\begin{Name}{1}{rpncalc}{James Tappin}{RPN Scientific Calculator}{RPNcalc}
-  \section{SYNOPSIS}
+  \Prog{rpncalc} \URL{https://github.com/jtappin/RPNcalc} is a fully
+  functional scientific calculator emulator, written entirely in
+  Fortran. It is both a usable tool and a demonstration of the
+  gtk-fortran libraries \URL{https://github.com/jerryd/gtk-fortran}.
+\end{Name}
 
-  \textbf{rpncalc} [\emph{option}]...
+\section{SYNOPSIS}
+
+  \Prog{rpncalc} \oOpt{options} \Dots
 
   \section{DESCRIPTION}
 
   A scientific decktop calculator using Reverse Polish notation.
+
   \section{OPTIONS}
 
   \begin{description}
-  \item [\textbf{-c}, \textbf{--closed}] start the
+  \item [\Opt{-c}, \Opt{-\,-closed}] start the
     calculator with the stack and memory display hidden.
-  \item [\textbf{-o}, \textbf{--open}] start the calculator
+  \item [\Opt{-o}, \Opt{-\,-open}] start the calculator
     with the stack and memory display visible (this is the default).
-  \item [\textbf{-r}, \textbf{--restore} \emph{ file}]
+  \item [\Opt{-r}, \OptArg{-\,-restore}{ file}]
     Load the stack and memory contents from the given file.
-  \item [\textbf{-m}, \textbf{--registers }\emph{ number}]
+  \item [\Opt{-m}, \OptArg{-\,-registers }{ number}]
     Set the number of memory registers to create. The default is 10.
-  \item [\textbf{-f}, \textbf{--focus}] Maintain keyboard
+  \item [\Opt{-f}, \Opt{-\,-focus}] Maintain keyboard
     focus in the input window.
-  \item [\textbf{-R}, \textbf{--radians}] Set the trigonometry unit to
+  \item [\Opt{-R}, \Opt{-\,-radians}] Set the trigonometry unit to
     radians.
-  \item [\textbf{-D}, \textbf{--degrees}] Set the trigonometry unit to
+  \item [\Opt{-D}, \Opt{-\,-degrees}] Set the trigonometry unit to
     degrees.
-  \item[\textbf{-G}, \textbf{--grads}] Set the trigonometry unit to grads
+  \item[\Opt{-G}, \Opt{-\,-grads}] Set the trigonometry unit to grads
     (1/100 of a right angle).
-  \item [\textbf{-h}, \textbf{--help}] Print a help text
+  \item [\Opt{-h}, \Opt{-\,-help}] Print a help text
     and exit.
   \end{description}
 
@@ -117,7 +121,7 @@
   \begin{enumerate}
   \item The less-used functions in the pulldown are not affected by
     this, as none have meaningful inverses.
-  \item The power operator \textbf{\Circum{}} entered from the keyboard is not
+  \item The power operator \textbf{\Circum} entered from the keyboard is not
     converted to a root.
   \end{enumerate}
 
@@ -266,6 +270,6 @@ James Tappin (jtappin at gmail dot com).
 
 RPNcalc is free software and may be modified and redistributed under
 the terms of the GNU General Public Licence Version 3.
-\end{Name}
 
-%\end{document}
+\LatexManEnd
+\end{document}

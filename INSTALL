@@ -3,7 +3,7 @@ RNPcalc -- building and installing
 
 Needs: Fortran 95/2003 (for gfortran: Version >= 4.6)
        GtkFortran, including gtk_hl
-       latex2man, man and ps2pdf to build the documentation.
+       latex2man, man and pdflatex to build the documentation.
 
 Step 0:
      Get RPNcalc from https://github.com/jtappin/RPNcalc
@@ -23,6 +23,8 @@ Step 2:
       	 and build & install it, using the cmake build instructions.
      2) gfortran has an internal error, solution:
       Make sure you have gfortran 4.6 or better.
+     3) Can't find latex2man, solution:
+      Install latex2man. (In Ubuntu, it is in texlive-extra-utils).
 
 Step 3:
      sudo make install
