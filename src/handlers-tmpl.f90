@@ -243,10 +243,10 @@ contains
        call c_f_pointer(gdata, fdata)
        call append_char_entry(fdata//c_null_char)
     end if
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
 
   end subroutine numpress
 
@@ -263,10 +263,10 @@ contains
        call append_char_entry("."//c_null_char)
        decimal_present = .TRUE.
     end if
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine dppress
 
   subroutine chspress(widget, gdata) bind(c)
@@ -324,10 +324,10 @@ contains
           call push_stack(x)
        end if
     end if
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine chspress
 
   subroutine eepress(widget, gdata) bind(c)
@@ -350,10 +350,10 @@ contains
           exponent_present = .true.
        end if
     end if
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine eepress
 
   subroutine pipress(widget, gdata) bind(c)
@@ -362,10 +362,10 @@ contains
 
     call push_stack(pi)
     call gtk_entry_set_text(fentry, c_null_char)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine pipress
 
   subroutine add_const(widget, gdata) bind(c)
@@ -378,10 +378,10 @@ contains
 
     call push_stack(cval)
     call gtk_entry_set_text(fentry, c_null_char)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine add_const
 
   subroutine delpress(widget, gdata) bind(c)
@@ -406,10 +406,9 @@ contains
        exponent_present = .false.
     end select
 
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
 
   end subroutine delpress
 
@@ -424,10 +423,10 @@ contains
 
     mid = gtk_statusbar_push(fstatus, 0, c_null_char)
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
     if (nchars == 0) then
        call pop_stack(val, status, readonly=.TRUE.)
        if (.not. status) return
@@ -450,10 +449,10 @@ contains
     real(kind=c_double) :: x, y, z
     logical :: status
 
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
 
     call set_result()
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
@@ -486,10 +485,14 @@ contains
     case (OP_DIVIDE)
        z = y/x
     case (OP_POWER)
-       if (x == int(x)) then  ! integer power safe for all signs
+       ! If the inverse flag is set and the operation was initiated by
+       ! the power button (rather than the ^ keystroke) take the root
+       if (isinv .and. c_associated(widget)) x = 1._c_double/x
+       if (x == aint(x)) then  ! integer power safe for all signs
           z = y**int(x)
 
-       else if (y < 0._c_double) then ! real power of a negative value (not allowed)
+       else if (y < 0._c_double) then ! real power of a negative value
+          ! (not allowed)
           mid = gtk_statusbar_push(fstatus, 0, &
                & "Cannot raise a negative value to a real power"//c_null_char)
           call push_stack(y, show_result=.false.)
@@ -497,6 +500,12 @@ contains
           return
        else
           z = y**x
+       end if
+       if (isinv .and. c_associated(widget)) then ! Only power is
+          !  affected by inverse flag
+          call gtk_toggle_button_set_active(karc, FALSE)
+          isinv = .FALSE.
+          call set_labels
        end if
     case(FUN_ATAN2)
        z = atan2(y, x)
@@ -531,10 +540,10 @@ contains
     end if
     call set_result()
     mid = gtk_statusbar_push(fstatus, 0, c_null_char)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine cepress
 
   subroutine capress(widget, gdata) bind(c)
@@ -555,10 +564,10 @@ contains
     call hl_gtk_listn_rem(fstack)
     mid = gtk_statusbar_push(fstatus, 0, c_null_char)
     if (dynamic_stats) call stack_stats(0._c_double, clear=.true.)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
 
   end subroutine capress
 
@@ -576,10 +585,10 @@ contains
 
     mid = gtk_statusbar_push(fstatus, 0, c_null_char)
     sflag = .true.
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
     if (stack_selected <= 0) then ! top element or none
        ! (swap with the entry box)
        nchars = int(gtk_entry_get_text_length(fentry), c_int)
@@ -623,10 +632,10 @@ contains
     logical :: status
 
     mid = gtk_statusbar_push(fstatus, 0, c_null_char)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
     if (stack_selected < 0) then ! no selection
        nchars = int(gtk_entry_get_text_length(fentry), c_int)
        if (nchars == 0) return ! No action of entry is empty
@@ -666,7 +675,7 @@ contains
     logical :: status
 
     integer(kind=c_int), dimension(:), allocatable :: idx
-    integer :: i
+    integer :: i, nshift
     integer(kind=c_int) :: nrows,mid
 
     mid = gtk_statusbar_push(fstatus, 0, c_null_char)
@@ -674,15 +683,25 @@ contains
     if (nrows <= 1) return  ! Empty or 1 row can't roll
 
     allocate(idx(nrows))
+    if (isinv) then
+       nshift=1
+    else
+       nshift=-1
+    end if
     idx = (/ (i-1, i=1,nrows) /)
-    idx = cshift(idx, -1)
+    idx = cshift(idx, nshift)
     call hl_gtk_listn_reorder(fstack, idx)
 
     call pop_stack(x, status, readonly=.true.)
     if (status) call set_result(x)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
+    if (isinv) then
+       call gtk_toggle_button_set_active(karc, FALSE)
+       isinv=.false.
+       call set_labels
     end if
   end subroutine rollpress
 
@@ -697,10 +716,10 @@ contains
     logical :: status
     integer :: i
 
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
     call set_result()
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
     if (nchars > 0) then
@@ -864,10 +883,10 @@ contains
     logical :: status
     real(kind=c_double) :: val
 
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
     nchars=int(gtk_entry_get_text_length(fentry), c_int)
     if (nchars > 0) then
        call read_entry(val, status,push=.false.)
@@ -886,10 +905,10 @@ contains
 
     isinv = (gtk_toggle_button_get_active(widget) == TRUE)
     call set_labels
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine invtoggle
 
   subroutine set_trigunit(widget, gdata) bind(c)
@@ -897,10 +916,10 @@ contains
     type(c_ptr), value :: widget, gdata
 
     trigunit = hl_gtk_radio_group_get_select(rdgrp)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine set_trigunit
 
   subroutine stacksel(widget, gdata) bind(c)
@@ -917,10 +936,10 @@ contains
        stack_selected = sellist(1)
        deallocate(sellist)
     end if
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine stacksel
 
   subroutine mempress(widget, gdata) bind(c)
@@ -940,10 +959,10 @@ contains
 
     nchars = gtk_entry_get_text_length(fentry)
 
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
 
     if (memop /= MEM_CLA) then
        if (mem_selected >= 0) then ! A register is selected by the list
@@ -1017,10 +1036,10 @@ contains
        mem_selected = sellist(1)
        deallocate(sellist)
     end if
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine memsel
 
   subroutine save_values(widget, gdata) bind(c)
@@ -1034,10 +1053,10 @@ contains
          & parent=win, filter=(/"*.rpn"/), &
          & filter_name=(/"RPN save files"/), edit_filters=TRUE)
 
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
     if (response == FALSE) return
 
     call save_all(file(1))
@@ -1056,10 +1075,10 @@ contains
          & parent=win, filter=(/"*.rpn"/), &
          & filter_name=(/"RPN save files"/), edit_filters=TRUE)
 
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
     if (response == FALSE) return
 
     call restore_all(file(1))
@@ -1121,10 +1140,9 @@ contains
 
     call gtk_widget_show_all(help_window)
 
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
 
   end subroutine show_help
 
@@ -1208,10 +1226,10 @@ contains
     call gtk_about_dialog_set_authors(dialog, authors)
     response_id =  gtk_dialog_run(dialog)
     call gtk_widget_destroy(dialog)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine about_gtkfortran
 
   subroutine set_format_make(widget, gdata) bind(c)
@@ -1342,10 +1360,10 @@ contains
     end select
 
     call gtk_widget_destroy(fmt_window)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine set_format_cb
 
   subroutine set_format_destroy(widget, gdata) bind(c)
@@ -1353,10 +1371,10 @@ contains
     type(c_ptr), value :: widget, gdata
 
     call gtk_widget_destroy(fmt_window)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine set_format_destroy
 
   subroutine set_stats(widget, gdata) bind(c)
@@ -1365,10 +1383,10 @@ contains
 
     dynamic_stats = (gtk_toggle_button_get_active(widget) == TRUE)
     if (dynamic_stats) call stack_stats(0._c_double, initialize=.true.)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine set_stats
 
   subroutine statsel(widget, gdata) bind(c)
@@ -1385,22 +1403,11 @@ contains
        call push_stack(x)
        deallocate(sellist)
     end if
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
   end subroutine statsel
-
-  subroutine set_entry_focus(widget, gdata) bind(c)
-    ! Set entry focus holding options
-    type(c_ptr), value :: widget, gdata
-
-    focus_entry = (gtk_check_menu_item_get_active(widget) == TRUE)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-    end if
-  end subroutine set_entry_focus
 
   subroutine set_dms_hms(widget, gdata) bind(c)
     ! Set format of degrees or hours minutes seconds display.

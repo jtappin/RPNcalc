@@ -100,7 +100,7 @@ module widgets
   type(c_ptr) :: kmsto, kmrcl, kmplus, kmminus, kmclr, kmcla
 
   ! Modes & flags
-  logical ::  isinv=.false., focus_entry=.false., dms_hms=.false.
+  logical ::  isinv=.false., dms_hms=.false.
   integer(kind=c_int) :: trigunit = 1
 
   ! Flags for "non-repeatable" elements in a number entry.

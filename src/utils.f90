@@ -202,6 +202,9 @@ contains
        call gtk_button_set_label(ksinh, "asinh"//c_null_char)
        call gtk_button_set_label(kcosh, "acosh"//c_null_char)
        call gtk_button_set_label(ktanh, "atanh"//c_null_char)
+       call hl_gtk_button_set_label_markup(kpower, &
+            & "<sup>x</sup>√y"//c_null_char)
+       call gtk_button_set_label(kroll, "R↑"//c_null_char)
     else
        call gtk_button_set_label(ksin, "sin"//c_null_char)
        call gtk_button_set_label(kcos, "cos"//c_null_char)
@@ -212,7 +215,10 @@ contains
        call gtk_button_set_label(ksinh, "sinh"//c_null_char)
        call gtk_button_set_label(kcosh, "cosh"//c_null_char)
        call gtk_button_set_label(ktanh, "tanh"//c_null_char)
-    end if
+       call hl_gtk_button_set_label_markup(kpower, &
+            & "y<sup>x</sup>"//c_null_char)
+       call gtk_button_set_label(kroll, "R↓"//c_null_char)
+     end if
   end subroutine set_labels
 
   subroutine push_stack(val, show_result)
@@ -405,10 +411,10 @@ contains
 
     call g_value_set_string(val_ptr, trim(rstring)//c_null_char)
     call g_object_set_property(cell, "text"//c_null_char, val_ptr)
-    if (focus_entry) then
-       call gtk_widget_grab_focus(fentry)
-       call gtk_editable_set_position(fentry, -1)   ! Put cursor at end.
-    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end.
+
   end subroutine show_list
 
   subroutine save_all(file, status)
@@ -422,7 +428,7 @@ contains
     type(c_ptr) :: cetext
     character(len=40) :: fetext
     real(kind=c_double) :: val
-    integer :: i, ios
+    integer :: i, ios, unit
     character(len=8) :: dformat
     character(len=80) :: iom
 
@@ -431,7 +437,7 @@ contains
     ! C_SIZEOF function instead).
     write(dformat, "('(Z',I0')')") 2*c_double
 
-    open(47, file=file, action="write", form="formatted", &
+    open(newunit=unit, file=file, action="write", form="formatted", &
          & iostat=ios, iomsg=iom)
     if (present(status)) status=ios
     if (ios /= 0) then
@@ -443,34 +449,34 @@ contains
     if (nchars > 0) then
        cetext = gtk_entry_get_text(fentry)
        call convert_c_string(cetext, nchars, fetext)
-       write(47, "(A/I0/A)") "Entry",nchars,fetext
+       write(unit, "(A/I0/A)") "Entry",nchars,fetext
     else
-       write(47, "(A/I0)") "Entry",0
+       write(unit, "(A/I0)") "Entry",0
     endif
 
     nrows = hl_gtk_listn_get_n_rows(fstack)
-    write(47, "(A/I0)") "Stack", nrows
+    write(unit, "(A/I0)") "Stack", nrows
     do i = 0, nrows-1
        call hl_gtk_listn_get_cell(fstack, i, 0, dvalue=val)
-       write(47, dformat) val
+       write(unit, dformat) val
     end do
 
-    write(47, "(A/I0)") "Regs", maxreg
+    write(unit, "(A/I0)") "Regs", maxreg
     do i = 0, maxreg
        call hl_gtk_listn_get_cell(fmemory, i, 1, dvalue=val)
-       write(47, dformat) val
+       write(unit, dformat) val
     end do
 
-    write(47, "(A)") "Stats"
+    write(unit, "(A)") "Stats"
     do i = 0, 9
        call hl_gtk_listn_get_cell(fstats, i, 1, dvalue=val)
-       write(47, dformat) val
+       write(unit, dformat) val
     end do
 
-    write(47, "(A/A/3I5)") "Fmt", result_format, fmt_type, &
+    write(unit, "(A/A/3I5)") "Fmt", result_format, fmt_type, &
          & fmt_decimal, fmt_expplaces
 
-    close(47)
+    close(unit)
 
   end subroutine save_all
 
@@ -484,7 +490,7 @@ contains
     integer(kind=c_int) :: nrows, nchars, mid
     character(len=40) :: etext
     real(kind=c_double) :: val
-    integer :: i, ios
+    integer :: i, ios, unit
     character(len=5) :: tag
     character(len=8) :: dformat
     character(len=80) :: iom
@@ -494,7 +500,7 @@ contains
     ! C_SIZEOF function instead).
     write(dformat, "('(Z',I0')')") 2*c_double
 
-    open(47, file=file, action="read", status='old', form="formatted", &
+    open(unit, file=file, action="read", status='old', form="formatted", &
          & iostat=ios, iomsg=iom)
     if (ios /= 0) then
        mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
@@ -505,7 +511,7 @@ contains
     call hl_gtk_listn_rem(fstack)   ! clear the stack
 
     do
-       read(47, "(A)", iostat=ios, iomsg=iom) tag
+       read(unit, "(A)", iostat=ios, iomsg=iom) tag
        if (ios /= 0) then
           if (ios == iostat_end) ios = 0  ! EOF is expected here
           exit
@@ -513,10 +519,10 @@ contains
 
        select case(tag)
        case("Entry")
-          read(47, *, iostat=ios, iomsg=iom) nchars
+          read(unit, *, iostat=ios, iomsg=iom) nchars
           if (ios /= 0) exit
           if (nchars > 0) then
-             read(47, "(A)", iostat=ios, iomsg=iom) etext
+             read(unit, "(A)", iostat=ios, iomsg=iom) etext
              if (ios /= 0) exit
              call gtk_entry_set_text(fentry, trim(etext)//c_null_char)
           else
@@ -524,10 +530,10 @@ contains
           end if
 
        case("Stack")
-          read(47, *, iostat=ios, iomsg=iom) nrows
+          read(unit, *, iostat=ios, iomsg=iom) nrows
           if (ios /= 0) exit
           do i = 0, nrows-1
-             read(47, dformat, iostat=ios, iomsg=iom) val
+             read(unit, dformat, iostat=ios, iomsg=iom) val
              if (ios /= 0) exit
              call hl_gtk_listn_ins(fstack)
              call hl_gtk_listn_set_cell(fstack, i, 0, dvalue=val)
@@ -536,31 +542,31 @@ contains
  
       case("Stats")
           do i = 0, 9
-             read(47, dformat, iostat=ios, iomsg=iom) val
+             read(unit, dformat, iostat=ios, iomsg=iom) val
              if (ios /= 0) exit
              call hl_gtk_listn_set_cell(fstats, i, 1, dvalue=val)
           end do
        case("Regs")
  
-         read(47, *, iostat=ios, iomsg=iom) nrows
+         read(unit, *, iostat=ios, iomsg=iom) nrows
           if (ios /= 0) exit
           if (nrows > maxreg) mid = gtk_statusbar_push(fstatus, 0, &
                & "Too many registers"//c_null_char)
           do i = 0, nrows
-             read(47, dformat, iostat=ios, iomsg=iom) val
+             read(unit, dformat, iostat=ios, iomsg=iom) val
              if (ios /= 0) exit
              if (i > maxreg) cycle
              call hl_gtk_listn_set_cell(fmemory, i, 1, dvalue=val)
           end do
 
        case("Form")  ! Old-style format
-          read(47,"(A)", iostat=ios, iomsg=iom) result_format
+          read(unit,"(A)", iostat=ios, iomsg=iom) result_format
           if (ios /= 0) exit
 
        case("Fmt")  ! New-style format
-          read(47,"(A)", iostat=ios, iomsg=iom) result_format
+          read(unit,"(A)", iostat=ios, iomsg=iom) result_format
           if (ios /= 0) exit
-          read(47,*, iostat=ios, iomsg=iom) fmt_type, &
+          read(unit,*, iostat=ios, iomsg=iom) fmt_type, &
                & fmt_decimal, fmt_expplaces
           if (ios /= 0) exit
 
@@ -573,7 +579,7 @@ contains
     if (ios /= 0) mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
     if (present(status)) status=ios
 
-    close(47)
+    close(unit)
 
   end subroutine restore_all
 end module utils

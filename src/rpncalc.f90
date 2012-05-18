@@ -23,13 +23,12 @@ program rpncalc
 
   ! Usage:
   !	rpncalc [-o|-open|-c|-closed] [{-r|--restore} <file>] \
-  !	       [{-m|--registers} <n>] [-f|--focus] [-h|--help]
+  !	       [{-m|--registers} <n>] [-h|--help]
   !
   !	-o, --open: Start with the stack displays open (default)
   !	-c, --closed: Start with the stack displays closed
   !	-r, --restore: Restore the specified file.
   !	-m, --registers: Set the number of registers to the specified value.
-  !	-f, --focus: Maintain keyboard focus in the input window.
   !	-h, --help: Print help text and exit.
 
   ! This source file contains the main program that creates the widgets.
@@ -90,13 +89,12 @@ program rpncalc
      case("-h", "--help")
         print *, "Usage:"
         print *, " rpncalc [-o|-open|-c|-closed] [{-r|--restore} <file>] \ "
-        print *, "       [{-m|--registers} <n>] [-f|--focus] [-h|--help]"
+        print *, "       [{-m|--registers} <n>] [-h|--help]"
         print *, " "
         print *, " -o, --open: Start with the stack displays open (default)"
         print *, " -c, --closed: Start with the stack displays closed"
         print *, " -r, --restore: Restore the specified file."
         print *, " -m, --registers: Set the number of registers to the specified value."
-        print *, " -f, --focus: Maintain keyboard focus in the input window."
         print *, " -h, --help: Print help text and exit."
         stop
      case("-o", "--open")         ! Start with the stack display open (default)
@@ -136,7 +134,7 @@ program rpncalc
             end if
         end if
      case("-f", "--focus")
-        focus_entry = .true.
+        write(error_unit, *) "RPNcalc: Focus is now always maintained"
      case default                 ! Bad option
         write(0, *) "RPNcalc: Unknown option:", trim(arg)
      end select
@@ -170,10 +168,7 @@ program rpncalc
   kfedit = hl_gtk_menu_item_new(femenu, "Result Format"//c_null_char, &
        & activate=c_funloc(set_format_make), accel_key="f"//c_null_char, &
        & accel_group=accel)
-  kefocus = hl_gtk_check_menu_item_new(femenu, "Hold entry focus"//c_null_char, &
-       & toggled = c_funloc(set_entry_focus), &
-       & initial_state=f_c_logical(focus_entry), &
-       & tooltip="Return entry focus to input window after button press"//c_null_char)
+
   khrdeg = hl_gtk_check_menu_item_new(femenu, "Display degrees"//c_null_char, &
        & toggled = c_funloc(set_dms_hms), tooltip = &
        & "Select angular or time format for HMS display"//c_null_char)
