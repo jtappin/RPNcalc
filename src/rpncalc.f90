@@ -356,7 +356,7 @@ program rpncalc
        & tooltip="Select/Deselect live stack statistics"//c_null_char)
   call hl_gtk_table_attach(keybox, kstats, 4, 0, xspan=2)
 
-  rdgrp=NULL
+  rdgrp=C_NULL_PTR
   krad = hl_gtk_radio_button_new(rdgrp, "Rad"//c_null_char, &
        & toggled=c_funloc(set_trigunit), &
        & tooltip = "Select radians mode"//c_null_char)

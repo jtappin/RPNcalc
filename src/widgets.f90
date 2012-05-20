@@ -20,7 +20,6 @@ module widgets
   ! needed by RPNcalc.
 
   use iso_c_binding
-  use gtk, only: NULL
 
   implicit none
 
