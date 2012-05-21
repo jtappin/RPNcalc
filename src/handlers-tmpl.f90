@@ -196,7 +196,7 @@ contains
        endif
        if (dflag) decimal_present = .true.
        if (eflag) exponent_present = .true.
-       if (opcode /= OP_NONE) call oppress(NULL, c_loc(opcode))
+       if (opcode /= OP_NONE) call oppress(C_NULL_PTR, c_loc(opcode))
     
        call g_signal_stop_emission_by_name(widget, "insert-text")
     else
