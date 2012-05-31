@@ -122,7 +122,8 @@ contains
           dflag = .true.
 
        case("E","D","e","d") ! An exponent (OK if there isn't already one
-          ! and it's not before a decimal
+          ! and it's not before a decimal, and there's at least 1 number
+          ! before it)
           if (exponent_present) cycle
           if (decimal_present) then
              if (i < len_trim(itext)) then
@@ -132,6 +133,9 @@ contains
                 if (index(etext(ipos+1:),'.') > 0) cycle
              end if
           end if
+          if (scan(etext(:j),"0123456789") == 0 .and.&
+               & scan(itext(:i),"0123456789") == 0) cycle
+
           otext(j:j) = itext(i:i)
           j = j+1
           eflag = .true.
