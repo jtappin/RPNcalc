@@ -60,9 +60,8 @@
   It is intended to be both a useful tool, and a demonstration of what
   can be done using gtk-fortran (and in particular the fortran-only
   high-level routines). The calculator is entirely written in
-  Fortran~2003.
-% \footnote{There is a perl script in the build system to
-%     incorporate this manual into the help displayer.}.
+  Fortran~2003 (with a few 2008 features such as the
+  \texttt{execute\_command\_line} subroutine.
 
   \subsection{Entering values:}
 
@@ -88,7 +87,7 @@
   \subsection{Operators:}
 
   The operators (\textbf{+}, \textbf{-}, \textbf{*}, \textbf{/} and
-  \textbf{y**x} and the \textbf{atan2} function) operate on the entry
+  \textbf{y**x} and also the \textbf{atan2} function) operate on the entry
   box and the top element on the stack if there is anything in the
   entry box. If the entry box is empty, then they operate on the top 2
   elements of the stack.
@@ -199,8 +198,7 @@
 
   If the \textbf{Live stats} toggle is enabled, then a summary of the
   statistical properties of the contents of the stack is maintained in
-  the "Statistics" tab of the display area. Clicking on a line of that
-  display copies its value to the stack.
+  the "Statistics" tab of the display area. 
 
   \subsection{Save \& Restore:}
 
@@ -217,32 +215,45 @@
 
   \subsection{Settings:}
 
-  In the current version, there are 3 user-definable settings accessed
+  In the current version, there are 2 user-definable settings accessed
   through the \textbf{Edit} menu:
 
-\subsubsection{Result Format:}
-Specify the format to use in the result box. You have the options to
-select one of the standard formats:
-\begin{description}
-\item [Fixed:] A fixed number of decimal places (set in the precision
-  spin box). The actual format used is "(F0.\emph{n})". WARNING: this
-  may be a GNU extension.
-\item[Sci:] Scientific format. Specify the number of decimals, and the
-  width of the exponent in the spin boxes. The total width is
-  calculated automatically.
-\item[Eng:] Engineering format, similar to scientific, except that the
-  exponent is always a multiple of 3.
-\item[Free:] Use a list-directed write (the default).
-\end{description}
-Alternatively you can type an explicit Fortran format statement into
-the combo box (with or without the enclosing parentheses). This may be
-any Fortran formatting code valid for a REAL type. Setting it to "*" or
-an empty string will use the default list-directed output (as will an
-invalid format).
+  \subsubsection{Result Format:}
+  Specify the format to use in the result box. You have the options to
+  select one of the standard formats:
+  \begin{description}
+  \item [Fixed:] A fixed number of decimal places (set in the precision
+    spin box). The actual format used is "(F0.\emph{n})". WARNING: this
+    may be a GNU extension.
+  \item[Sci:] Scientific format. Specify the number of decimals, and
+    the width of the exponent in the spin boxes. The total width is
+    calculated automatically.
+  \item[Eng:] Engineering format, similar to scientific, except that
+    the exponent is always a multiple of 3.
+  \item[Free:] Use a list-directed write (the default).
+  \end{description}
+  Alternatively you can type an explicit Fortran format statement into
+  the combo box (with or without the enclosing parentheses). This may
+  be any Fortran formatting code valid for a REAL type. Setting it to
+  "*" or an empty string will use the default list-directed output (as
+  will an invalid format).
 
-\subsubsection{Show degrees:}
-If this is enabled, then use angular rather than time notation for the
-HMS display (the button will be relabelled \textbf{DMS}).
+  \subsubsection{Show degrees:}
+  If this is enabled, then use angular rather than time notation for the
+  HMS display (the button will be relabelled \textbf{DMS}).
+
+\subsection{Help system:}
+
+This manual can be accessed in a number of ways:
+\begin{enumerate}
+\item A manpage is generated and can be accessed using 
+\texttt{man rpncalc}.
+\item The ``Help'' item in the menu will display either the text
+  version or (if the environment variable \texttt{RPNCALC\_VIEWER} is
+  set to a PDF viewer) the PDF version.
+\item The text and PDF versions are installed in the
+  \texttt{share/docs/rpncalc} subdirectory of the installation directory.
+\end{enumerate}
 
 \subsection{Accelerators:}
 
@@ -257,6 +268,7 @@ The menu items have accerators to save mouse clicking:
 \item About -- ctrl-a
 \item About gtk-fortran -- ctrl-shift-a
 \end{itemize}
+
 \section{AUTHORS}
 
 James Tappin (jtappin at gmail dot com).

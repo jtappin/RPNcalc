@@ -1091,55 +1091,65 @@ contains
     ! Display help text
     type(c_ptr), value :: widget, gdata
 
+    character(len=*), parameter :: textfile="@TEXTFILE@"
+    character(len=*), parameter :: pdffile="@PDFFILE@"
     type(c_ptr) :: hscroll, hview, hquit, hbox
     character(kind=c_char), dimension(:), allocatable, save :: text
-    character(len=*), parameter :: textfile="@TEXTFILE@"
     integer :: unit, iostat, textlen
     character(len=80) :: iomsg
     integer(kind=c_int) :: isvalid
     type(c_ptr) :: end_point
     character(kind=c_char), pointer :: end_char
+    character(len=256) :: pdfviewer
+    integer :: vstatus
 
-    if (.not. allocated(text)) then
-       ! Note that the easiest way to read a whole file into an array
-       ! of CHAR*1 is to open it as an unformatted stream.
-       open(newunit=unit, file=textfile, access='stream', action='read', &
-            & iostat=iostat, iomsg=iomsg, form="unformatted")
-       if (iostat /= 0) then
-          write(error_unit, *) "rpncalc: Failed to open help file: ", &
-               & trim(textfile)
-          write(error_unit, *) "Reason: ", trim(iomsg)
-          return
+    call get_environment_variable('RPNCALC_VIEWER', value=pdfviewer, &
+         & status=vstatus)
+
+    if (vstatus == 0) then
+       call execute_command_line(trim(pdfviewer)//' '//pdffile, wait=.false.)
+    else
+       if (.not. allocated(text)) then
+          ! Note that the easiest way to read a whole file into an array
+          ! of CHAR*1 is to open it as an unformatted stream.
+          open(newunit=unit, file=textfile, access='stream', action='read', &
+               & iostat=iostat, iomsg=iomsg, form="unformatted")
+          if (iostat /= 0) then
+             write(error_unit, *) "rpncalc: Failed to open help file: ", &
+                  & trim(textfile)
+             write(error_unit, *) "Reason: ", trim(iomsg)
+             return
+          end if
+          inquire(unit, size=textlen)
+          allocate(text(textlen))
+          read(unit, iostat=iostat, iomsg=iomsg) text
+          if (iostat /= 0) then
+             write(error_unit, *) "rpncalc: Failed to read help file: ", &
+                  & trim(textfile)
+             write(error_unit, *) "Reason: ", trim(iomsg)
+             return
+          end if
+          close(unit)
        end if
-       inquire(unit, size=textlen)
-       allocate(text(textlen))
-       read(unit, iostat=iostat, iomsg=iomsg) text
-       if (iostat /= 0) then
-          write(error_unit, *) "rpncalc: Failed to read help file: ", &
-               & trim(textfile)
-          write(error_unit, *) "Reason: ", trim(iomsg)
-          return
-       end if
-       close(unit)
+
+       help_window = hl_gtk_window_new("RPN Calculator"//c_null_char, &
+            & deletable=FALSE, above=TRUE, parent=win)
+
+       hbox = hl_gtk_box_new()
+       call gtk_container_add(help_window, hbox)
+
+       hview = hl_gtk_text_view_new(hscroll, editable=FALSE, &
+            & ssize=(/700, 600/), initial_text = text)
+       call hl_gtk_box_pack(hbox, hscroll)
+
+       hquit = hl_gtk_button_new("Dismiss"//c_null_char, &
+            & clicked=c_funloc(help_del))
+
+       call hl_gtk_box_pack(hbox, hquit)
+
+       call gtk_widget_show_all(help_window)
+
     end if
-
-    help_window = hl_gtk_window_new("RPN Calculator"//c_null_char, &
-         & deletable=FALSE, above=TRUE, parent=win)
-
-    hbox = hl_gtk_box_new()
-    call gtk_container_add(help_window, hbox)
-
-    hview = hl_gtk_text_view_new(hscroll, editable=FALSE, &
-         & ssize=(/700, 600/), initial_text = text)
-    call hl_gtk_box_pack(hbox, hscroll)
-
-    hquit = hl_gtk_button_new("Dismiss"//c_null_char, &
-         & clicked=c_funloc(help_del))
-
-    call hl_gtk_box_pack(hbox, hquit)
-
-    call gtk_widget_show_all(help_window)
-
 
     call gtk_widget_grab_focus(fentry)
     call gtk_editable_set_position(fentry, -1)   ! Put cursor at end

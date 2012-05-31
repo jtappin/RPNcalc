@@ -43,6 +43,7 @@ DESKTOP=$(PROG).desktop
 
 DOCDIR=$(SHRDIR)/doc/$(PROG)
 TEXTFILE=$(DOCDIR)/$(PROG).txt
+PDFFILE=$(DOCDIR)/$(PROG).pdf
 
 all: $(PROG)
 
@@ -66,7 +67,8 @@ uninstall:
 	rm $(BINDIR)/$(PROG) $(APPDIR)/$(DESKTOP)
 
 handlers.f90: handlers-tmpl.f90
-	sed -e "s:@TEXTFILE@:$(TEXTFILE):"  handlers-tmpl.f90 > handlers.f90
+	sed -e "s:@TEXTFILE@:$(TEXTFILE):" -e "s:@PDFFILE@:$(PDFFILE):" \
+	handlers-tmpl.f90 > handlers.f90
 
 # Dependencies
 handlers.o:   widgets.o
