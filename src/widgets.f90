@@ -89,7 +89,8 @@ module widgets
 
   ! Entry & result windows and stack display
   type(c_ptr) :: fentry, fstack, sstack, fresult, sbar, fstatus, &
-       & fmemory, smemory, fstats, sstats, fexpand
+       & mbox, mem_spin, fmemory, smemory, fstats, sstats, fexpand, &
+       & mem_sbox, mem_slabel
 
   ! Windows & containers (and title label)
   type(c_ptr) :: win, base, keybox, mstabs, help_window, &

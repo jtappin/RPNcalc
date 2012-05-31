@@ -1389,25 +1389,26 @@ contains
 
   end subroutine set_stats
 
-  subroutine statsel(widget, gdata) bind(c)
-    ! Copy stats to the stack.
-    type(c_ptr), value :: widget, gdata
-
-    integer(kind=c_int) :: count
-    integer(kind=c_int), dimension(:), allocatable :: sellist
-    real(kind=c_double) :: x
-
-    count = hl_gtk_listn_get_selections(fstats, sellist)
-    if (count > 0) then
-       call hl_gtk_listn_get_cell(fstats, sellist(1), 1, dvalue=x)
-       call push_stack(x)
-       deallocate(sellist)
-    end if
-
-    call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-
-  end subroutine statsel
+!! This was more annoying than useful
+!!$  subroutine statsel(widget, gdata) bind(c)
+!!$    ! Copy stats to the stack.
+!!$    type(c_ptr), value :: widget, gdata
+!!$
+!!$    integer(kind=c_int) :: count
+!!$    integer(kind=c_int), dimension(:), allocatable :: sellist
+!!$    real(kind=c_double) :: x
+!!$
+!!$    count = hl_gtk_listn_get_selections(fstats, sellist)
+!!$    if (count > 0) then
+!!$       call hl_gtk_listn_get_cell(fstats, sellist(1), 1, dvalue=x)
+!!$       call push_stack(x)
+!!$       deallocate(sellist)
+!!$    end if
+!!$
+!!$    call gtk_widget_grab_focus(fentry)
+!!$    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+!!$
+!!$  end subroutine statsel
 
   subroutine set_dms_hms(widget, gdata) bind(c)
     ! Set format of degrees or hours minutes seconds display.
@@ -1420,4 +1421,39 @@ contains
        call gtk_menu_item_set_label(khms, "HMS"//c_null_char)
     end if
   end subroutine set_dms_hms
+
+  subroutine add_remove_registers(widget, gdata) bind(c)
+    ! Add or remove registers according to the setting of the register count.
+    type(c_ptr), value :: widget, gdata
+
+    integer(kind=c_int) :: nreg, nsel
+    integer(kind=c_int) :: i
+    integer(kind=c_int), dimension(:), allocatable :: selected
+    
+    ! Since any valid INTEGER can be represented exactly by any double,
+    ! we don't need to worry about using nint etc.
+
+    nreg = int(hl_gtk_spin_button_get_value(widget))
+
+    if (nreg > maxreg+1) then
+       do i = maxreg+1, nreg-1
+          call hl_gtk_listn_ins(fmemory)   ! Default is append
+          call hl_gtk_listn_set_cell(fmemory, i, 0, ivalue=i)
+          call hl_gtk_listn_set_cell(fmemory, i, 1, dvalue=0._c_double)
+       end do
+    else if (nreg < maxreg+1) then
+       nsel = hl_gtk_listn_get_selections(fmemory, selected)
+       if (nsel > 0) then
+          if (any(selected >= nreg)) then
+             call hl_gtk_listn_set_selection(fmemory)
+             mem_selected = -1
+          end if
+       end if
+       do i = maxreg, nreg, -1
+          call hl_gtk_listn_rem(fmemory, i)
+       end do
+    end if
+    maxreg = nreg-1
+  end subroutine add_remove_registers
+
 end module handlers

@@ -482,7 +482,8 @@ program rpncalc
   ! Stack display
 
   fstack = hl_gtk_listn_new(sstack, changed=c_funloc(stacksel), &
-       & height=350, titles=(/ "Stack"//c_null_char /), types= (/g_type_double/))
+       & height=350, titles=(/ "Stack"//c_null_char /), &
+       & types= (/g_type_double/))
   call hl_gtk_listn_set_cell_data_func(fstack, stackcol, &
        & func=c_funloc(show_list), &
        & data=c_loc(stackcol))
@@ -490,12 +491,25 @@ program rpncalc
   idx = hl_gtk_notebook_add_page(mstabs, sstack, label="Stack"//c_null_char)
 
   ! Registers.
+  mbox = hl_gtk_box_new()
+  idx = hl_gtk_notebook_add_page(mstabs, mbox, &
+       & label="Registers"//c_null_char) 
   fmemory = hl_gtk_listn_new(smemory, changed=c_funloc(memsel), &
-       & height=350, titles= (/ "Index"//c_null_char, "Value"//c_null_char /), &
+       & height=300, titles= (/ "Index"//c_null_char, "Value"//c_null_char /), &
        & types = (/ g_type_int, g_type_double /))
   call hl_gtk_listn_set_cell_data_func(fmemory, memcol, &
        & func=c_funloc(show_list), data=c_loc(memcol))
-  idx = hl_gtk_notebook_add_page(mstabs, smemory, label="Registers"//c_null_char)
+  call hl_gtk_box_pack(mbox, smemory)
+
+  mem_sbox = hl_gtk_box_new(horizontal = TRUE)
+  call hl_gtk_box_pack(mbox, mem_sbox, expand=FALSE)
+
+  mem_slabel=gtk_label_new("Number of registers:"//c_null_char)
+  call hl_gtk_box_pack(mem_sbox, mem_slabel)
+  mem_spin = hl_gtk_spin_button_new(0_c_int, huge(1_c_int), &
+       & initial_value=maxreg+1, value_changed=c_funloc(add_remove_registers), &
+       & tooltip="Change the number of registers"//c_null_char)
+  call hl_gtk_box_pack(mem_sbox, mem_spin)
 
   ! Set up display of registers.
 
@@ -506,8 +520,9 @@ program rpncalc
   end do
 
   ! Statistics
-  fstats = hl_gtk_listn_new(sstats, changed=c_funloc(statsel),&
-       & height=350, titles=(/ "Statistic"//c_null_char, "Value"//c_null_char//"    " /), &
+  fstats = hl_gtk_listn_new(sstats, & ! changed=c_funloc(statsel),&
+       & height=350, titles=(/ "Statistic"//c_null_char, &
+       & "Value"//c_null_char//"    " /), &
        & types = (/ g_type_string, g_type_double /))
   call hl_gtk_listn_set_cell_data_func(fstats, statcol, &
        & func=c_funloc(show_list), &
