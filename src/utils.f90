@@ -346,7 +346,6 @@ contains
           s4 = s4+val**4
        end if
 
-       call hl_gtk_listn_set_cell(fstats, 0, 1, dvalue=real(nrows,c_double))
        if (nrows >= 1) then
           avg = s1/real(nrows, c_double)
           if (nrows >=2) then
@@ -373,6 +372,7 @@ contains
           avg = 0._c_double
        end if
     end if
+    call hl_gtk_listn_set_cell(fstats, 0, 1, dvalue=real(nrows,c_double))
     call hl_gtk_listn_set_cell(fstats, 1, 1, dvalue=avg)
     call hl_gtk_listn_set_cell(fstats, 2, 1, dvalue=var)
     call hl_gtk_listn_set_cell(fstats, 3, 1, dvalue=sdev)
@@ -395,7 +395,7 @@ contains
 
     character(len=40) :: rstring
     real(kind=c_double) :: val
-        type(gvalue), target :: cvalue, svalue
+    type(gvalue), target :: cvalue, svalue
     type(c_ptr) :: val_ptr
     integer(kind=c_int), pointer :: colno
 

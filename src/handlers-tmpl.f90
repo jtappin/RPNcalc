@@ -1403,26 +1403,31 @@ contains
 
   end subroutine set_stats
 
-!! This was more annoying than useful
-!!$  subroutine statsel(widget, gdata) bind(c)
-!!$    ! Copy stats to the stack.
-!!$    type(c_ptr), value :: widget, gdata
-!!$
-!!$    integer(kind=c_int) :: count
-!!$    integer(kind=c_int), dimension(:), allocatable :: sellist
-!!$    real(kind=c_double) :: x
-!!$
-!!$    count = hl_gtk_listn_get_selections(fstats, sellist)
-!!$    if (count > 0) then
-!!$       call hl_gtk_listn_get_cell(fstats, sellist(1), 1, dvalue=x)
-!!$       call push_stack(x)
-!!$       deallocate(sellist)
-!!$    end if
-!!$
-!!$    call gtk_widget_grab_focus(fentry)
-!!$    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
-!!$
-!!$  end subroutine statsel
+  subroutine statsel(widget, gdata) bind(c)
+    ! Copy stats to the stack.
+    type(c_ptr), value :: widget, gdata
+
+    integer(kind=c_int) :: count, i
+    integer(kind=c_int), dimension(:), allocatable :: sellist
+    real(kind=c_double) :: x
+
+    count = hl_gtk_listn_get_selections(fstats, sellist)
+    if (count > 0) then
+       do i = 1, count
+          call hl_gtk_listn_get_cell(fstats, sellist(i), 1, dvalue=x)
+          call push_stack(x)
+       end do
+       deallocate(sellist)
+    end if
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
+  end subroutine statsel
+
+  subroutine do_nowt(widget, gdata) bind(c)
+    type(c_ptr), value :: widget, gdata
+  end subroutine do_nowt
 
   subroutine set_dms_hms(widget, gdata) bind(c)
     ! Set format of degrees or hours minutes seconds display.

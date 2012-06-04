@@ -9,7 +9,7 @@
 PREFIX=/usr/local
 
 # Which GTK library to use (set this to 2 or 3)
-GTKVER=3
+GTKVER=2
 
 # Fortran compiler. For gfortran it must be at least a v4.6 snapshot.
 # If you have that and an earlier distribution version, then you can specify a 

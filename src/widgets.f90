@@ -89,12 +89,10 @@ module widgets
 
   ! Entry & result windows and stack display
   type(c_ptr) :: fentry, fstack, sstack, fresult, sbar, fstatus, &
-       & mbox, mem_spin, fmemory, smemory, fstats, sstats, fexpand, &
-       & mem_sbox, mem_slabel
+       & mbox, mem_spin, fmemory, smemory, fstats, sstats, fexpand
 
   ! Windows & containers (and title label)
-  type(c_ptr) :: win, base, keybox, mstabs, help_window, &
-       & jbase, junk
+  type(c_ptr) :: win, base, keybox, mstabs, help_window
 
   ! Memory keys
   type(c_ptr) :: kmsto, kmrcl, kmplus, kmminus, kmclr, kmcla

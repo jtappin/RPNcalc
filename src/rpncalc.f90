@@ -34,13 +34,16 @@ program rpncalc
   ! This source file contains the main program that creates the widgets.
 
   use iso_c_binding !, only: c_ptr, c_null_ptr, c_loc
+  use iso_fortran_env, only: error_unit
+
   use gtk, only: gtk_button_new, gtk_check_button_new,&
        & gtk_container_add, gtk_entry_new, gtk_expander_new,&
        & gtk_label_new, gtk_main, gtk_menu_item_new, gtk_menu_new,&
        & gtk_radio_button_new, gtk_statusbar_new, gtk_table_attach,&
        & gtk_table_new, gtk_widget_show, gtk_widget_show_all,&
        & gtk_window_new, gtk_init, gtk_expander_set_expanded,&
-       & GTK_PACK_DIRECTION_LTR, GDK_CONTROL_MASK, GDK_SHIFT_MASK
+       & GTK_PACK_DIRECTION_LTR, GDK_CONTROL_MASK, GDK_SHIFT_MASK, &
+       & TRUE, FALSE
   use gtk_hl
 
   use handlers
@@ -68,6 +71,7 @@ program rpncalc
   character(len=10) :: ws ! workspace for number button labels
   integer :: ix, iy
   integer(kind=c_int) :: idx
+  type(c_ptr) :: junk, jbase, jbase1
 
   ! Command line argument handling
   integer :: iarg, narg, status
@@ -83,49 +87,56 @@ program rpncalc
      if (iarg > narg) exit
      call get_command_argument(iarg, arg, status=status)
      if (status > 0) exit
-     if (status < 0) write(0,*) "RPNcalc: Warning argument truncated"
+     if (status < 0) write(error_unit,*) "RPNcalc: Warning argument truncated"
 
      select case(arg)
      case("-h", "--help")
         print *, "Usage:"
         print *, " rpncalc [-o|-open|-c|-closed] [{-r|--restore} <file>] \ "
-        print *, "       [{-m|--registers} <n>] [-h|--help]"
+        print *, "       [{-m|--registers} <n>] [-h|--help] \ "
+        print *, "       [-D|--degrees|-R|--radians|-G|--grads] "
         print *, " "
         print *, " -o, --open: Start with the stack displays open (default)"
         print *, " -c, --closed: Start with the stack displays closed"
         print *, " -r, --restore: Restore the specified file."
         print *, " -m, --registers: Set the number of registers to the specified value."
+        print *, " -D, --degrees: Do trig in degrees (default)."
+        print *, " -R, --radians: Do trig in radians."
+        print *, " -G, --grads: Do trig in grads."
         print *, " -h, --help: Print help text and exit."
         stop
+
      case("-o", "--open")         ! Start with the stack display open (default)
         isopen = TRUE
      case("-c", "--closed")       ! Start with the stack display closed
         isopen = FALSE
      case("-r", "--restore")      ! Restore a save file
         if (iarg == narg) then
-           write(0, *) "RPNcalc: ",trim(arg)," option needs an argument"
+           write(error_unit, *) "RPNcalc: ",trim(arg)," option needs an argument"
         else
            call get_command_argument(iarg+1, restfile)
            if (index(restfile,'-') == 1) then
-              write(0, *) "RPNcalc: ",trim(arg)," option needs an argument"
+              write(error_unit, *) "RPNcalc: ",trim(arg)," option needs an argument"
            else
               iarg = iarg+1
            end if
         end if
      case("-m", "--registers")    ! Number of memory registers to allocate
         if (iarg == narg) then
-           write(0, *) "RPNcalc: ",trim(arg)," option needs an argument"
+           write(error_unit, *) "RPNcalc: ",trim(arg), &
+                & " option needs an argument"
         else
            call get_command_argument(iarg+1, smaxreg)
            if (index(smaxreg,'-') == 1) then
-              write(0, *) "RPNcalc: ",trim(arg)," option needs an argument"
+              write(error_unit, *) "RPNcalc: ",trim(arg), &
+                   & " option needs an argument"
            else
               read(smaxreg, *, iostat=status, iomsg=msg) maxreg
               if (status /= 0) then
-                 write(0, *) "RPNcalc: error reading register count: "
-                 write(0, *) "         ", msg
-                 write(0, *) "RPNcalc: ", trim(arg), " invalid count: ", &
-                      & trim(smaxreg)
+                 write(error_unit, *) "RPNcalc: error reading register count: "
+                 write(error_unit, *) "         ", msg
+                 write(error_unit, *) "RPNcalc: ", trim(arg),&
+                      & " invalid count: ", trim(smaxreg)
                  maxreg = 9    ! Reset to default
               else
                  maxreg = maxreg-1  ! The highest number is the count-1
@@ -133,10 +144,16 @@ program rpncalc
               iarg = iarg+1
             end if
         end if
+     case("-R","--radians")
+        trigunit = 0
+     case("-D","--degrees")
+        trigunit = 1
+     case("-G","--grads")
+        trigunit = 2
      case("-f", "--focus")
         write(error_unit, *) "RPNcalc: Focus is now always maintained"
      case default                 ! Bad option
-        write(0, *) "RPNcalc: Unknown option:", trim(arg)
+        write(error_unit, *) "RPNcalc: Unknown option:", trim(arg)
      end select
      iarg = iarg+1
   end do
@@ -251,10 +268,12 @@ program rpncalc
 
   ! Enter and duplicate entry
 
-  kenter = hl_gtk_button_new("Enter"//c_null_char, clicked=c_funloc(enter_value), &
+  kenter = hl_gtk_button_new("Enter"//c_null_char, &
+       & clicked=c_funloc(enter_value), &
        & tooltip="Move entry to stack"//c_null_char)
   call hl_gtk_table_attach(keybox, kenter, 0, 6, xspan=3)
-  kdup = hl_gtk_button_new("Duplicate"//c_null_char, clicked=c_funloc(duppress), &
+  kdup = hl_gtk_button_new("Duplicate"//c_null_char, &
+       & clicked=c_funloc(duppress), &
        & tooltip="Copy entry to stack"//c_null_char)
   call hl_gtk_table_attach(keybox, kdup, 3, 6, xspan=2)
 
@@ -379,7 +398,8 @@ program rpncalc
 
   pull = hl_gtk_menu_submenu_new(menu, "More"//c_null_char, &
        & tooltip="Less-used functions"//c_null_char)
-  kabs = hl_gtk_menu_item_new(pull, "abs"//c_null_char, activate=c_funloc(funpress), &
+  kabs = hl_gtk_menu_item_new(pull, "abs"//c_null_char, &
+       & activate=c_funloc(funpress), &
        & data=c_loc(pabs), tooltip="Absolute value"//c_null_char)
   kaint = hl_gtk_menu_item_new(pull, "int"//c_null_char, &
        & activate=c_funloc(funpress), data=c_loc(pint), &
@@ -491,25 +511,28 @@ program rpncalc
   idx = hl_gtk_notebook_add_page(mstabs, sstack, label="Stack"//c_null_char)
 
   ! Registers.
-  mbox = hl_gtk_box_new()
-  idx = hl_gtk_notebook_add_page(mstabs, mbox, &
+  jbase = hl_gtk_box_new()
+  idx = hl_gtk_notebook_add_page(mstabs, jbase, &
        & label="Registers"//c_null_char) 
   fmemory = hl_gtk_listn_new(smemory, changed=c_funloc(memsel), &
        & height=300, titles= (/ "Index"//c_null_char, "Value"//c_null_char /), &
        & types = (/ g_type_int, g_type_double /))
   call hl_gtk_listn_set_cell_data_func(fmemory, memcol, &
        & func=c_funloc(show_list), data=c_loc(memcol))
-  call hl_gtk_box_pack(mbox, smemory)
+  call hl_gtk_box_pack(jbase, smemory)
 
-  mem_sbox = hl_gtk_box_new(horizontal = TRUE)
-  call hl_gtk_box_pack(mbox, mem_sbox, expand=FALSE)
+  jbase1 = hl_gtk_box_new(horizontal = TRUE)
+  call hl_gtk_box_pack(jbase,jbase1, expand=FALSE)
 
-  mem_slabel=gtk_label_new("Number of registers:"//c_null_char)
-  call hl_gtk_box_pack(mem_sbox, mem_slabel)
+  junk=gtk_label_new(c_null_char)
+  call hl_gtk_box_pack(jbase1,junk)
+  junk=gtk_label_new("Number of registers:"//c_null_char)
+  call hl_gtk_box_pack(jbase1,junk, expand=FALSE)
+
   mem_spin = hl_gtk_spin_button_new(0_c_int, huge(1_c_int), &
        & initial_value=maxreg+1, value_changed=c_funloc(add_remove_registers), &
        & tooltip="Change the number of registers"//c_null_char)
-  call hl_gtk_box_pack(mem_sbox, mem_spin)
+  call hl_gtk_box_pack(jbase1, mem_spin, expand=FALSE)
 
   ! Set up display of registers.
 
@@ -520,14 +543,18 @@ program rpncalc
   end do
 
   ! Statistics
-  fstats = hl_gtk_listn_new(sstats, & ! changed=c_funloc(statsel),&
-       & height=350, titles=(/ "Statistic"//c_null_char, &
+  jbase = hl_gtk_box_new()
+  idx = hl_gtk_notebook_add_page(mstabs, jbase, &
+       & label="Statistics"//c_null_char)
+  fstats = hl_gtk_listn_new(sstats, &
+       & height=300, titles=(/ "Statistic"//c_null_char, &
        & "Value"//c_null_char//"    " /), &
-       & types = (/ g_type_string, g_type_double /))
+       & types = (/ g_type_string, g_type_double /), &
+       & multiple=TRUE)
   call hl_gtk_listn_set_cell_data_func(fstats, statcol, &
        & func=c_funloc(show_list), &
        & data=c_loc(statcol))
-  idx = hl_gtk_notebook_add_page(mstabs, sstats, label="Statistics"//c_null_char)
+  call hl_gtk_box_pack(jbase, sstats)
 
   do i = 0, 9
      call hl_gtk_listn_ins(fstats)
@@ -543,6 +570,11 @@ program rpncalc
   call hl_gtk_listn_set_cell(fstats, 7, 0, svalue="∑ x**2"//c_null_char)
   call hl_gtk_listn_set_cell(fstats, 8, 0, svalue="∑ x**3"//c_null_char)
   call hl_gtk_listn_set_cell(fstats, 9, 0, svalue="∑ x**4"//c_null_char)
+
+  junk = hl_gtk_button_new("Copy to stack"//c_null_char, &
+       & clicked = c_funloc(statsel), &
+       & tooltip = "Copy the selected statistic(s) to the stack"//c_null_char)
+  call hl_gtk_box_pack(jbase, junk, expand=FALSE)
 
   ! Realize
   call gtk_widget_show_all(win)
