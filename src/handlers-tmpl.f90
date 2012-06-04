@@ -1425,10 +1425,6 @@ contains
 
   end subroutine statsel
 
-  subroutine do_nowt(widget, gdata) bind(c)
-    type(c_ptr), value :: widget, gdata
-  end subroutine do_nowt
-
   subroutine set_dms_hms(widget, gdata) bind(c)
     ! Set format of degrees or hours minutes seconds display.
     type(c_ptr), value :: widget, gdata

@@ -246,7 +246,7 @@ program rpncalc
      call hl_gtk_table_attach(keybox, knum(i), ix,iy)
   end do
 
-  kpoint = hl_gtk_button_new("."//C_NULL_CHAR, clicked=c_funloc(dppress))
+  kpoint = hl_gtk_button_new("•"//C_NULL_CHAR, clicked=c_funloc(dppress))
   call hl_gtk_table_attach(keybox, kpoint, 1,4)
 
   kchs = hl_gtk_button_new("+/-"//C_NULL_CHAR, clicked=c_funloc(chspress), &
