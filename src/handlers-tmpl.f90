@@ -227,6 +227,8 @@ contains
           mid = gtk_statusbar_push(fstatus, 0, &
                & "Entered text includes misplaced decimal -- ignored"// &
                & c_null_char)
+       case(err_ok)   ! Don't put an error message if the cause was
+          ! an operator
        case default   ! More than one of the above
           mid = gtk_statusbar_push(fstatus, 0, &
                & "Entered text includes errors -- ignored"// &
