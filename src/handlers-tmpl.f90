@@ -87,6 +87,12 @@ contains
     logical :: dflag, eflag, svalid
     integer(kind=c_int), target :: opcode
 
+    integer, parameter :: err_ok = 0
+    integer, parameter :: err_invalid = 1
+    integer, parameter :: err_exponent = 2
+    integer, parameter :: err_decimal = 4
+    integer :: error_code
+
     call convert_c_string(ctext, nchars, itext)
     call c_f_pointer(ppos, ipos)
     if (ipos == 0) itext=adjustl(itext)
@@ -100,6 +106,7 @@ contains
 
     j=1
     opcode=OP_NONE
+    error_code = err_ok
     do i = 1, nchars
        select case(itext(i:i))
        case('0':'9') ! A number, always OK
@@ -108,13 +115,22 @@ contains
 
        case('.') ! A decimal point (OK if there's not already one present
           ! and it's not after an exponent
-          if (decimal_present) cycle
+          if (decimal_present) then
+             error_code = ior(error_code, err_decimal)
+             cycle
+          end if
           if (exponent_present) then
              if (i > 1) then
-                if (scan(itext(:i-1), "EeDd") > 0) cycle
+                if (scan(itext(:i-1), "EeDd") > 0) then
+                   error_code = ior(error_code, err_decimal)
+                   cycle
+                end if
              end if
              if (ipos > 0) then
-                if (scan(itext(:ipos),"EeDd") > 0) cycle
+                if (scan(etext(:ipos),"EeDd") > 0) then
+                   error_code = ior(error_code, err_decimal)
+                   cycle
+                end if
              end if
           end if
           otext(j:j) = itext(i:i)
@@ -124,18 +140,29 @@ contains
        case("E","D","e","d") ! An exponent (OK if there isn't already one
           ! and it's not before a decimal, and there's at least 1 number
           ! before it)
-          if (exponent_present) cycle
+          if (exponent_present) then
+             error_code = ior(error_code, err_exponent)
+             cycle
+          end if
           if (decimal_present) then
              if (i < len_trim(itext)) then
-                if (index(itext(i+1:),'.') > 0) cycle
+                if (index(itext(i+1:),'.') > 0) then
+                   error_code = ior(error_code, err_exponent)
+                   cycle
+                end if
              end if
              if (ipos < nchars-1) then
-                if (index(etext(ipos+1:),'.') > 0) cycle
+                if (index(etext(ipos+1:),'.') > 0) then
+                   error_code = ior(error_code, err_exponent)
+                   cycle
+                end if
              end if
           end if
-          if (scan(etext(:j),"0123456789") == 0 .and.&
-               & scan(itext(:i),"0123456789") == 0) cycle
-
+          if (scan(etext(:ipos),"0123456789") == 0 .and. &
+               & scan(itext(:i),"0123456789") == 0) then
+             error_code = ior(error_code, err_exponent)
+             cycle
+          end if
           otext(j:j) = itext(i:i)
           j = j+1
           eflag = .true.
@@ -155,7 +182,8 @@ contains
           if (svalid) then
              otext(j:j) = itext(i:i)
              j = j+1
-          else if (i == nchars .and. ipos == nentry .and. nchars+nentry > 1) then
+          else if (i == nchars .and. ipos == nentry .and. &
+               & nchars+nentry > 1) then
              if (itext(i:i) == '+') then
                 opcode = OP_PLUS
              else
@@ -180,20 +208,38 @@ contains
           end if
  
        case default  ! Anything else is invalid
+          error_code = ior(error_code, err_invalid)
        end select
     end do
 
     if (j <= nchars) then ! We had to exclude some chars otherwise let the
        ! default handler do it.
-       mid = gtk_statusbar_push(fstatus, 0, &
-            & "Entered text includes invalid characters -- excluded"//c_null_char)
-       if (j > 1) then
+       select case (error_code)
+       case (err_invalid)
+          mid = gtk_statusbar_push(fstatus, 0, &
+               & "Entered text includes invalid characters -- excluded"// &
+               & c_null_char)
+       case (err_exponent)
+          mid = gtk_statusbar_push(fstatus, 0, &
+               & "Entered text includes misplaced exponent -- ignored"// &
+               & c_null_char)
+       case (err_decimal) 
+          mid = gtk_statusbar_push(fstatus, 0, &
+               & "Entered text includes misplaced decimal -- ignored"// &
+               & c_null_char)
+       case default   ! More than one of the above
+          mid = gtk_statusbar_push(fstatus, 0, &
+               & "Entered text includes errors -- ignored"// &
+               & c_null_char)
+       end select
+
+       if (j > 0) then
           if (ipos > 0) then
              wtext = etext(:ipos)//otext(:j-1)
           else
              wtext = otext(:j-1)
           endif
-          if (ipos < nchars-1) then
+          if (ipos < nentry-1) then
              wtext = trim(wtext)//trim(etext(ipos+1:))
           end if
           call gtk_entry_set_text(widget, trim(wtext)//c_null_char)
@@ -201,7 +247,8 @@ contains
        if (dflag) decimal_present = .true.
        if (eflag) exponent_present = .true.
        if (opcode /= OP_NONE) call oppress(C_NULL_PTR, c_loc(opcode))
-    
+       ipos = ipos+j-1
+
        call g_signal_stop_emission_by_name(widget, "insert-text")
     else
        if (dflag) decimal_present = .true.
@@ -342,7 +389,8 @@ contains
     integer(kind=c_int), target :: pos
 
     if (exponent_present) then
-       mid = gtk_statusbar_push(fstatus, 0, "Exponent already present"//c_null_char)
+       mid = gtk_statusbar_push(fstatus, 0, &
+            & "Exponent already present"//c_null_char)
     else
        nchars = int(gtk_entry_get_text_length(fentry), c_int)
        if (nchars == 0) then
