@@ -29,9 +29,10 @@ module handlers
        & gtk_window_set_transient_for, gtk_about_dialog_set_website, &
        & gtk_check_menu_item_get_active, gtk_widget_grab_focus, &
        & gtk_editable_set_position, gtk_combo_box_set_active, &
-       & gtk_menu_item_set_label
-
-  use g, only:  g_signal_stop_emission_by_name, g_utf8_validate
+       & gtk_menu_item_set_label, gtk_editable_cut_clipboard, &
+       & gtk_editable_paste_clipboard, gtk_editable_copy_clipboard, &
+       & gtk_editable_get_selection_bounds, gtk_editable_delete_selection
+  use g, only:  g_signal_stop_emission_by_name
 
   use iso_fortran_env, only: error_unit
 
@@ -87,10 +88,12 @@ contains
     logical :: dflag, eflag, svalid
     integer(kind=c_int), target :: opcode
 
-    integer, parameter :: err_ok = 0
-    integer, parameter :: err_invalid = 1
-    integer, parameter :: err_exponent = 2
-    integer, parameter :: err_decimal = 4
+    ! Error codes for invalid inputs.
+    integer, parameter :: err_ok = 0         ! No error
+    integer, parameter :: err_invalid = 1    ! Invalid character
+    integer, parameter :: err_exponent = 2   ! Exponent in invalid place
+    integer, parameter :: err_decimal = 4    ! Decimal in invalid place
+    integer, parameter :: err_operator = 8   ! Operator in invalid place
     integer :: error_code
 
     call convert_c_string(ctext, nchars, itext)
@@ -169,6 +172,8 @@ contains
 
        case("+","-") ! A sign (OK at the start or immediately after
           ! an exponent, or at the very end when it's an operator.
+          ! The end placement is only accepted if a single character
+          ! is entered (for safety in the case of an incomplete selection).
           svalid=.true.
           if (i > 1) then
              if (scan(itext(i-1:i-1), "EeDd") == 0) svalid=.false.
@@ -182,7 +187,7 @@ contains
           if (svalid) then
              otext(j:j) = itext(i:i)
              j = j+1
-          else if (i == nchars .and. ipos == nentry .and. &
+          else if (nchars == 1 .and. ipos == nentry .and. &
                & nchars+nentry > 1) then
              if (itext(i:i) == '+') then
                 opcode = OP_PLUS
@@ -190,10 +195,14 @@ contains
                 opcode = OP_MINUS
              endif
              exit
+          else
+             error_code = ior(error_code, err_operator)
+             cycle
           end if
 
        case("*","/","^") ! Operators other than + & -
-          if (i == nchars .and. ipos == nentry) then
+          ! Only accepted for a single character at the end of the field.
+          if (nchars == 1 .and. ipos == nentry) then
              select case(itext(i:i))
              case("*")
                 opcode = OP_TIMES
@@ -204,6 +213,7 @@ contains
              end select
              exit
           else
+             error_code = ior(error_code, err_operator)
              cycle
           end if
  
@@ -227,8 +237,13 @@ contains
           mid = gtk_statusbar_push(fstatus, 0, &
                & "Entered text includes misplaced decimal -- ignored"// &
                & c_null_char)
+       case (err_operator)
+          mid = gtk_statusbar_push(fstatus, 0, &
+               & "Entered text includes misplaced operator -- ignored"// &
+               & c_null_char)
+ 
        case(err_ok)   ! Don't put an error message if the cause was
-          ! an operator
+          ! a valid operator
        case default   ! More than one of the above
           mid = gtk_statusbar_push(fstatus, 0, &
                & "Entered text includes errors -- ignored"// &
@@ -241,7 +256,7 @@ contains
           else
              wtext = otext(:j-1)
           endif
-          if (ipos < nentry-1) then
+          if (ipos < nentry) then
              wtext = trim(wtext)//trim(etext(ipos+1:))
           end if
           call gtk_entry_set_text(widget, trim(wtext)//c_null_char)
@@ -283,6 +298,42 @@ contains
     if (iloc > 0) decimal_present = .false.
 
   end subroutine char_deleted
+
+  subroutine menu_cut(widget, gdata) bind(c)
+    ! Cut the selection to the clipboard.
+    type(c_ptr), value :: widget, gdata
+
+    call gtk_editable_cut_clipboard(fentry)
+
+  end subroutine menu_cut
+  subroutine menu_delete(widget, gdata) bind(c)
+    ! Cut the selection to the clipboard.
+    type(c_ptr), value :: widget, gdata
+
+    call gtk_editable_delete_selection(fentry)
+
+  end subroutine menu_delete
+
+  subroutine menu_copy(widget, gdata) bind(c)
+    ! Copy the selection to the clipboard.
+    type(c_ptr), value :: widget, gdata
+
+    if (c_f_logical(gtk_editable_get_selection_bounds(fentry, &
+         & c_null_ptr, c_null_ptr))) then
+       call gtk_editable_copy_clipboard(fentry)
+    else if (c_f_logical(gtk_editable_get_selection_bounds(fresult, &
+         & c_null_ptr, c_null_ptr))) then
+       call gtk_editable_copy_clipboard(fresult)
+    end if
+  end subroutine menu_copy
+
+  subroutine menu_paste(widget, gdata) bind(c)
+    ! Paste from the clipboard.
+    type(c_ptr), value :: widget, gdata
+
+    call gtk_editable_paste_clipboard(fentry)
+
+  end subroutine menu_paste
 
   subroutine numpress(widget, gdata) bind(c)
     ! Keypad number entry -- gdata will be a pointer to the number

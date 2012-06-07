@@ -98,7 +98,8 @@
   subtraction operators will only work in this way if a sign would not
   be a valid part of a number where they are entered, notably
   \texttt{+} or \texttt{-} in an empty entry box is not treated as an
-  operator.
+  operator. Note also that operators at the end of a multi-character
+  paste are not accepted.
 
   The result is placed on the top of the stack, and displayed in the
   result window.
@@ -242,6 +243,14 @@
   If this is enabled, then use angular rather than time notation for the
   HMS display (the button will be relabelled \textbf{DMS}).
 
+\subsection{Cut \& Paste:}
+
+The \textbf{Edit} menu has options to cut or copy the selected text in
+the entry window (or the result window in the case of copy) to the
+clipboard. The current clipboard item my also be pasted into the entry
+box, or the selected text may be deleted. The usual keybindings for
+these operations are also available.
+
 \subsection{Help system:}
 
 This manual can be accessed in a number of ways:
@@ -263,6 +272,10 @@ The menu items have accerators to save mouse clicking:
 \item Save -- ctrl-s
 \item Restore -- ctrl-o
 \item Quit -- ctrl-q
+\item Cut -- ctrl-x
+\item Delete -- ctrl-shift-x
+\item Copy -- ctrl-c
+\item Paste -- ctrl-v
 \item Set Format -- ctrl-f
 \item Help -- ctrl-h
 \item About -- ctrl-a

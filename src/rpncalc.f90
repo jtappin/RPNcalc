@@ -182,6 +182,26 @@ program rpncalc
        & accel_group=accel)
 
   femenu = hl_gtk_menu_submenu_new(fmenu, "Edit"//c_null_char)
+  kcut = hl_gtk_menu_item_new(femenu, "Cut"//c_null_char, &
+       & activate=c_funloc(menu_cut), accel_key="x"//c_null_char, &
+       & accel_group=accel, &
+       & tooltip="Cut selection in entry box to the clipboard."//c_null_char)
+  kcopy = hl_gtk_menu_item_new(femenu, "Copy"//c_null_char, &
+       & activate=c_funloc(menu_copy), accel_key="c"//c_null_char, &
+       & accel_group=accel, &
+       & tooltip="Copy selection in entry or result to the clipboard."&
+       &//c_null_char)
+  kpaste = hl_gtk_menu_item_new(femenu, "Paste"//c_null_char, &
+       & activate=c_funloc(menu_paste), accel_key="v"//c_null_char, &
+       & accel_group=accel, &
+       & tooltip="Paste from the clipboard to the entry box."//c_null_char)
+  ktdel = hl_gtk_menu_item_new(femenu, "Delete"//c_null_char,&
+       & activate=c_funloc(menu_delete), accel_key='x'//c_null_char, &
+       & accel_group=accel, accel_mods=ior(GDK_CONTROL_MASK, GDK_SHIFT_MASK), &
+       & tooltip="Delete the selection from the entry box."//c_null_char)
+
+  junk = hl_gtk_menu_item_new(femenu)
+
   kfedit = hl_gtk_menu_item_new(femenu, "Result Format"//c_null_char, &
        & activate=c_funloc(set_format_make), accel_key="f"//c_null_char, &
        & accel_group=accel)
