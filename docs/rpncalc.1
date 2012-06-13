@@ -1,0 +1,418 @@
+'\" t
+.\" Manual page created with latex2man on Fri Jun  8 21:53:16 MDT 2012
+.\" NOTE: This file is generated, DO NOT EDIT.
+.de Vb
+.ft CW
+.nf
+..
+.de Ve
+.ft R
+
+.fi
+..
+.TH "RPNCALC" "1" "08 June 2012" "RPN Scientific Calculator " "RPN Scientific Calculator "
+.SH NAME
+
+.PP
+rpncalc
+\fBhttps://github.com/jtappin/RPNcalc\fP
+is a fully 
+functional scientific calculator emulator, written entirely in 
+Fortran. It is both a usable tool and a demonstration of the 
+gtk\-fortran libraries \fBhttps://github.com/jerryd/gtk\-fortran\fP\&.
+.PP
+.SH SYNOPSIS
+
+.PP
+rpncalc
+[\fBoptions\fP]
+\&...
+.PP
+.SH DESCRIPTION
+
+.PP
+A scientific decktop calculator using Reverse Polish notation. 
+.PP
+.SH OPTIONS
+
+.PP
+.TP
+\fB\-c\fP, \fB\- \-closed\fP
+ start the 
+calculator with the stack and memory display hidden. 
+.TP
+\fB\-o\fP, \fB\- \-open\fP
+ start the calculator 
+with the stack and memory display visible (this is the default). 
+.TP
+\fB\-r\fP, 
+\fB\- \-restore\fP\fI file\fP
+ Load the stack and memory contents from the given file. 
+.TP
+\fB\-m\fP, 
+\fB\- \-registers \fP\fI number\fP
+ Set the number of memory registers to create. The default is 10. 
+.TP
+\fB\-R\fP, \fB\- \-radians\fP
+ Set the trigonometry unit to 
+radians. 
+.TP
+\fB\-D\fP, \fB\- \-degrees\fP
+ Set the trigonometry unit to 
+degrees. 
+.TP
+\fB\-G\fP, \fB\- \-grads\fP
+ Set the trigonometry unit to grads 
+(1/100 of a right angle). 
+.TP
+\fB\-h\fP, \fB\- \-help\fP
+ Print a help text 
+and exit. 
+.PP
+.SH USER\&'S GUIDE
+
+.PP
+.SS INTRODUCTION
+.PP
+The gtk\-fortran RPN calculator is a fully functional scientific 
+calculator emulator. It is not based on any particular model of 
+calculator, but rather assembles those features that I find useful in 
+a calculator. It uses the stack\-based reverse Polish logic system for 
+2 reasons: 
+.TP
+1.
+That\&'s what I like to use, and most calculator emulators are 
+algebraic notation. 
+.TP
+2.
+I\&'m lazy and it\&'s a lot easier to implement a reverse Polish 
+system. 
+.PP
+It is intended to be both a useful tool, and a demonstration of what 
+can be done using gtk\-fortran (and in particular the fortran\-only 
+high\-level routines). The calculator is entirely written in 
+Fortran 2003 (with a few 2008 features such as the 
+execute_command_line
+subroutine. 
+.PP
+.SS ENTERING VALUES:
+.PP
+All values with RPNcalc are stored as double\-precision reals (Gtk+ 
+has no support for long doubles). 
+.PP
+Values can be entered either using the keypad, or by typing into the 
+entry box. Values entered from the keypad make sanity checks for 2 
+decimal points or a decimal entered after the exponent has been 
+started and the change\-sign key works in a reasonably intelligent 
+way. When values are typed or pasted into the entry box, characters 
+that cannot be part of a number are rejected with a warning. 
+.PP
+A value may be transferred from the entry to the stack by pressing 
+the keyboard Enter
+key while focus is on the entry window, 
+or by clicking the \fBEnter\fP
+key on the keypad. The \fBDup\fP
+key copies the entry box to the stack without clearing the entry 
+box. If the contents of the entry box are not a valid number (i.e. a 
+Fortran READ
+statement cannot convert it to a floating point 
+value) a message is displayed in the status bar and you may edit the 
+entry box to correct the problem. 
+.PP
+.SS OPERATORS:
+.PP
+The operators (\fB+\fP,
+\fB\-\fP,
+\fB*\fP,
+\fB/\fP
+and 
+\fBy**x\fP
+and also the \fBatan2\fP
+function) operate on the entry 
+box and the top element on the stack if there is anything in the 
+entry box. If the entry box is empty, then they operate on the top 2 
+elements of the stack. 
+.PP
+Operators may also be accessed by typing the operator into the entry 
+window (N.B. The exponentiation operator is ^
+rather than 
+**
+for convenience of implementation). The addition and 
+subtraction operators will only work in this way if a sign would not 
+be a valid part of a number where they are entered, notably 
++
+or \-
+in an empty entry box is not treated as an 
+operator. Note also that operators at the end of a multi\-character 
+paste are not accepted. 
+.PP
+The result is placed on the top of the stack, and displayed in the 
+result window. 
+.PP
+.SS FUNCTIONS:
+.PP
+The functions operate on a single value, which is taken from the 
+entry box if that has content or from the top of the stack 
+otherwise. The result is placed on the top of the stack, and 
+displayed in the result window. 
+.PP
+If the \fBInverse\fP
+checkbox is set, then functions are replaced 
+by their inverses (e.g. \fBsin\fP
+becomes \fBasin\fP),
+in 
+addition, the \fBy**x\fP
+operator becomes the 
+corresponding root and the 
+\fIroll down\fP
+button becomes \fIroll up\fP\&.
+Note that: 
+.TP
+1.
+The less\-used functions in the pulldown are not affected by 
+this, as none have meaningful inverses. 
+.TP
+2.
+The power operator \fB^\fP entered from the keyboard is not
+converted to a root. 
+.PP
+The \fBRad\fP,
+\fBDeg\fP
+and \fBGrad\fP
+radio buttons are 
+used to select Radians, Degrees or Grads for the trigonometric 
+functions. 
+.PP
+The \fBHMS\fP
+key is not a proper function, it doesn\&'t remove or 
+add anything to the stack. It displays the contents of the entry box 
+or the top of the stack as if it were a number of hours converted to 
+\fIHH\fP\fB:\fP\fIMM\fP\fB:\fP\fISS.sss\fP
+format (or 
+\fID\fP\fBd\fP \fIHH\fP\fBh\fP \fIMM\fP\fBm\fP \fISS.sss\fP\fBs\fP
+if the value is greater than 24). 
+.PP
+Some less\-used functions are in the \fBMore\fP
+pulldown. The 
+\fBatan2\fP
+function computes arctan(y/x)
+removing the 
+quadrant ambiguities. 
+.PP
+Functions whose arguments are out of range will produce an error 
+message and the stack is left unchanged. 
+.PP
+.SS STACK OPERATIONS
+.PP
+.TP
+.B *
+\fBCE\fP clears the entry box, or if that is empty deletes
+the top entry on the stack. 
+.PP
+.TP
+.B *
+\fBCA\fP clears the entry box and all entries on the stack.
+.PP
+.TP
+.B *
+The \fIup\fP button moves the selected item in the stack up
+one place. If the top item (or nothing) is selected then it is 
+exchanged with the entry box. 
+.PP
+.TP
+.B *
+The \fIdown\fP button moves the selected entry on the stack
+down one place. 
+.PP
+.TP
+.B *
+The \fIroll down\fP button, moves the last element of the
+stack to the top and all others down one place. 
+.PP
+.SS CONSTANTS:
+.PP
+There are a number of built in fundamental physics constants that are 
+build in to the calculator, these can be entered from the 
+\fBPhys\fP
+pull\-down menu. 
+.PP
+.SS MEMORY REGISTERS:
+.PP
+The calculator also has memory registers (numbered from 0). The 
+contents of these registers can be viewed by selecting the 
+``registers\&'' tab. The default number of registers is 10, but this 
+may be set with the \fB\-m\fP
+option, or by setting a new number in 
+the spin box at the bottom of the registers tab. 
+.PP
+These can be accessed in one of two ways: 
+.TP
+1.
+Select a register in the registers tab, and then click a memory 
+operation. In this case the value used will be the entry box or the 
+top of the stack if the entry is empty. 
+.TP
+2.
+Enter a register number in the entry box and click the memory 
+operation. The value used is the top of the stack. 
+.PP
+The operations are: 
+.TP
+.B *
+\fBSTO:\fP Store the value in the selected register.
+.TP
+.B *
+\fBRCL:\fP Copy the selected register to the top of the
+stack 
+.TP
+.B *
+\fBM+:\fP Add the value to the selected register
+.TP
+.B *
+\fBM\-:\fP Subtract the value from the selected register
+.TP
+.B *
+\fBMCL:\fP Clear the selected register.
+.TP
+.B *
+\fBMCA:\fP Clear all registers
+.PP
+.SS STATISTICS:
+.PP
+If the \fBLive stats\fP
+toggle is enabled, then a summary of the 
+statistical properties of the contents of the stack is maintained in 
+the "Statistics" tab of the display area. 
+.PP
+.SS SAVE & RESTORE:
+.PP
+The stack, registers and entry box can be saved to and restored from 
+a text file with the \fBFile\->Save\fP
+and 
+\fBFile\->Restore\fP
+menu items. 
+.PP
+The file format is a plain text file with the floating point values 
+written in hexadecimal \-\- this allows the retention of full\-precision 
+but is endian\-independent. Obviously any machines that do not use 
+IEEE floating point values will not be able to read files from other 
+machines. Also any machine with a c_double
+that is not 
+8\-bytes will not work. 
+.PP
+.SS SETTINGS:
+.PP
+In the current version, there are 2 user\-definable settings accessed 
+through the \fBEdit\fP
+menu: 
+.PP
+.SS Result Format:
+Specify the format to use in the result box. You have the options to 
+select one of the standard formats: 
+.TP
+Fixed: 
+A fixed number of decimal places (set in the precision 
+spin box). The actual format used is "(F0.\fIn\fP)".
+WARNING: this 
+may be a GNU extension. 
+.TP
+Sci: 
+Scientific format. Specify the number of decimals, and 
+the width of the exponent in the spin boxes. The total width is 
+calculated automatically. 
+.TP
+Eng: 
+Engineering format, similar to scientific, except that 
+the exponent is always a multiple of 3. 
+.TP
+Free: 
+Use a list\-directed write (the default). 
+.PP
+Alternatively you can type an explicit Fortran format statement into 
+the combo box (with or without the enclosing parentheses). This may 
+be any Fortran formatting code valid for a REAL type. Setting it to 
+"*" or an empty string will use the default list\-directed output (as 
+will an invalid format). 
+.PP
+.SS Show degrees:
+If this is enabled, then use angular rather than time notation for the 
+HMS display (the button will be relabelled \fBDMS\fP).
+.PP
+.SS CUT & PASTE:
+.PP
+The \fBEdit\fP
+menu has options to cut or copy the selected text in 
+the entry window (or the result window in the case of copy) to the 
+clipboard. The current clipboard item my also be pasted into the entry 
+box, or the selected text may be deleted. The usual keybindings for 
+these operations are also available. 
+.PP
+.SS HELP SYSTEM:
+.PP
+This manual can be accessed in a number of ways: 
+.TP
+1.
+A manpage is generated and can be accessed using 
+man rpncalc\&.
+.TP
+2.
+The ``Help\&'' item in the menu will display either the text 
+version or (if the environment variable RPNCALC_VIEWER
+is 
+set to a PDF viewer) the PDF version. 
+.TP
+3.
+The text and PDF versions are installed in the 
+share/docs/rpncalc
+subdirectory of the installation directory. 
+.PP
+.SS ACCELERATORS:
+.PP
+The menu items have accerators to save mouse clicking: 
+.PP
+.TP
+.B *
+Save \-\- ctrl\-s 
+.TP
+.B *
+Restore \-\- ctrl\-o 
+.TP
+.B *
+Quit \-\- ctrl\-q 
+.TP
+.B *
+Cut \-\- ctrl\-x 
+.TP
+.B *
+Delete \-\- ctrl\-shift\-x 
+.TP
+.B *
+Copy \-\- ctrl\-c 
+.TP
+.B *
+Paste \-\- ctrl\-v 
+.TP
+.B *
+Set Format \-\- ctrl\-f 
+.TP
+.B *
+Help \-\- ctrl\-h 
+.TP
+.B *
+About \-\- ctrl\-a 
+.TP
+.B *
+About gtk\-fortran \-\- ctrl\-shift\-a 
+.PP
+.SH AUTHORS
+
+.PP
+James Tappin (jtappin at gmail dot com). 
+.PP
+.SH LICENCE
+
+.PP
+RPNcalc is free software and may be modified and redistributed under 
+the terms of the GNU General Public Licence Version 3. 
+.PP
+.\" NOTE: This file is generated, DO NOT EDIT.
