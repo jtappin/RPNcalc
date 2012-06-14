@@ -55,17 +55,20 @@ program rpncalc
   integer :: i
   character, dimension(10), target :: pnum
   integer(kind=c_int), target :: pplus= OP_PLUS, pminus=OP_MINUS, &
-       & ptimes=OP_TIMES, pdiv=OP_DIVIDE, ppow=OP_POWER, patan2=FUN_ATAN2
+       & ptimes=OP_TIMES, pdiv=OP_DIVIDE, ppow=OP_POWER, patan2=FUN_ATAN2, &
+       & pmod = FUN_MOD
 
   integer(kind=c_int), target :: psin=FUN_SIN, pcos=FUN_COS, ptan=FUN_TAN,&
        & pln=FUN_LN, psqrt=FUN_SQRT, psinh=FUN_SINH, pcosh=FUN_COSH, &
        & ptanh=FUN_TANH, pl10=FUN_LOG10, pinv=FUN_INV, pabs=FUN_ABS, &
-       & pint=FUN_INT, pfrac=FUN_FRAC, pfact=FUN_FACTORIAL
+       & pint=FUN_INT, pfrac=FUN_FRAC, pfact=FUN_FACTORIAL, pnint=FUN_ROUND
 
   integer(kind=c_int), target :: pmsto=MEM_STO, pmrcl=MEM_RCL, &
        & pmplus=MEM_PLUS, pmminus=MEM_MINUS, pmclr=MEM_CLR, pmcla=MEM_CLA
 
   integer(kind=c_int), target :: stackcol=0, memcol=1, statcol=1
+
+  integer(kind=c_int), target :: binary = 2, octal = 8, hexadecimal = 16
 
   ! Workspace variables
   character(len=10) :: ws ! workspace for number button labels
@@ -424,6 +427,9 @@ program rpncalc
   kaint = hl_gtk_menu_item_new(pull, "int"//c_null_char, &
        & activate=c_funloc(funpress), data=c_loc(pint), &
        & tooltip="Integer part"//c_null_char)
+  kanint = hl_gtk_menu_item_new(pull, "round"//c_null_char, &
+       & activate=c_funloc(funpress), data=c_loc(pnint), &
+       & tooltip="Round to nearest integer"//c_null_char)
   kfrac = hl_gtk_menu_item_new(pull, "frac"//c_null_char, &
        & activate=c_funloc(funpress), data=c_loc(pfrac), &
        & tooltip="Fractional part"//c_null_char)
@@ -431,10 +437,24 @@ program rpncalc
        & activate=c_funloc(oppress), data=c_loc(patan2), &
        & tooltip="Arctan y/x with disambiguation"//c_null_char)
   kfact = hl_gtk_menu_item_new(pull, "factorial"//c_null_char, &
-       & activate=c_funloc(funpress), data=c_loc(pfact))
+       & activate=c_funloc(funpress), data=c_loc(pfact), &
+       & tooltip="X factorial"//c_null_char)
+  kmod = hl_gtk_menu_item_new(pull, "mod"//c_null_char, &
+       & activate=c_funloc(oppress), data=c_loc(pmod),&
+       & tooltip = "Remainder of y/x"//c_null_char)
+  junk = hl_gtk_menu_item_new(pull)
   khms= hl_gtk_menu_item_new(pull, "HMS"//c_null_char, &
        & activate=c_funloc(hmspress), &
        & tooltip="Display entry or top of stack in H:M:S format"//c_null_char)
+  khex = hl_gtk_menu_item_new(pull, "Hexadecimal"//c_null_char, &
+       & activate=c_funloc(base_display), data=c_loc(hexadecimal), &
+       & tooltip="Show entry or top of stack in hexadecimal"//c_null_char)
+  koct = hl_gtk_menu_item_new(pull, "Octal"//c_null_char, &
+       & activate=c_funloc(base_display), data=c_loc(octal), &
+       & tooltip="Show entry or top of stack in octal"//c_null_char)
+  kbin = hl_gtk_menu_item_new(pull, "Binary"//c_null_char, &
+       & activate=c_funloc(base_display), data=c_loc(binary), &
+       & tooltip="Show entry or top of stack in binary"//c_null_char)
 
   ! A Pulldown for fundamental physics constants
 

@@ -581,7 +581,7 @@ contains
 
     call c_f_pointer(gdata, opcode)
     select case(opcode)
-    case(OP_PLUS)
+    case (OP_PLUS)
        z = y+x
     case (OP_MINUS)
        z = y-x
@@ -612,7 +612,7 @@ contains
           isinv = .FALSE.
           call set_labels
        end if
-    case(FUN_ATAN2)
+    case (FUN_ATAN2)
        z = atan2(y, x)
        select case(trigunit)
        case(1)
@@ -621,7 +621,10 @@ contains
           z = z * 200._c_double/pi
        case(0)
        end select
+    case (FUN_MOD)
+       z = modulo(y, x)
     end select
+
     call push_stack(z)
     call set_result(z)
     mid = gtk_statusbar_push(fstatus, 0, c_null_char)
@@ -956,6 +959,8 @@ contains
        z = abs(x)
     case(FUN_INT)
        z = aint(x)
+    case(FUN_ROUND)
+       z = anint(x)
     case(FUN_FRAC)
        z = x - aint(x)
     case(FUN_FACTORIAL)
@@ -966,7 +971,8 @@ contains
           end do
        else
           mid = gtk_statusbar_push(fstatus, 0, &
-               & "Factorial argument out of range or not an integer"//c_null_char)
+               & "Factorial argument out of range or not an integer"&
+               & //c_null_char)
           call push_stack(x, show_result=.false.)
           return
        end if
@@ -1003,6 +1009,73 @@ contains
     call show_hms(val, fresult)
     mid = gtk_statusbar_push(fstatus, 0, c_null_char)
   end subroutine hmspress
+
+  subroutine base_display(widget, gdata) bind(c)
+    ! Display a value in hex, octal or binary
+    type(c_ptr), value :: widget, gdata
+
+    real(kind=c_double) :: val
+    integer(kind=c_long) :: ival
+    integer(kind=c_int) :: nchars, mid
+    logical :: status
+    integer(kind=c_int), pointer :: base
+    character(len=65,kind=c_char) :: result
+    character(len=12) :: fmt
+
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+
+    nchars=int(gtk_entry_get_text_length(fentry), c_int)
+    if (nchars > 0) then
+       call read_entry(val, status, push=.false.)
+       if (.not. status) return
+    else
+       call pop_stack(val, status, readonly=.TRUE.)
+       if (.not. status) return
+    end if
+
+    if (val /= aint(val)) then
+       mid = gtk_statusbar_push(fstatus, 0, &
+            & "Value is not an integer."//c_null_char)
+       return
+    end if
+    if (abs(val) > real(huge(1_c_long),c_double)) then
+       mid = gtk_statusbar_push(fstatus, 0, &
+            & "Value is too large."//c_null_char)
+       return
+    end if
+    ival = int(val,kind=c_double)
+
+    call c_f_pointer(gdata, base)
+    select case (base)
+    case(2)
+       if (leading_zeroes) then
+          fmt = "(B64.64,'b')"
+       else 
+          fmt = "(B0,'b')"
+       end if
+    case(8)
+       if (leading_zeroes) then
+          fmt = "(O22.22,'o')"
+       else 
+          fmt = "(O0,'o')"
+       end if
+    case(16)
+       if (leading_zeroes) then
+          fmt = "(Z16.16,'x')"
+       else 
+          fmt = "(Z0,'x')"
+       end if
+    case default
+       mid = gtk_statusbar_push(fstatus, 0, &
+            & "Invalid base specified."//c_null_char)
+       return
+    end select
+    write(result, fmt) ival
+
+    call gtk_entry_set_text(fresult, trim(result)//c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+  end subroutine base_display
 
   subroutine invtoggle(widget, gdata) bind(c)
     ! Toggle inverse functions
@@ -1374,7 +1447,8 @@ contains
          & initial_choices=(/"Fixed   (F)", "Sci    (ES)", "Eng    (EN)", &
          & "General (G)", "Free    (*)"/), &
          & active = fmt_type, &
-         & tooltip="Choose a format type or give a Fortran format code"//c_null_char)
+         & tooltip="Choose a format type or give a Fortran format code" &
+         & //c_null_char)
     call hl_gtk_box_pack(jbb, fmt_choose)
 
     jbb = hl_gtk_box_new(horizontal=TRUE)
@@ -1387,7 +1461,8 @@ contains
        issens=FALSE
     end if
     fmt_precision = hl_gtk_spin_button_new(1, 30, initial_value=fmt_decimal, &
-         & sensitive=issens, tooltip="Set the number of decimal places"//c_null_char)
+         & sensitive=issens, tooltip="Set the number of decimal places"&
+         & //c_null_char)
     call hl_gtk_box_pack(jbb, fmt_precision)
     junk = gtk_label_new("Exponent:"//c_null_char)
     call hl_gtk_box_pack(jbb, junk, expand=FALSE)
@@ -1397,12 +1472,23 @@ contains
        issens=FALSE
     end if
     fmt_expsize = hl_gtk_spin_button_new(1, 3, initial_value=fmt_expplaces,&
-         & sensitive=issens, tooltip="Set the width of the exponent"//c_null_char)
+         & sensitive=issens, tooltip="Set the width of the exponent"&
+         & //c_null_char)
     call hl_gtk_box_pack(jbb, fmt_expsize)
 
     jbb = hl_gtk_box_new(horizontal=TRUE)
     call hl_gtk_box_pack(jb, jbb)
-    junk = hl_gtk_button_new("Apply"//c_null_char, clicked=c_funloc(set_format_cb))
+    junk = hl_gtk_check_button_new("Show leading zeroes in base-n displays?" &
+         & //c_null_char, toggled=c_funloc(set_format_zeroes), &
+         & initial_state = f_c_logical(leading_zeroes), &
+         & tooltip = "Control display of leading zeroes in base-n displays"&
+         & //c_null_char)
+    call hl_gtk_box_pack(jbb, junk)
+
+    jbb = hl_gtk_box_new(horizontal=TRUE)
+    call hl_gtk_box_pack(jb, jbb)
+    junk = hl_gtk_button_new("Apply"//c_null_char, &
+         & clicked=c_funloc(set_format_cb))
     call hl_gtk_box_pack(jbb, junk)
     junk = hl_gtk_button_new("Cancel"//c_null_char, &
          & clicked=c_funloc(set_format_destroy))
@@ -1413,6 +1499,9 @@ contains
   subroutine set_format_type_cb(widget, gdata) bind(c)
     ! Set the display format type
     type(c_ptr), value :: widget, gdata
+
+    ! Return if this is called during the setup
+    if (.not. c_associated(fmt_precision)) return
 
     fmt_type = hl_gtk_combo_box_get_active(widget)
 
@@ -1492,6 +1581,14 @@ contains
 
   end subroutine set_format_destroy
 
+  subroutine set_format_zeroes(widget, gdata) bind(c)
+    ! Set / Unset leading zeroes.
+
+    type(c_ptr), value :: widget, gdata
+ 
+    leading_zeroes = c_f_logical(gtk_toggle_button_get_active(widget))
+
+  end subroutine set_format_zeroes
   subroutine set_stats(widget, gdata) bind(c)
     ! Compute stats of the stack.
     type(c_ptr), value :: widget, gdata

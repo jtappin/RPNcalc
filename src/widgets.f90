@@ -33,6 +33,7 @@ module widgets
      enumerator :: OP_DIVIDE
      enumerator :: OP_POWER
      enumerator :: FUN_ATAN2      ! Behaves like an operator (2 args)
+     enumerator :: FUN_MOD	  ! Ditto
   end enum
 
   enum, bind(c)  ! Function identifiers
@@ -48,6 +49,7 @@ module widgets
      enumerator :: FUN_INV
      enumerator :: FUN_ABS
      enumerator :: FUN_INT
+     enumerator :: FUN_ROUND
      enumerator :: FUN_FRAC
      enumerator :: FUN_FACTORIAL
   end enum
@@ -77,7 +79,8 @@ module widgets
   type(c_ptr) :: krad, kdeg, kgrad, rdgrp
 
   ! The pulldown menu for "obscure" functions
-  type(c_ptr) :: menu, pull, kabs, kaint, kfrac, katan2, kfact
+  type(c_ptr) :: menu, pull, kabs, kaint, kfrac, katan2, kfact, kmod, &
+       & khex, koct, kbin, kanint
 
   ! The physics constants pulldown
   type(c_ptr) :: phys, fconst, k_c, k_e, k_h, k_hb, k_k, k_g, k_e0, k_m0, &
@@ -112,6 +115,7 @@ module widgets
   type(c_ptr) :: fmt_window, fmt_choose, fmt_precision, fmt_expsize
   integer(kind=c_int) :: fmt_type=4, fmt_decimal=5, fmt_expplaces=2
   character(len=20) :: result_format=""
+  logical :: leading_zeroes = .FALSE.
 
   ! Statistics
   real(kind=c_double) :: s1=0._c_double, s2=0._c_double, &
