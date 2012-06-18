@@ -127,12 +127,16 @@
   used to select Radians, Degrees or Grads for the trigonometric
   functions.
 
-  The \textbf{HMS} key is not a proper function, it doesn't remove or
-  add anything to the stack. It displays the contents of the entry box
-  or the top of the stack as if it were a number of hours converted to
+  The \textbf{HMS} and the various base-\emph{n} keys are not proper
+  functions, they don't remove or add anything to the stack.
+  \textbf{HMS}displays the contents of the entry box or the top of the
+  stack as if it were a number of hours converted to
   \emph{HH}\textbf{:}\emph{MM}\textbf{:}\emph{SS.sss} format (or
   \emph{D}\textbf{d}~\emph{HH}\textbf{h}~\emph{MM}\textbf{m}~\emph{SS.sss}\textbf{s}
-  if the value is greater than 24).
+  if the value is greater than 24). The \textbf{Hexadecimal},
+  \texttt{Octal} and \textbf{Binary} keys will display the integer
+  representation of entry value or the top of the stack in the
+  respective notations provided that the value is an integer.
 
   Some less-used functions are in the \textbf{More} pulldown. The
   \textbf{atan2} function computes \texttt{arctan(y/x)} removing the
@@ -238,6 +242,9 @@
   be any Fortran formatting code valid for a REAL type. Setting it to
   "*" or an empty string will use the default list-directed output (as
   will an invalid format).
+
+This menu also includes an option to show or suppress the leading
+zeroes in base-\emph{n} displays.
 
   \subsubsection{Show degrees:}
   If this is enabled, then use angular rather than time notation for the

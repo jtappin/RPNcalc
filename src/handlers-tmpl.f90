@@ -44,9 +44,7 @@ module handlers
   implicit none
 
   ! Constants (these are used both in main and some handlers)
-  character, parameter :: linefeed=char(10)
   real(kind=c_double), parameter :: pi = 3.1415926535897932384626433832795029_c_double
-  real(kind=c_double), parameter :: dtor = pi/180._c_double
 
 contains
 
@@ -89,11 +87,13 @@ contains
     integer(kind=c_int), target :: opcode
 
     ! Error codes for invalid inputs.
-    integer, parameter :: err_ok = 0         ! No error
-    integer, parameter :: err_invalid = 1    ! Invalid character
+    integer, parameter :: err_ok =       0   ! No error
+    integer, parameter :: err_invalid =  1   ! Invalid character
     integer, parameter :: err_exponent = 2   ! Exponent in invalid place
-    integer, parameter :: err_decimal = 4    ! Decimal in invalid place
+    integer, parameter :: err_decimal =  4   ! Decimal in invalid place
     integer, parameter :: err_operator = 8   ! Operator in invalid place
+    integer, parameter :: err_numeral = 16   ! Number in invalid place
+
     integer :: error_code
 
     call convert_c_string(ctext, nchars, itext)
@@ -112,7 +112,19 @@ contains
     error_code = err_ok
     do i = 1, nchars
        select case(itext(i:i))
-       case('0':'9') ! A number, always OK
+       case('0':'9') ! A number, OK except before a sign
+          if (ipos == 0 .and. nentry >= 1) then  ! at start of line
+             if (etext(1:1) == '+' .or. etext(1:1) == '-') then
+                error_code = ior(error_code, err_numeral)
+                cycle
+             end if
+          else if (exponent_present .and. ipos < nentry) then
+             if (scan(etext(ipos:ipos), "EeDd") /= 0 .and. &
+                  & scan(etext(ipos+1:ipos+1), "+-") /= 0) then
+                error_code = ior(error_code, err_numeral)
+                cycle
+             end if
+          end if
           otext(j:j) = itext(i:i)
           j = j+1
 
@@ -241,7 +253,10 @@ contains
           mid = gtk_statusbar_push(fstatus, 0, &
                & "Entered text includes misplaced operator -- ignored"// &
                & c_null_char)
- 
+       case (err_numeral)
+          mid = gtk_statusbar_push(fstatus, 0, &
+               & "A numeral may not immediately precede a sign -- ignored"// &
+               & c_null_char)
        case(err_ok)   ! Don't put an error message if the cause was
           ! a valid operator
        case default   ! More than one of the above
@@ -1476,6 +1491,8 @@ contains
          & //c_null_char)
     call hl_gtk_box_pack(jbb, fmt_expsize)
 
+    junk = hl_gtk_separator_new()
+    call hl_gtk_box_pack(jb, junk)
     jbb = hl_gtk_box_new(horizontal=TRUE)
     call hl_gtk_box_pack(jb, jbb)
     junk = hl_gtk_check_button_new("Show leading zeroes in base-n displays?" &

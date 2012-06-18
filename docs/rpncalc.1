@@ -1,5 +1,5 @@
 '\" t
-.\" Manual page created with latex2man on Fri Jun  8 21:53:16 MDT 2012
+.\" Manual page created with latex2man on Mon Jun 18 14:13:31 MDT 2012
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -10,7 +10,7 @@
 
 .fi
 ..
-.TH "RPNCALC" "1" "08 June 2012" "RPN Scientific Calculator " "RPN Scientific Calculator "
+.TH "RPNCALC" "1" "18 June 2012" "RPN Scientific Calculator " "RPN Scientific Calculator "
 .SH NAME
 
 .PP
@@ -184,13 +184,21 @@ used to select Radians, Degrees or Grads for the trigonometric
 functions. 
 .PP
 The \fBHMS\fP
-key is not a proper function, it doesn\&'t remove or 
-add anything to the stack. It displays the contents of the entry box 
-or the top of the stack as if it were a number of hours converted to 
+and the various base\-\fIn\fP
+keys are not proper 
+functions, they don\&'t remove or add anything to the stack. 
+\fBHMS\fPdisplays
+the contents of the entry box or the top of the 
+stack as if it were a number of hours converted to 
 \fIHH\fP\fB:\fP\fIMM\fP\fB:\fP\fISS.sss\fP
 format (or 
 \fID\fP\fBd\fP \fIHH\fP\fBh\fP \fIMM\fP\fBm\fP \fISS.sss\fP\fBs\fP
-if the value is greater than 24). 
+if the value is greater than 24). The \fBHexadecimal\fP,
+Octal
+and \fBBinary\fP
+keys will display the integer 
+representation of entry value or the top of the stack in the 
+respective notations provided that the value is an integer. 
 .PP
 Some less\-used functions are in the \fBMore\fP
 pulldown. The 
@@ -333,6 +341,10 @@ the combo box (with or without the enclosing parentheses). This may
 be any Fortran formatting code valid for a REAL type. Setting it to 
 "*" or an empty string will use the default list\-directed output (as 
 will an invalid format). 
+.PP
+This menu also includes an option to show or suppress the leading 
+zeroes in base\-\fIn\fP
+displays. 
 .PP
 .SS Show degrees:
 If this is enabled, then use angular rather than time notation for the 
