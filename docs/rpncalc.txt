@@ -243,4 +243,4 @@ LICENCE
        RPNcalc  is  free  software and may be modified and redistributed under the terms of the GNU General
        Public Licence Version 3.
 
-RPN Scientific Calculator                       18 June 2012                                     RPNCALC(1)
+RPN Scientific Calculator                       09 July 2012                                     RPNCALC(1)

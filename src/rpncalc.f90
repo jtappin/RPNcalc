@@ -43,7 +43,7 @@ program rpncalc
        & gtk_table_new, gtk_widget_show, gtk_widget_show_all,&
        & gtk_window_new, gtk_init, gtk_expander_set_expanded,&
        & GTK_PACK_DIRECTION_LTR, GDK_CONTROL_MASK, GDK_SHIFT_MASK, &
-       & TRUE, FALSE
+       & TRUE, FALSE, gtk_window_set_icon_name
   use gtk_hl
 
   use handlers
@@ -166,7 +166,7 @@ program rpncalc
 
   ! Create a window and put a vertical box into it
   win = hl_gtk_window_new("RPN Calculator", destroy=c_funloc(my_destroy), &
-       & resizable=FALSE, accel_group=accel)
+       & resizable=FALSE, accel_group=accel, icon_name="calc"//c_null_char)
   base = hl_gtk_box_new()
   call gtk_container_add(win, base)
 
