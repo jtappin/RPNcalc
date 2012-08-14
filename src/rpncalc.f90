@@ -39,8 +39,8 @@ program rpncalc
   use gtk, only: gtk_button_new, gtk_check_button_new,&
        & gtk_container_add, gtk_entry_new, gtk_expander_new,&
        & gtk_label_new, gtk_main, gtk_menu_item_new, gtk_menu_new,&
-       & gtk_radio_button_new, gtk_statusbar_new, gtk_table_attach,&
-       & gtk_table_new, gtk_widget_show, gtk_widget_show_all,&
+       & gtk_radio_button_new, gtk_statusbar_new,&
+       & gtk_widget_show, gtk_widget_show_all,&
        & gtk_window_new, gtk_init, gtk_expander_set_expanded,&
        & GTK_PACK_DIRECTION_LTR, GDK_CONTROL_MASK, GDK_SHIFT_MASK, &
        & TRUE, FALSE, gtk_window_set_icon_name
