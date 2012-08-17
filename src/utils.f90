@@ -21,9 +21,13 @@ module utils
   ! the stack and memories.
 
   use iso_c_binding
-  use gtk, only: gtk_editable_insert_text, gtk_statusbar_push, &
-       & gtk_button_set_label, gtk_widget_grab_focus, gtk_editable_set_position
-  use g, only:g_object_set_property
+  use g, only: g_object_set_property, g_value_get_double, g_value_init, &
+       & g_value_set_string
+
+  use gtk, only: gtk_button_set_label, gtk_editable_insert_text, &
+       & gtk_editable_set_position, gtk_entry_get_text, &
+       & gtk_entry_get_text_length, gtk_entry_set_text, gtk_statusbar_push, &
+       & gtk_tree_model_get_value, gtk_widget_grab_focus, TRUE
 
   use widgets
   use gtk_hl
@@ -76,7 +80,7 @@ contains
 
   end subroutine show_hms
 
-   subroutine append_char_entry(chr)
+  subroutine append_char_entry(chr)
     ! Append a single character to the entry window
     character(kind=c_char), intent(in) :: chr
 
@@ -218,7 +222,7 @@ contains
        call hl_gtk_button_set_label_markup(kpower, &
             & "y<sup>x</sup>"//c_null_char)
        call gtk_button_set_label(kroll, "R↓"//c_null_char)
-     end if
+    end if
   end subroutine set_labels
 
   subroutine push_stack(val, show_result)
@@ -239,7 +243,7 @@ contains
 
     call hl_gtk_listn_ins(fstack, 0)
     call hl_gtk_listn_set_cell(fstack, 0, 0, dvalue=val)
-    
+
     if (ishow) call set_result(val)
     if (dynamic_stats) call stack_stats(val)
   end subroutine push_stack
@@ -326,7 +330,7 @@ contains
           s2 = 0._c_double
           s3 = 0._c_double
           s4 = 0._c_double
-          
+
           do i = 0, nrows-1
              call hl_gtk_listn_get_cell(fstack, i, 0, dvalue=x)
              s1 = s1+x
@@ -539,16 +543,16 @@ contains
              call hl_gtk_listn_set_cell(fstack, i, 0, dvalue=val)
              if (i == 0) call set_result(val)
           end do
- 
-      case("Stats")
+
+       case("Stats")
           do i = 0, 9
              read(unit, dformat, iostat=ios, iomsg=iom) val
              if (ios /= 0) exit
              call hl_gtk_listn_set_cell(fstats, i, 1, dvalue=val)
           end do
        case("Regs")
- 
-         read(unit, *, iostat=ios, iomsg=iom) nrows
+
+          read(unit, *, iostat=ios, iomsg=iom) nrows
           if (ios /= 0) exit
           if (nrows > maxreg) mid = gtk_statusbar_push(fstatus, 0, &
                & "Too many registers"//c_null_char)

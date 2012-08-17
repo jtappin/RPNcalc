@@ -36,14 +36,10 @@ program rpncalc
   use iso_c_binding !, only: c_ptr, c_null_ptr, c_loc
   use iso_fortran_env, only: error_unit
 
-  use gtk, only: gtk_button_new, gtk_check_button_new,&
-       & gtk_container_add, gtk_entry_new, gtk_expander_new,&
-       & gtk_label_new, gtk_main, gtk_menu_item_new, gtk_menu_new,&
-       & gtk_radio_button_new, gtk_statusbar_new, gtk_table_attach,&
-       & gtk_table_new, gtk_widget_show, gtk_widget_show_all,&
-       & gtk_window_new, gtk_init, gtk_expander_set_expanded,&
-       & GTK_PACK_DIRECTION_LTR, GDK_CONTROL_MASK, GDK_SHIFT_MASK, &
-       & TRUE, FALSE, gtk_window_set_icon_name
+  use gtk, only: gtk_container_add, gtk_expander_new, &
+       & gtk_expander_set_expanded, gtk_label_new, gtk_main, &
+       & gtk_statusbar_new, gtk_widget_show_all, gtk_init, TRUE, FALSE, &
+       & GDK_SHIFT_MASK, GDK_CONTROL_MASK, GTK_PACK_DIRECTION_LTR
   use gtk_hl
 
   use handlers
@@ -145,7 +141,7 @@ program rpncalc
                  maxreg = maxreg-1  ! The highest number is the count-1
               end if
               iarg = iarg+1
-            end if
+           end if
         end if
      case("-R","--radians")
         trigunit = 0
