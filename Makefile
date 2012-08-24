@@ -35,6 +35,7 @@ NAME_SUFFIX=
 ##############################################################
 
 SUBDIRS=docs src
+CLNSUBDIRS=src
 
 all:
 	for dir in $(SUBDIRS); do \
@@ -51,6 +52,11 @@ install:
 	done
 
 clean:
+	for dir in $(CLNSUBDIRS); do \
+	$(MAKE) $(MFLAGS) -C $$dir "NAME_SUFFIX=$(NAME_SUFFIX)" clean; \
+	done
+
+clean-all:
 	for dir in $(SUBDIRS); do \
 	$(MAKE) $(MFLAGS) -C $$dir "NAME_SUFFIX=$(NAME_SUFFIX)" clean; \
 	done
