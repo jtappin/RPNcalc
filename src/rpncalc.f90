@@ -394,21 +394,11 @@ program rpncalc
        & tooltip="Select/Deselect live stack statistics"//c_null_char)
   call hl_gtk_table_attach(keybox, kstats, 4, 0, xspan=2)
 
-  rdgrp=C_NULL_PTR
-  krad = hl_gtk_radio_button_new(rdgrp, "Rad"//c_null_char, &
-       & toggled=c_funloc(set_trigunit), &
-       & tooltip = "Select radians mode"//c_null_char)
-  call hl_gtk_table_attach(keybox, krad, 0, 0)
-  kdeg = hl_gtk_radio_button_new(rdgrp, "Deg"//c_null_char, &
-       & toggled=c_funloc(set_trigunit), &
-       & tooltip = "Select degrees mode"//c_null_char)
-  call hl_gtk_table_attach(keybox, kdeg, 1, 0)
-  kgrad = hl_gtk_radio_button_new(rdgrp, "Grad"//c_null_char, &
-       & toggled=c_funloc(set_trigunit), &
-       & tooltip = "Select grads mode"//c_null_char)
-  call hl_gtk_table_attach(keybox, kgrad, 2, 0)
-
-  call hl_gtk_radio_group_set_select(rdgrp, trigunit)
+  ktrigs = hl_gtk_combo_box_new(changed=c_funloc(set_trigunit), &
+       & initial_choices=['Radians', 'Degrees','Grads  '], &
+       & active=trigunit, tooltip= &
+       & 'Select the unit for trigonometric functions'//c_null_char)
+  call hl_gtk_table_attach(keybox, ktrigs, 0, 0, xspan=2)
 
   ! A pulldown for more obscure functions
 

@@ -35,7 +35,8 @@ module handlers
        & gtk_main_quit, gtk_menu_item_set_label, gtk_statusbar_push, &
        & gtk_toggle_button_get_active, gtk_toggle_button_set_active, &
        & gtk_widget_destroy, gtk_widget_grab_focus, gtk_widget_set_sensitive, &
-       & gtk_widget_show_all, gtk_window_set_transient_for, TRUE, FALSE
+       & gtk_widget_show_all, gtk_window_set_transient_for, &
+       & gtk_combo_box_get_active, TRUE, FALSE
 
   use iso_fortran_env, only: error_unit
 
@@ -1111,7 +1112,7 @@ contains
     ! Select trig units
     type(c_ptr), value :: widget, gdata
 
-    trigunit = hl_gtk_radio_group_get_select(rdgrp)
+    trigunit = gtk_combo_box_get_active(widget)
 
     call gtk_widget_grab_focus(fentry)
     call gtk_editable_set_position(fentry, -1)   ! Put cursor at end

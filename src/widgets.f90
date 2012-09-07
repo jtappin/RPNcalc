@@ -75,8 +75,8 @@ module widgets
        & ksqrt, kinv, kdup, karc, kloge, klog10, kpi, ksinh, kcosh, &
        & ktanh, kpower, kroll, kdel, khms, kstats
 
-  ! The radians/degrees radio menu.
-  type(c_ptr) :: krad, kdeg, kgrad, rdgrp
+  ! The radians/degrees/grads pulldown.
+  type(c_ptr) :: ktrigs
 
   ! The pulldown menu for "obscure" functions
   type(c_ptr) :: menu, pull, kabs, kaint, kfrac, katan2, kfact, kmod, &

@@ -2,47 +2,47 @@ RPNCALC(1)                RPN Scientific Calculator                 RPNCALC(1)
 
 
 
-NNAAMMEE
-       rpncalc hhttttppss::////ggiitthhuubb..ccoomm//jjttaappppiinn//RRPPNNccaallcc is a fully functional scien‐
+NAME
+       rpncalc https://github.com/jtappin/RPNcalc is a fully functional scien‐
        tific calculator emulator, written entirely in Fortran. It  is  both  a
        usable   tool   and   a  demonstration  of  the  gtk-fortran  libraries
-       hhttttppss::////ggiitthhuubb..ccoomm//jjeerrrryydd//ggttkk--ffoorrttrraann.
+       https://github.com/jerryd/gtk-fortran.
 
-SSYYNNOOPPSSIISS
-       rpncalc [ooppttiioonnss] ...
+SYNOPSIS
+       rpncalc [options] ...
 
-DDEESSCCRRIIPPTTIIOONN
+DESCRIPTION
        A scientific decktop calculator using Reverse Polish notation.
 
-OOPPTTIIOONNSS
-       --cc, -- --cclloosseedd
+OPTIONS
+       -c, - -closed
                start the calculator with the stack and memory display hidden.
 
-       --oo, -- --ooppeenn
+       -o, - -open
                start the calculator with the stack and memory display  visible
               (this is the default).
 
-       --rr,    -- --rreessttoorree _f_i_l_e
+       -r,    - -restore file
                Load the stack and memory contents from the given file.
 
-       --mm,    -- --rreeggiisstteerrss  _n_u_m_b_e_r
+       -m,    - -registers  number
                Set  the  number  of memory registers to create. The default is
               10.
 
-       --RR, -- --rraaddiiaannss
+       -R, - -radians
                Set the trigonometry unit to radians.
 
-       --DD, -- --ddeeggrreeeess
+       -D, - -degrees
                Set the trigonometry unit to degrees.
 
-       --GG, -- --ggrraaddss
+       -G, - -grads
                Set the trigonometry unit to grads (1/100 of a right angle).
 
-       --hh, -- --hheellpp
+       -h, - -help
                Print a help text and exit.
 
-UUSSEERR''SS GGUUIIDDEE
-   IINNTTRROODDUUCCTTIIOONN
+USER'S GUIDE
+   INTRODUCTION
        The gtk-fortran RPN calculator is a fully functional scientific  calcu‐
        lator  emulator. It is not based on any particular model of calculator,
        but rather assembles those features that I find useful in a calculator.
@@ -60,7 +60,7 @@ UUSSEERR''SS GGUUIIDDEE
        2003 (with a few 2008 features such as the execute_command_line subrou‐
        tine.
 
-   EENNTTEERRIINNGG VVAALLUUEESS::
+   ENTERING VALUES:
        All  values with RPNcalc are stored as double-precision reals (Gtk+ has
        no support for long doubles).
 
@@ -73,14 +73,14 @@ UUSSEERR''SS GGUUIIDDEE
 
        A  value may be transferred from the entry to the stack by pressing the
        keyboard Enter key while focus is on the entry window, or  by  clicking
-       the  EEnntteerr  key  on the keypad. The DDuupp key copies the entry box to the
+       the  Enter  key  on the keypad. The Dup key copies the entry box to the
        stack without clearing the entry box. If the contents of the entry  box
        are not a valid number (i.e. a Fortran READ statement cannot convert it
        to a floating point value) a message is displayed in the status bar and
        you may edit the entry box to correct the problem.
 
-   OOPPEERRAATTOORRSS::
-       The operators (++, --, **, // and yy****xx and also the aattaann22 function) operate
+   OPERATORS:
+       The operators (+, -, *, / and y**x and also the atan2 function) operate
        on the entry box and the top element on the stack if there is  anything
        in  the  entry box. If the entry box is empty, then they operate on the
        top 2 elements of the stack.
@@ -96,66 +96,66 @@ UUSSEERR''SS GGUUIIDDEE
        The result is placed on the top of the  stack,  and  displayed  in  the
        result window.
 
-   FFUUNNCCTTIIOONNSS::
+   FUNCTIONS:
        The  functions operate on a single value, which is taken from the entry
        box if that has content or from the top of  the  stack  otherwise.  The
        result  is  placed on the top of the stack, and displayed in the result
        window.
 
-       If the IInnvveerrssee checkbox is set, then functions are  replaced  by  their
-       inverses  (e.g.  ssiinn  becomes  aassiinn),  in  addition,  the yy****xx operator
-       becomes the corresponding root and the _r_o_l_l _d_o_w_n  button  becomes  _r_o_l_l
-       _u_p.  Note that:
+       If the Inverse checkbox is set, then functions are  replaced  by  their
+       inverses  (e.g.  sin  becomes  asin),  in  addition,  the y**x operator
+       becomes the corresponding root and the roll down  button  becomes  roll
+       up.  Note that:
 
        1.     The  less-used  functions  in  the  pulldown are not affected by
               this, as none have meaningful inverses.
 
-       2.     The power operator ^^ entered from the keyboard is not  converted
+       2.     The power operator ^ entered from the keyboard is not  converted
               to a root.
 
-       The RRaadd, DDeegg and GGrraadd radio buttons are used to select Radians, Degrees
+       The Rad, Deg and Grad radio buttons are used to select Radians, Degrees
        or Grads for the trigonometric functions.
 
-       The HHMMSS and the various base-_n keys  are  not  proper  functions,  they
-       don't remove or add anything to the stack.  HHMMSSdisplays the contents of
+       The HMS and the various base-n keys  are  not  proper  functions,  they
+       don't remove or add anything to the stack.  HMSdisplays the contents of
        the entry box or the top of the stack as if it were a number  of  hours
-       converted to _H_H::_M_M::_S_S_._s_s_s format (or _Ddd _H_Hhh _M_Mmm _S_S_._s_s_sss if the value is
-       greater than 24). The HHeexxaaddeecciimmaall, Octal and BBiinnaarryy keys  will  display
+       converted to HH:MM:SS.sss format (or Dd HHh MMm SS.ssss if the value is
+       greater than 24). The Hexadecimal, Octal and Binary keys  will  display
        the  integer  representation  of entry value or the top of the stack in
        the respective notations provided that the value is an integer.
 
-       Some less-used functions are in the MMoorree pulldown. The  aattaann22  function
+       Some less-used functions are in the More pulldown. The  atan2  function
        computes arctan(y/x) removing the quadrant ambiguities.
 
        Functions  whose  arguments are out of range will produce an error mes‐
        sage and the stack is left unchanged.
 
-   SSTTAACCKK OOPPEERRAATTIIOONNSS
-       **      CCEE clears the entry box, or if that is  empty  deletes  the  top
+   STACK OPERATIONS
+       *      CE clears the entry box, or if that is  empty  deletes  the  top
               entry on the stack.
 
-       **      CCAA clears the entry box and all entries on the stack.
+       *      CA clears the entry box and all entries on the stack.
 
-       **      The _u_p button moves the selected item in the stack up one place.
+       *      The up button moves the selected item in the stack up one place.
               If the top item (or nothing) is selected then  it  is  exchanged
               with the entry box.
 
-       **      The  _d_o_w_n  button moves the selected entry on the stack down one
+       *      The  down  button moves the selected entry on the stack down one
               place.
 
-       **      The _r_o_l_l _d_o_w_n button, moves the last element of the stack to the
+       *      The roll down button, moves the last element of the stack to the
               top and all others down one place.
 
-   CCOONNSSTTAANNTTSS::
+   CONSTANTS:
        There  are  a number of built in fundamental physics constants that are
-       build in to  the  calculator,  these  can  be  entered  from  the  PPhhyyss
+       build in to  the  calculator,  these  can  be  entered  from  the  Phys
        pull-down menu.
 
-   MMEEMMOORRYY RREEGGIISSTTEERRSS::
+   MEMORY REGISTERS:
        The  calculator  also  has memory registers (numbered from 0). The con‐
        tents of these registers can be viewed by selecting  the  ``registers''
        tab.  The  default  number of registers is 10, but this may be set with
-       the --mm option, or by setting a new number in the spin box at the bottom
+       the -m option, or by setting a new number in the spin box at the bottom
        of the registers tab.
 
        These can be accessed in one of two ways:
@@ -169,26 +169,26 @@ UUSSEERR''SS GGUUIIDDEE
 
        The operations are:
 
-       **      SSTTOO:: Store the value in the selected register.
+       *      STO: Store the value in the selected register.
 
-       **      RRCCLL:: Copy the selected register to the top of the stack
+       *      RCL: Copy the selected register to the top of the stack
 
-       **      MM++:: Add the value to the selected register
+       *      M+: Add the value to the selected register
 
-       **      MM--:: Subtract the value from the selected register
+       *      M-: Subtract the value from the selected register
 
-       **      MMCCLL:: Clear the selected register.
+       *      MCL: Clear the selected register.
 
-       **      MMCCAA:: Clear all registers
+       *      MCA: Clear all registers
 
-   SSTTAATTIISSTTIICCSS::
-       If the LLiivvee ssttaattss toggle is enabled, then a summary of the  statistical
+   STATISTICS:
+       If the Live stats toggle is enabled, then a summary of the  statistical
        properties  of  the contents of the stack is maintained in the "Statis‐
        tics" tab of the display area.
 
-   SSAAVVEE && RREESSTTOORREE::
+   SAVE & RESTORE:
        The stack, registers and entry box can be saved to and restored from  a
-       text file with the FFiillee-->>SSaavvee and FFiillee-->>RReessttoorree menu items.
+       text file with the File->Save and File->Restore menu items.
 
        The  file  format  is  a plain text file with the floating point values
        written in hexadecimal -- this allows the retention  of  full-precision
@@ -197,16 +197,16 @@ UUSSEERR''SS GGUUIIDDEE
        machines. Also any machine with a c_double that is not 8-bytes will not
        work.
 
-   SSEETTTTIINNGGSS::
+   SETTINGS:
        In the current version, there are 2  user-definable  settings  accessed
-       through the EEddiitt menu:
+       through the Edit menu:
 
-   RReessuulltt FFoorrmmaatt::
+   Result Format:
        Specify  the  format  to use in the result box. You have the options to
        select one of the standard formats:
 
        Fixed: A fixed number of decimal places  (set  in  the  precision  spin
-              box).  The actual format used is "(F0._n)".  WARNING: this may be
+              box).  The actual format used is "(F0.n)".  WARNING: this may be
               a GNU extension.
 
        Sci:   Scientific format. Specify the number of decimals, and the width
@@ -225,20 +225,20 @@ UUSSEERR''SS GGUUIIDDEE
        invalid format).
 
        This  menu  also  includes  an  option  to show or suppress the leading
-       zeroes in base-_n displays.
+       zeroes in base-n displays.
 
-   SShhooww ddeeggrreeeess::
+   Show degrees:
        If this is enabled, then use angular rather than time notation for  the
-       HMS display (the button will be relabelled DDMMSS).
+       HMS display (the button will be relabelled DMS).
 
-   CCUUTT && PPAASSTTEE::
-       The EEddiitt menu has options to cut or copy the selected text in the entry
+   CUT & PASTE:
+       The Edit menu has options to cut or copy the selected text in the entry
        window (or the result window in the case of copy) to the clipboard. The
        current  clipboard  item  my  also be pasted into the entry box, or the
        selected text may be deleted. The usual keybindings  for  these  opera‐
        tions are also available.
 
-   HHEELLPP SSYYSSTTEEMM::
+   HELP SYSTEM:
        This manual can be accessed in a number of ways:
 
        1.     A manpage is generated and can be accessed using man rpncalc.
@@ -250,36 +250,36 @@ UUSSEERR''SS GGUUIIDDEE
        3.     The  text  and PDF versions are installed in the share/docs/rpn‐
               calc subdirectory of the installation directory.
 
-   AACCCCEELLEERRAATTOORRSS::
+   ACCELERATORS:
        The menu items have accerators to save mouse clicking:
 
-       **      Save -- ctrl-s
+       *      Save -- ctrl-s
 
-       **      Restore -- ctrl-o
+       *      Restore -- ctrl-o
 
-       **      Quit -- ctrl-q
+       *      Quit -- ctrl-q
 
-       **      Cut -- ctrl-x
+       *      Cut -- ctrl-x
 
-       **      Delete -- ctrl-shift-x
+       *      Delete -- ctrl-shift-x
 
-       **      Copy -- ctrl-c
+       *      Copy -- ctrl-c
 
-       **      Paste -- ctrl-v
+       *      Paste -- ctrl-v
 
-       **      Set Format -- ctrl-f
+       *      Set Format -- ctrl-f
 
-       **      Help -- ctrl-h
+       *      Help -- ctrl-h
 
-       **      About -- ctrl-a
+       *      About -- ctrl-a
 
-       **      About gtk-fortran -- ctrl-shift-a
+       *      About gtk-fortran -- ctrl-shift-a
 
-AAUUTTHHOORRSS
+AUTHORS
        James Tappin (jtappin at gmail dot com).
 
-LLIICCEENNCCEE
+LICENCE
        RPNcalc is free software and may be modified  and  redistributed  under
        the terms of the GNU General Public Licence Version 3.
 
-RPN Scientific Calculator       14 August 2012                      RPNCALC(1)
+RPN Scientific Calculator       29 August 2012                      RPNCALC(1)
