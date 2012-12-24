@@ -30,5 +30,30 @@ Step 3:
      sudo make install
      This will install the executable and desktop file. Alternatively
      if you just want to try it out, run:
-     ./rpncalc
+     ./src/rpncalc
      in the rpncalc directory.
+
+Notes for using g95
+-------------------
+
+The alternative Fortran comiler g95, can be used to build RPNcalc but
+there are a couple of edits necessary as it does not support inverse
+hyperbolic functions or the execute_command_line subroutine (all of
+which are Fortran 2008 features).
+
+Inverse Hyperbolics:
+	Uncomment the defintions at the end of utils.f90
+
+execute_command_line:
+	Comment out the execute_command line call at line 1313
+	(24/12/2012 version) and the line on each side of it, i.e.:
+!    if (vstatus == 0) then
+!       call execute_command_line(trim(pdfviewer)//' '//pdffile, wait=.false.)
+!    else
+
+	and also the closing end if at line 1355. The PDF help viewer
+	will not be available.
+
+The program can then be build by using:
+
+make FC=g95

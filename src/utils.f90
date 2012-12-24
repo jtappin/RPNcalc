@@ -87,7 +87,7 @@ contains
     integer(kind=c_int), target :: flen
 
     flen = int(gtk_entry_get_text_length(fentry), c_int)
-    call gtk_editable_insert_text(fentry, chr//c_null_char, -1, c_loc(flen))
+    call gtk_editable_insert_text(fentry, chr//c_null_char, -1_c_int, c_loc(flen))
 
   end subroutine append_char_entry
 
@@ -112,17 +112,18 @@ contains
 
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
     if (nchars == 0) then
-       mid = gtk_statusbar_push(fstatus, 0, "Entry field is empty"//c_null_char)
+       mid = gtk_statusbar_push(fstatus, 0_c_int, &
+            & "Entry field is empty"//c_null_char)
        status = .FALSE.
        return
     end if
 
     ctext = gtk_entry_get_text(fentry)
-    call convert_c_string(ctext, nchars, ftext)
+    call convert_c_string(ctext, int(nchars), ftext)
 
     read(ftext,*, iostat=ios, iomsg=iom) val
     if (ios /= 0) then
-       mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
+       mid = gtk_statusbar_push(fstatus, 0_c_int, trim(iom)//c_null_char)
        status=.FALSE.
     else
        status=.TRUE.
@@ -148,17 +149,18 @@ contains
 
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
     if (nchars == 0) then
-       mid = gtk_statusbar_push(fstatus, 0, "Entry field is empty"//c_null_char)
+       mid = gtk_statusbar_push(fstatus, 0_c_int, &
+            & "Entry field is empty"//c_null_char)
        status = .FALSE.
        return
     end if
 
     ctext = gtk_entry_get_text(fentry)
-    call convert_c_string(ctext, nchars, ftext)
+    call convert_c_string(ctext, int(nchars), ftext)
 
     read(ftext,*, iostat=ios, iomsg=iom) val
     if (ios /= 0) then
-       mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
+       mid = gtk_statusbar_push(fstatus, 0_c_int, trim(iom)//c_null_char)
        status=.FALSE.
     else
        status=.TRUE.
@@ -181,7 +183,7 @@ contains
        else
           write(text, result_format, iostat=ios, iomsg=iom) val
           if (ios /= 0) then
-             mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
+             mid = gtk_statusbar_push(fstatus, 0_c_int, trim(iom)//c_null_char)
              write(text, *) val
           end if
        end if
@@ -241,8 +243,8 @@ contains
        ishow=.true.
     end if
 
-    call hl_gtk_listn_ins(fstack, 0)
-    call hl_gtk_listn_set_cell(fstack, 0, 0, dvalue=val)
+    call hl_gtk_listn_ins(fstack, 0_c_int)
+    call hl_gtk_listn_set_cell(fstack, 0_c_int, 0_c_int, dvalue=val)
 
     if (ishow) call set_result(val)
     if (dynamic_stats) call stack_stats(val)
@@ -268,15 +270,15 @@ contains
 
     shwm = hl_gtk_listn_get_n_rows(fstack)
     if (shwm == 0) then
-       mid = gtk_statusbar_push(fstatus, 0, &
+       mid = gtk_statusbar_push(fstatus, 0_c_int, &
             & "No values left on stack: cannot get a value"//c_null_char)
        status = .FALSE.
        return
     end if
 
-    call hl_gtk_listn_get_cell(fstack, 0, 0, dvalue=val)
+    call hl_gtk_listn_get_cell(fstack, 0_c_int, 0_c_int, dvalue=val)
     if (delete_top) then
-       call hl_gtk_listn_rem(fstack, 0)
+       call hl_gtk_listn_rem(fstack, 0_c_int)
        if (dynamic_stats) call stack_stats(val, remove=.true.)
     end if
 
@@ -311,7 +313,7 @@ contains
 
     nrows = hl_gtk_listn_get_n_rows(fstack)
     if (iclr .or. nrows == 0) then
-       if (nrows /= 0) mid = gtk_statusbar_push(fstatus, 0, &
+       if (nrows /= 0) mid = gtk_statusbar_push(fstatus, 0_c_int, &
             & "Clearing statistics while stack not empty"//c_null_char)
 
        s1 = 0._c_double
@@ -332,7 +334,7 @@ contains
           s4 = 0._c_double
 
           do i = 0, nrows-1
-             call hl_gtk_listn_get_cell(fstack, i, 0, dvalue=x)
+             call hl_gtk_listn_get_cell(fstack, i, 0_c_int, dvalue=x)
              s1 = s1+x
              s2 = s2+x**2
              s3 = s3+x**3
@@ -376,16 +378,17 @@ contains
           avg = 0._c_double
        end if
     end if
-    call hl_gtk_listn_set_cell(fstats, 0, 1, dvalue=real(nrows,c_double))
-    call hl_gtk_listn_set_cell(fstats, 1, 1, dvalue=avg)
-    call hl_gtk_listn_set_cell(fstats, 2, 1, dvalue=var)
-    call hl_gtk_listn_set_cell(fstats, 3, 1, dvalue=sdev)
-    call hl_gtk_listn_set_cell(fstats, 4, 1, dvalue=skew)
-    call hl_gtk_listn_set_cell(fstats, 5, 1, dvalue=kurt)
-    call hl_gtk_listn_set_cell(fstats, 6, 1, dvalue=s1)
-    call hl_gtk_listn_set_cell(fstats, 7, 1, dvalue=s2)
-    call hl_gtk_listn_set_cell(fstats, 8, 1, dvalue=s3)
-    call hl_gtk_listn_set_cell(fstats, 9, 1, dvalue=s4)
+    call hl_gtk_listn_set_cell(fstats, 0_c_int, 1_c_int, &
+         & dvalue=real(nrows,c_double))
+    call hl_gtk_listn_set_cell(fstats, 1_c_int, 1_c_int, dvalue=avg)
+    call hl_gtk_listn_set_cell(fstats, 2_c_int, 1_c_int, dvalue=var)
+    call hl_gtk_listn_set_cell(fstats, 3_c_int, 1_c_int, dvalue=sdev)
+    call hl_gtk_listn_set_cell(fstats, 4_c_int, 1_c_int, dvalue=skew)
+    call hl_gtk_listn_set_cell(fstats, 5_c_int, 1_c_int, dvalue=kurt)
+    call hl_gtk_listn_set_cell(fstats, 6_c_int, 1_c_int, dvalue=s1)
+    call hl_gtk_listn_set_cell(fstats, 7_c_int, 1_c_int, dvalue=s2)
+    call hl_gtk_listn_set_cell(fstats, 8_c_int, 1_c_int, dvalue=s3)
+    call hl_gtk_listn_set_cell(fstats, 9_c_int, 1_c_int, dvalue=s4)
 
   end subroutine stack_stats
 
@@ -417,7 +420,7 @@ contains
     call g_object_set_property(cell, "text"//c_null_char, val_ptr)
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end.
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end.
 
   end subroutine show_list
 
@@ -432,7 +435,8 @@ contains
     type(c_ptr) :: cetext
     character(len=40) :: fetext
     real(kind=c_double) :: val
-    integer :: i, ios, unit
+    integer :: ios, unit=44
+    integer(kind=c_int) :: i
     character(len=8) :: dformat
     character(len=80) :: iom
 
@@ -441,18 +445,18 @@ contains
     ! C_SIZEOF function instead).
     write(dformat, "('(Z',I0')')") 2*c_double
 
-    open(newunit=unit, file=file, action="write", form="formatted", &
+    open(unit=unit, file=file, action="write", form="formatted", &
          & iostat=ios, iomsg=iom)
     if (present(status)) status=ios
     if (ios /= 0) then
-       mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
+       mid = gtk_statusbar_push(fstatus, 0_c_int, trim(iom)//c_null_char)
        return
     end if
 
     nchars=gtk_entry_get_text_length(fentry)
     if (nchars > 0) then
        cetext = gtk_entry_get_text(fentry)
-       call convert_c_string(cetext, nchars, fetext)
+       call convert_c_string(cetext, int(nchars), fetext)
        write(unit, "(A/I0/A)") "Entry",nchars,fetext
     else
        write(unit, "(A/I0)") "Entry",0
@@ -461,19 +465,19 @@ contains
     nrows = hl_gtk_listn_get_n_rows(fstack)
     write(unit, "(A/I0)") "Stack", nrows
     do i = 0, nrows-1
-       call hl_gtk_listn_get_cell(fstack, i, 0, dvalue=val)
+       call hl_gtk_listn_get_cell(fstack, i, 0_c_int, dvalue=val)
        write(unit, dformat) val
     end do
 
     write(unit, "(A/I0)") "Regs", maxreg
     do i = 0, maxreg
-       call hl_gtk_listn_get_cell(fmemory, i, 1, dvalue=val)
+       call hl_gtk_listn_get_cell(fmemory, i, 1_c_int, dvalue=val)
        write(unit, dformat) val
     end do
 
     write(unit, "(A)") "Stats"
     do i = 0, 9
-       call hl_gtk_listn_get_cell(fstats, i, 1, dvalue=val)
+       call hl_gtk_listn_get_cell(fstats, i, 1_c_int, dvalue=val)
        write(unit, dformat) val
     end do
 
@@ -494,7 +498,8 @@ contains
     integer(kind=c_int) :: nrows, nchars, mid
     character(len=40) :: etext
     real(kind=c_double) :: val
-    integer :: i, ios, unit
+    integer :: ios, unit=44
+    integer(kind=c_int) :: i
     character(len=5) :: tag
     character(len=8) :: dformat
     character(len=80) :: iom
@@ -507,7 +512,7 @@ contains
     open(unit, file=file, action="read", status='old', form="formatted", &
          & iostat=ios, iomsg=iom)
     if (ios /= 0) then
-       mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
+       mid = gtk_statusbar_push(fstatus, 0_c_int, trim(iom)//c_null_char)
        if (present(status)) status=ios
        return
     end if
@@ -540,7 +545,7 @@ contains
              read(unit, dformat, iostat=ios, iomsg=iom) val
              if (ios /= 0) exit
              call hl_gtk_listn_ins(fstack)
-             call hl_gtk_listn_set_cell(fstack, i, 0, dvalue=val)
+             call hl_gtk_listn_set_cell(fstack, i, 0_c_int, dvalue=val)
              if (i == 0) call set_result(val)
           end do
 
@@ -548,19 +553,19 @@ contains
           do i = 0, 9
              read(unit, dformat, iostat=ios, iomsg=iom) val
              if (ios /= 0) exit
-             call hl_gtk_listn_set_cell(fstats, i, 1, dvalue=val)
+             call hl_gtk_listn_set_cell(fstats, i, 1_c_int, dvalue=val)
           end do
        case("Regs")
 
           read(unit, *, iostat=ios, iomsg=iom) nrows
           if (ios /= 0) exit
-          if (nrows > maxreg) mid = gtk_statusbar_push(fstatus, 0, &
+          if (nrows > maxreg) mid = gtk_statusbar_push(fstatus, 0_c_int, &
                & "Too many registers"//c_null_char)
           do i = 0, nrows
              read(unit, dformat, iostat=ios, iomsg=iom) val
              if (ios /= 0) exit
              if (i > maxreg) cycle
-             call hl_gtk_listn_set_cell(fmemory, i, 1, dvalue=val)
+             call hl_gtk_listn_set_cell(fmemory, i, 1_c_int, dvalue=val)
           end do
 
        case("Form")  ! Old-style format
@@ -575,15 +580,39 @@ contains
           if (ios /= 0) exit
 
        case default
-          mid = gtk_statusbar_push(fstatus, 0, &
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
                & "Unknown tag: "//tag//c_null_char)
        end select
     end do
 
-    if (ios /= 0) mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
+    if (ios /= 0) mid = gtk_statusbar_push(fstatus, 0_c_int, &
+         & trim(iom)//c_null_char)
     if (present(status)) status=ios
 
     close(unit)
 
   end subroutine restore_all
+
+
+  ! Inverse hyperbolics for those Fortrans that don't support them.
+
+!!$  function asinh(x)
+!!$    real(kind=c_double) :: asinh
+!!$    real(kind=c_double), intent(in) :: x
+!!$
+!!$    asinh = log(x + sqrt(x**2 + 1._c_double))
+!!$  end function asinh
+!!$  function acosh(x)
+!!$    real(kind=c_double) :: acosh
+!!$    real(kind=c_double), intent(in) :: x
+!!$
+!!$    acosh = log(x + sqrt(x**2 - 1._c_double))
+!!$  end function acosh
+!!$  function atanh(x)
+!!$    real(kind=c_double) :: atanh
+!!$    real(kind=c_double), intent(in) :: x
+!!$
+!!$    atanh = log((1._c_double+x)/(1._c_double-x))/2._c_double
+!!$  end function atanh
+
 end module utils

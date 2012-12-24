@@ -69,7 +69,7 @@ contains
     logical :: status
     integer(kind=c_int) :: mid
 
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
     call read_entry(val, status, push=.true.)
     if (.not. status) return
     call gtk_entry_set_text(fentry, c_null_char)
@@ -100,13 +100,13 @@ contains
 
     integer :: error_code
 
-    call convert_c_string(ctext, nchars, itext)
+    call convert_c_string(ctext, int(nchars), itext)
     call c_f_pointer(ppos, ipos)
     if (ipos == 0) itext=adjustl(itext)
 
     nentry = gtk_entry_get_text_length(widget)
     cetext = gtk_entry_get_text(widget)
-    call convert_c_string(cetext, nentry, etext)
+    call convert_c_string(cetext, int(nentry), etext)
 
     eflag=.false.
     dflag=.false.
@@ -242,29 +242,29 @@ contains
        ! default handler do it.
        select case (error_code)
        case (err_invalid)
-          mid = gtk_statusbar_push(fstatus, 0, &
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
                & "Entered text includes invalid characters -- excluded"// &
                & c_null_char)
        case (err_exponent)
-          mid = gtk_statusbar_push(fstatus, 0, &
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
                & "Entered text includes misplaced exponent -- ignored"// &
                & c_null_char)
        case (err_decimal) 
-          mid = gtk_statusbar_push(fstatus, 0, &
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
                & "Entered text includes misplaced decimal -- ignored"// &
                & c_null_char)
        case (err_operator)
-          mid = gtk_statusbar_push(fstatus, 0, &
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
                & "Entered text includes misplaced operator -- ignored"// &
                & c_null_char)
        case (err_numeral)
-          mid = gtk_statusbar_push(fstatus, 0, &
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
                & "A numeral may not immediately precede a sign -- ignored"// &
                & c_null_char)
        case(err_ok)   ! Don't put an error message if the cause was
           ! a valid operator
        case default   ! More than one of the above
-          mid = gtk_statusbar_push(fstatus, 0, &
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
                & "Entered text includes errors -- ignored"// &
                & c_null_char)
        end select
@@ -307,7 +307,7 @@ contains
     cetext = gtk_entry_get_text(widget)
 
     if (iend < 0) iend = nchars-1
-    call convert_c_string(cetext, nchars, etext)
+    call convert_c_string(cetext, int(nchars), etext)
 
     ! Was there an exponent marker in the deleted segment?
     iloc = scan(etext(istart+1:iend+1), "EeDd")
@@ -361,14 +361,14 @@ contains
     character, pointer :: fdata
     integer(kind=c_int) :: mid
 
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
     if (c_associated(gdata)) then
        call c_f_pointer(gdata, fdata)
        call append_char_entry(fdata//c_null_char)
     end if
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
 
   end subroutine numpress
@@ -380,7 +380,7 @@ contains
     integer(kind=c_int) :: mid
 
     if (decimal_present .or. exponent_present) then
-       mid = gtk_statusbar_push(fstatus, 0, &
+       mid = gtk_statusbar_push(fstatus, 0_c_int, &
             & "Decimal point not permitted here"//c_null_char)
     else
        call append_char_entry("."//c_null_char)
@@ -388,7 +388,7 @@ contains
     end if
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine dppress
 
@@ -405,15 +405,15 @@ contains
     real(kind=c_double) :: x
     logical :: status
 
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
     if (exponent_present) then
        ctext = gtk_entry_get_text(fentry)
-       call convert_c_string(ctext, nchars, alltext)
+       call convert_c_string(ctext, int(nchars), alltext)
        idx = max(index(alltext, 'E'), index(alltext,'e'), &
             & index(alltext, 'D'), index(alltext, 'd'))
        if (idx == 0) then
-          mid = gtk_statusbar_push(fstatus, 0, "D'Oh"//c_null_char)
+          mid = gtk_statusbar_push(fstatus, 0_c_int, "D'Oh"//c_null_char)
        else
           idx=idx+1
           select case(alltext(idx:idx))
@@ -427,17 +427,19 @@ contains
           call gtk_entry_set_text(fentry, trim(alltext)//c_null_char)
        end if
     else if (nchars > 0) then
-       ctext = gtk_editable_get_chars(fentry, 0, 1)
+       ctext = gtk_editable_get_chars(fentry, 0_c_int, 1_c_int)
        call convert_c_string(ctext, 1, ftext)
        pos = 0
        select case(ftext)
        case ('+')
-          call gtk_editable_delete_text(fentry, 0, 1)
-          call gtk_editable_insert_text(fentry, '-'//c_null_char, 1, c_loc(pos))
+          call gtk_editable_delete_text(fentry, 0_c_int, 1_c_int)
+          call gtk_editable_insert_text(fentry, '-'//c_null_char, &
+               & 1_c_int, c_loc(pos))
        case ('-')
-          call gtk_editable_delete_text(fentry, 0, 1)
+          call gtk_editable_delete_text(fentry, 0_c_int, 1_c_int)
        case default  ! no sign present
-          call gtk_editable_insert_text(fentry, '-'//c_null_char, 1, c_loc(pos))
+          call gtk_editable_insert_text(fentry, '-'//c_null_char, &
+               & 1_c_int, c_loc(pos))
        end select
     else
        call set_result()
@@ -449,7 +451,7 @@ contains
     end if
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine chspress
 
@@ -461,22 +463,23 @@ contains
     integer(kind=c_int), target :: pos
 
     if (exponent_present) then
-       mid = gtk_statusbar_push(fstatus, 0, &
+       mid = gtk_statusbar_push(fstatus, 0_c_int, &
             & "Exponent already present"//c_null_char)
     else
        nchars = int(gtk_entry_get_text_length(fentry), c_int)
        if (nchars == 0) then
-          mid = gtk_statusbar_push(fstatus, 0, &
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
                & "Must have a mantissa before an exponent."//c_null_char)
        else
           pos = nchars
-          call gtk_editable_insert_text(fentry, 'E'//c_null_char, 1, c_loc(pos))
+          call gtk_editable_insert_text(fentry, 'E'//c_null_char, &
+               & 1_c_int, c_loc(pos))
           exponent_present = .true.
        end if
     end if
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine eepress
 
@@ -488,7 +491,7 @@ contains
     call gtk_entry_set_text(fentry, c_null_char)
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine pipress
 
@@ -504,7 +507,7 @@ contains
     call gtk_entry_set_text(fentry, c_null_char)
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine add_const
 
@@ -519,9 +522,9 @@ contains
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
     if (nchars == 0) return
 
-    clast = gtk_editable_get_chars(fentry, nchars-1, nchars)
+    clast = gtk_editable_get_chars(fentry, nchars-1_c_int, nchars)
     call convert_c_string(clast, 1, last)
-    call gtk_editable_delete_text(fentry, nchars-1, nchars)
+    call gtk_editable_delete_text(fentry, nchars-1_c_int, nchars)
 
     select case(last)
     case('.')
@@ -532,7 +535,7 @@ contains
 
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine delpress
 
@@ -545,11 +548,11 @@ contains
     real(kind=c_double) :: val
     logical :: status
 
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
     if (nchars == 0) then
        call pop_stack(val, status, readonly=.TRUE.)
@@ -575,7 +578,7 @@ contains
 
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
 
     call set_result()
@@ -617,7 +620,7 @@ contains
 
        else if (y < 0._c_double) then ! real power of a negative value
           ! (not allowed)
-          mid = gtk_statusbar_push(fstatus, 0, &
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
                & "Cannot raise a negative value to a real power"//c_null_char)
           call push_stack(y, show_result=.false.)
           call push_stack(x, show_result=.false.)
@@ -646,7 +649,7 @@ contains
 
     call push_stack(z)
     call set_result(z)
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
   end subroutine oppress
 
   subroutine cepress(widget, gdata) bind(c)
@@ -666,10 +669,10 @@ contains
        call pop_stack(xjunk, status)
     end if
     call set_result()
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine cepress
 
@@ -689,11 +692,11 @@ contains
     endif
 
     call hl_gtk_listn_rem(fstack)
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
     if (dynamic_stats) call stack_stats(0._c_double, clear=.true.)
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
 
   end subroutine capress
@@ -710,11 +713,11 @@ contains
     real(kind=c_double) :: x, y
     logical :: status, sflag
 
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
     sflag = .true.
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
     if (stack_selected <= 0) then ! top element or none
        ! (swap with the entry box)
@@ -736,7 +739,8 @@ contains
        end if
        call hl_gtk_listn_set_selection(fstack)
     else
-       call hl_gtk_listn_swap_rows(fstack, stack_selected, stack_selected-1)
+       call hl_gtk_listn_swap_rows(fstack, stack_selected, &
+            & stack_selected-1_c_int)
        stack_selected = stack_selected-1
     end if
     if (sflag) then
@@ -758,20 +762,20 @@ contains
     integer(kind=c_int) :: isel, nrows
     logical :: status
 
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
     if (stack_selected < 0) then ! no selection
        nchars = int(gtk_entry_get_text_length(fentry), c_int)
        if (nchars == 0) return ! No action of entry is empty
 
        ctext = gtk_entry_get_text(fentry)
-       call convert_c_string(ctext, nchars, ftext)
+       call convert_c_string(ctext, int(nchars), ftext)
        read(ftext, *, iostat=ios, iomsg=iom) x
        if (ios /= 0) then
-          mid = gtk_statusbar_push(fstatus, 0, trim(iom)//c_null_char)
+          mid = gtk_statusbar_push(fstatus, 0_c_int, trim(iom)//c_null_char)
           return
        end if
        call pop_stack(y, status)
@@ -784,7 +788,7 @@ contains
        nrows = hl_gtk_listn_get_n_rows(fstack)
        if (nrows <= 1) return
        isel = min(stack_selected, nrows-2)
-       call hl_gtk_listn_swap_rows(fstack, isel, isel+1)
+       call hl_gtk_listn_swap_rows(fstack, isel, isel+1_c_int)
        if (isel == stack_selected) then
           stack_selected = stack_selected+1
        else
@@ -805,7 +809,7 @@ contains
     integer :: i, nshift
     integer(kind=c_int) :: nrows,mid
 
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
     nrows = hl_gtk_listn_get_n_rows(fstack)
     if (nrows <= 1) return  ! Empty or 1 row can't roll
 
@@ -823,7 +827,7 @@ contains
     if (status) call set_result(x)
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
     if (isinv) then
        call gtk_toggle_button_set_active(karc, FALSE)
@@ -845,7 +849,7 @@ contains
 
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
     call set_result()
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
@@ -873,7 +877,7 @@ contains
     case(FUN_SIN)
        if (isinv) then
           if (abs(x) > 1._c_double) then
-             mid = gtk_statusbar_push(fstatus, 0, &
+             mid = gtk_statusbar_push(fstatus, 0_c_int, &
                   & "Asin argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
@@ -885,7 +889,7 @@ contains
     case(FUN_COS)
        if (isinv) then
           if (abs(x) > 1._c_double) then
-             mid = gtk_statusbar_push(fstatus, 0, &
+             mid = gtk_statusbar_push(fstatus, 0_c_int, &
                   & "Acos argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
@@ -905,7 +909,7 @@ contains
           z = exp(x)
        else
           if (x <= 0._c_double) then
-             mid = gtk_statusbar_push(fstatus, 0, &
+             mid = gtk_statusbar_push(fstatus, 0_c_int, &
                   & "Ln argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
@@ -917,7 +921,7 @@ contains
           z = x**2
        else
           if (x <= 0._c_double) then
-             mid = gtk_statusbar_push(fstatus, 0, &
+             mid = gtk_statusbar_push(fstatus, 0_c_int, &
                   & "Sqrt argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
@@ -933,7 +937,7 @@ contains
     case(FUN_COSH)
        if (isinv) then
           if (x < 1._c_double) then
-             mid = gtk_statusbar_push(fstatus, 0, &
+             mid = gtk_statusbar_push(fstatus, 0_c_int, &
                   & "Acosh argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
@@ -945,7 +949,7 @@ contains
     case(FUN_TANH)
        if (isinv) then
           if (abs(x) > 1._c_double) then
-             mid = gtk_statusbar_push(fstatus, 0, &
+             mid = gtk_statusbar_push(fstatus, 0_c_int, &
                   & "Atanh argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
@@ -959,7 +963,7 @@ contains
           z = 10._c_double ** x
        else
           if (x <= 0._c_double) then
-             mid = gtk_statusbar_push(fstatus, 0, &
+             mid = gtk_statusbar_push(fstatus, 0_c_int, &
                   & "Log10 argument out of range"//c_null_char)
              call push_stack(x, show_result=.false.)
              return
@@ -968,7 +972,7 @@ contains
        end if
     case(FUN_INV)
        if (x == 0._c_double) then
-          mid = gtk_statusbar_push(fstatus, 0, &
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
                & "Zero argument for 1/X in not permitted"//c_null_char)
           call push_stack(x, show_result=.false.)
           return
@@ -989,7 +993,7 @@ contains
              z = z*real(i, c_double)
           end do
        else
-          mid = gtk_statusbar_push(fstatus, 0, &
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
                & "Factorial argument out of range or not an integer"&
                & //c_null_char)
           call push_stack(x, show_result=.false.)
@@ -997,7 +1001,7 @@ contains
        end if
     end select
     call push_stack(z)
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
     if (isinv) then
        call gtk_toggle_button_set_active(karc, FALSE)
        isinv = .FALSE.
@@ -1015,7 +1019,7 @@ contains
 
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
     nchars=int(gtk_entry_get_text_length(fentry), c_int)
     if (nchars > 0) then
@@ -1026,7 +1030,7 @@ contains
        if (.not. status) return
     end if
     call show_hms(val, fresult)
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
   end subroutine hmspress
 
   subroutine base_display(widget, gdata) bind(c)
@@ -1042,7 +1046,7 @@ contains
     character(len=12) :: fmt
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
     nchars=int(gtk_entry_get_text_length(fentry), c_int)
     if (nchars > 0) then
@@ -1054,12 +1058,12 @@ contains
     end if
 
     if (val /= aint(val)) then
-       mid = gtk_statusbar_push(fstatus, 0, &
+       mid = gtk_statusbar_push(fstatus, 0_c_int, &
             & "Value is not an integer."//c_null_char)
        return
     end if
     if (abs(val) > real(huge(1_c_long),c_double)) then
-       mid = gtk_statusbar_push(fstatus, 0, &
+       mid = gtk_statusbar_push(fstatus, 0_c_int, &
             & "Value is too large."//c_null_char)
        return
     end if
@@ -1086,14 +1090,14 @@ contains
           fmt = "(Z0,'x')"
        end if
     case default
-       mid = gtk_statusbar_push(fstatus, 0, &
+       mid = gtk_statusbar_push(fstatus, 0_c_int, &
             & "Invalid base specified."//c_null_char)
        return
     end select
     write(result, fmt) ival
 
     call gtk_entry_set_text(fresult, trim(result)//c_null_char)
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
   end subroutine base_display
 
   subroutine invtoggle(widget, gdata) bind(c)
@@ -1104,7 +1108,7 @@ contains
     call set_labels
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine invtoggle
 
@@ -1115,7 +1119,7 @@ contains
     trigunit = gtk_combo_box_get_active(widget)
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine set_trigunit
 
@@ -1135,7 +1139,7 @@ contains
     end if
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine stacksel
 
@@ -1158,7 +1162,7 @@ contains
 
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
 
     if (memop /= MEM_CLA) then
@@ -1175,13 +1179,13 @@ contains
           entry_index=.false.
        else
           if (nchars == 0) then
-             mid = gtk_statusbar_push(fstatus, 0, &
+             mid = gtk_statusbar_push(fstatus, 0_c_int, &
                   & "No content in entry and no register selected"//c_null_char)
              return
           end if
           call read_entry(midx, status)
           if (.not. status .or. midx < 0 .or. midx > maxreg) then
-             mid = gtk_statusbar_push(fstatus, 0, &
+             mid = gtk_statusbar_push(fstatus, 0_c_int, &
                   & "Entry field is not a valid register"//c_null_char)
              return
           end if
@@ -1195,28 +1199,28 @@ contains
 
     select case(memop)
     case(MEM_STO)
-       call hl_gtk_listn_set_cell(fmemory, midx, 1, dvalue=x)
+       call hl_gtk_listn_set_cell(fmemory, midx, 1_c_int, dvalue=x)
     case(MEM_RCL)
-       call hl_gtk_listn_get_cell(fmemory, midx, 1, dvalue=y)
+       call hl_gtk_listn_get_cell(fmemory, midx, 1_c_int, dvalue=y)
        call push_stack(y)
     case(MEM_PLUS)
-       call hl_gtk_listn_get_cell(fmemory, midx, 1, dvalue=y)
-       call hl_gtk_listn_set_cell(fmemory, midx, 1, dvalue=y+x)
+       call hl_gtk_listn_get_cell(fmemory, midx, 1_c_int, dvalue=y)
+       call hl_gtk_listn_set_cell(fmemory, midx, 1_c_int, dvalue=y+x)
     case(MEM_MINUS)
-       call hl_gtk_listn_get_cell(fmemory, midx, 1, dvalue=y)
-       call hl_gtk_listn_set_cell(fmemory, midx, 1, dvalue=y-x)
+       call hl_gtk_listn_get_cell(fmemory, midx, 1_c_int, dvalue=y)
+       call hl_gtk_listn_set_cell(fmemory, midx, 1_c_int, dvalue=y-x)
     case(MEM_CLR)
-       call hl_gtk_listn_set_cell(fmemory, midx, 1, dvalue=0._c_double)
+       call hl_gtk_listn_set_cell(fmemory, midx, 1_c_int, dvalue=0._c_double)
     case(MEM_CLA)
        do midx = 0, maxreg
-          call hl_gtk_listn_set_cell(fmemory, midx, 1, dvalue=0._c_double)
+          call hl_gtk_listn_set_cell(fmemory, midx, 1_c_int, dvalue=0._c_double)
        end do
     end select
 
     call hl_gtk_listn_set_selection(fmemory)
     mem_selected = -1
     if (entry_index) call gtk_entry_set_text(fentry, c_null_char)
-    mid = gtk_statusbar_push(fstatus, 0, c_null_char)
+    mid = gtk_statusbar_push(fstatus, 0_c_int, c_null_char)
   end subroutine mempress
 
   subroutine memsel(widget, gdata) bind(c)
@@ -1235,7 +1239,7 @@ contains
     end if
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine memsel
 
@@ -1252,7 +1256,7 @@ contains
 
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
     if (response == FALSE) return
 
@@ -1274,7 +1278,7 @@ contains
 
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
     if (response == FALSE) return
 
@@ -1292,7 +1296,7 @@ contains
     character(len=*), parameter :: pdffile="@PDFFILE@"
     type(c_ptr) :: hscroll, hview, hquit, hbox
     character(kind=c_char), dimension(:), allocatable, save :: text
-    integer :: unit, iostat, textlen
+    integer :: unit=45, iostat, textlen
     character(len=80) :: iomsg
     integer(kind=c_int) :: isvalid
     type(c_ptr) :: end_point
@@ -1303,13 +1307,15 @@ contains
     call get_environment_variable('RPNCALC_VIEWER', value=pdfviewer, &
          & status=vstatus)
 
+    ! For compilers / run times that don't support execute_command_line
+    ! Comment out the next 3 lines and the closing endif
     if (vstatus == 0) then
        call execute_command_line(trim(pdfviewer)//' '//pdffile, wait=.false.)
     else
        if (.not. allocated(text)) then
           ! Note that the easiest way to read a whole file into an array
           ! of CHAR*1 is to open it as an unformatted stream.
-          open(newunit=unit, file=textfile, access='stream', action='read', &
+          open(unit=unit, file=textfile, access='stream', action='read', &
                & iostat=iostat, iomsg=iomsg, form="unformatted")
           if (iostat /= 0) then
              write(error_unit, *) "rpncalc: Failed to open help file: ", &
@@ -1336,7 +1342,7 @@ contains
        call gtk_container_add(help_window, hbox)
 
        hview = hl_gtk_text_view_new(hscroll, editable=FALSE, &
-            & ssize=(/700, 600/), initial_text = text)
+            & ssize=(/700_c_int, 600_c_int/), initial_text = text)
        call hl_gtk_box_pack(hbox, hscroll)
 
        hquit = hl_gtk_button_new("Dismiss"//c_null_char, &
@@ -1349,7 +1355,7 @@ contains
     end if
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine show_help
 
@@ -1435,7 +1441,7 @@ contains
     call gtk_widget_destroy(dialog)
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine about_gtkfortran
 
@@ -1479,7 +1485,8 @@ contains
     else
        issens=FALSE
     end if
-    fmt_precision = hl_gtk_spin_button_new(1, 30, initial_value=fmt_decimal, &
+    fmt_precision = hl_gtk_spin_button_new(1_c_int, 30_c_int, &
+         & initial_value=fmt_decimal, &
          & sensitive=issens, tooltip="Set the number of decimal places"&
          & //c_null_char)
     call hl_gtk_box_pack(jbb, fmt_precision)
@@ -1490,7 +1497,8 @@ contains
     else
        issens=FALSE
     end if
-    fmt_expsize = hl_gtk_spin_button_new(1, 3, initial_value=fmt_expplaces,&
+    fmt_expsize = hl_gtk_spin_button_new(1_c_int, 3_c_int, &
+         & initial_value=fmt_expplaces,&
          & sensitive=issens, tooltip="Set the width of the exponent"&
          & //c_null_char)
     call hl_gtk_box_pack(jbb, fmt_expsize)
@@ -1587,7 +1595,7 @@ contains
     call gtk_widget_destroy(fmt_window)
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine set_format_cb
 
@@ -1598,7 +1606,7 @@ contains
     call gtk_widget_destroy(fmt_window)
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine set_format_destroy
 
@@ -1618,7 +1626,7 @@ contains
     if (dynamic_stats) call stack_stats(0._c_double, initialize=.true.)
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine set_stats
 
@@ -1633,14 +1641,14 @@ contains
     count = hl_gtk_listn_get_selections(fstats, sellist)
     if (count > 0) then
        do i = 1, count
-          call hl_gtk_listn_get_cell(fstats, sellist(i), 1, dvalue=x)
+          call hl_gtk_listn_get_cell(fstats, sellist(i), 1_c_int, dvalue=x)
           call push_stack(x)
        end do
        deallocate(sellist)
     end if
 
     call gtk_widget_grab_focus(fentry)
-    call gtk_editable_set_position(fentry, -1)   ! Put cursor at end
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
 
   end subroutine statsel
 
@@ -1672,8 +1680,8 @@ contains
     if (nreg > maxreg+1) then
        do i = maxreg+1, nreg-1
           call hl_gtk_listn_ins(fmemory)   ! Default is append
-          call hl_gtk_listn_set_cell(fmemory, i, 0, ivalue=i)
-          call hl_gtk_listn_set_cell(fmemory, i, 1, dvalue=0._c_double)
+          call hl_gtk_listn_set_cell(fmemory, i, 0_c_int, ivalue=i)
+          call hl_gtk_listn_set_cell(fmemory, i, 1_c_int, dvalue=0._c_double)
        end do
     else if (nreg < maxreg+1) then
        nsel = hl_gtk_listn_get_selections(fmemory, selected)
