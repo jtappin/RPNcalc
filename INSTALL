@@ -2,11 +2,55 @@ RNPcalc -- building and installing
 ==================================
 
 Needs: Fortran 95/2003 (for gfortran: Version >= 4.6)
-       GtkFortran, including gtk_hl
+       GtkFortran, including gtk_hl (Gtk2 or Gtk3 version)
        latex2man, man and pdflatex to build the documentation.
+       cmake for the preferred build system
 
 Step 0:
-     Get RPNcalc from https://github.com/jtappin/RPNcalc
+     Get RPNcalc from https://github.com/jtappin/RPNcalc, this applies
+     to both systems.
+
+Using cmake (Preferred)
+=======================
+
+Step 1:
+     Create a build directory in the toplevel rpncalc directory, we
+     will call it "build" here, and cd to  it. DO NOT try to build in
+     place (i.e. from the top-level directory) it will not work as
+     files will be copied to themselves.
+
+Step 2:
+     cmake ..
+     This will check that all needed software is present and create the
+     needed Makefiles.
+     Possible problems:
+     1) Can't find the gtk-fortran pkg-config file.
+      a) pkg-config does not look in /usr/local, solution:
+      	 export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+      b) GtkFortran is not installed, solution:
+      	 Get GtkFortran from https://github.com/jerryd/gtk-fortran/
+      	 and build & install it, using the cmake build instructions.
+     2) Can't find latex2man, solution:
+     	Install latex2man. (In Ubuntu, it is in texlive-extra-utils, in
+     	Arch it is in texlive-core).
+     3) Can't find pdflatex, solution:
+     	Install pdflatex. (In Ubuntu, it is in texlive-latex-base, in
+     	Arch it is in texlive-bin).
+
+Step 3:
+     make
+     This will build the binary and generate the documentation.
+     Possible problems:
+     1) gfortran has an internal error, solution:
+      Make sure you have gfortran 4.6 or better.
+
+Step 4:
+     sudo make install
+     This will install the binary, documentation and desktop file.
+
+
+Old Hand Configured Method (Deprecated)
+=======================================
 
 Step 1:
      Edit the top-level Makefile. The lines you may need to edit are commented.
@@ -24,7 +68,11 @@ Step 2:
      2) gfortran has an internal error, solution:
       Make sure you have gfortran 4.6 or better.
      3) Can't find latex2man, solution:
-      Install latex2man. (In Ubuntu, it is in texlive-extra-utils).
+      Install latex2man. (In Ubuntu, it is in texlive-extra-utils, in
+     	Arch it is in texlive-core).
+     4) Can't find pdflatex, solution:
+     	Install pdflatex. (In Ubuntu, it is in texlive-latex-base, in
+     	Arch it is in texlive-bin).
 
 Step 3:
      sudo make install
