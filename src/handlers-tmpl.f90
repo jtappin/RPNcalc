@@ -1371,74 +1371,25 @@ contains
     ! Display an about dialogue
     type(c_ptr), value :: widget, gdata
 
-    type(c_ptr) :: adialog
-    integer(kind=c_int) :: response
-    character(kind=c_char), dimension(:), allocatable, target :: au1
-    type(c_ptr), dimension(2) :: authors
-
-    call convert_f_string((/ "James Tappin" /), au1)
-    authors(1) = c_loc(au1)
-    authors(2) = C_NULL_PTR
-
-    adialog = gtk_about_dialog_new()
-    call gtk_window_set_transient_for(adialog, win)
-    call gtk_about_dialog_set_program_name(adialog, "RPN Calculator"//C_NULL_CHAR)
-    call gtk_about_dialog_set_license(adialog, "GNU GPL 3"//C_NULL_CHAR)
-    call gtk_about_dialog_set_comments(adialog, &
+    call hl_gtk_about_dialog_show(name="RPN Calculator"//c_null_char, &
+         & authors=(/ "James Tappin" /), comments=&
          & "This RPN calculator is a demonstration"//c_new_line// &
          & "of the capabilities of Gtk-fortran."//c_new_line//c_new_line// &
          & "It is entirely written in Fortran 95/2003."//c_new_line// &
-         & "It should work with both Gtk+-2.24 and 3.0"//c_null_char)
-    call gtk_about_dialog_set_authors(adialog, authors)
-    call gtk_about_dialog_set_website(adialog, &
-         & "https://github.com/jtappin/RPNcalc/wiki"//C_NULL_CHAR)
+         & "It should work with both Gtk+-2.24 and 3.x"//c_null_char, &
+         & website="https://github.com/jtappin/RPNcalc/wiki"//c_null_char, &
+         & license="GNU GPL 3"//c_null_char, parent=win)
 
-    response = gtk_dialog_run(adialog)
-    call gtk_widget_destroy(adialog)
+    call gtk_widget_grab_focus(fentry)
+    call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
+
   end subroutine about_rpn
 
   subroutine about_gtkfortran (widget, gdata )  bind(c)
     ! About Gtk Fortran info.
     type(c_ptr), value :: widget, gdata
 
-    type(c_ptr) :: dialog
-    integer(c_int) :: response_id
-    character(kind=c_char), dimension(:), allocatable, target :: au1, au2, &
-         & au3, au4, au5
-    type(c_ptr), dimension(6) :: authors
-
-    call convert_f_string((/ "Jerry DeLisle" /), au1)
-    call convert_f_string((/ "Vincent Magnin" /), au2)
-    call convert_f_string((/ "James Tappin" /), au3)
-    call convert_f_string((/ "Jens Hunger" /), au4)
-    call convert_f_string((/ "Kyle Horne"/), au5)
-    authors(1) = c_loc(au1)
-    authors(2) = c_loc(au2)
-    authors(3) = c_loc(au3)
-    authors(4) = c_loc(au4)
-    authors(5) = c_loc(au5)
-    authors(6) = C_NULL_PTR
-
-    dialog = gtk_about_dialog_new()
-    call gtk_window_set_transient_for(dialog, win)
-    call gtk_about_dialog_set_program_name(dialog, "Gtk-fortran"//C_NULL_CHAR)
-    call gtk_about_dialog_set_license(dialog, "GNU GPL 3"//C_NULL_CHAR)
-    call gtk_about_dialog_set_comments(dialog, &
-         & "The gtk-fortran project aims to offer scientists programmi&
-         &ng in Fortran a cross-platform library to build Graphical Us&
-         &er Interfaces (GUI)."//c_new_line// & 
-         &" Gtk-fortran is a partial GTK+ / Fortran binding 100% writt&
-         &en in Fortran, thanks to the ISO_C_BINDING module for intero&
-         &perability between C and Fortran, which is a part of the For&
-         &tran 2003 standard."//c_new_line// & 
-         & " GTK+ is a free software cross-platform graphical library &
-         &available for Linux, Unix, Windows and MacOs X."//C_NULL_CHAR) 
-    call gtk_about_dialog_set_website(dialog, &
-         & "https://github.com/jerryd/gtk-fortran/wiki"//C_NULL_CHAR)
-
-    call gtk_about_dialog_set_authors(dialog, authors)
-    response_id =  gtk_dialog_run(dialog)
-    call gtk_widget_destroy(dialog)
+    call hl_gtk_about_dialog_gtk_fortran(win)
 
     call gtk_widget_grab_focus(fentry)
     call gtk_editable_set_position(fentry, -1_c_int)   ! Put cursor at end
