@@ -89,7 +89,7 @@ module widgets
   ! Menubar
   type(c_ptr) :: fmenu, ffmenu, fhmenu, kabout, ksave, krestore, khelp, &
        & kfabout, femenu, kfedit, kefocus, khrdeg, accel, kcopy, kcut, &
-       & kpaste, ktdel
+       & kpaste, ktdel, kpset
 
   ! Entry & result windows and stack display
   type(c_ptr) :: fentry, fstack, sstack, fresult, sbar, fstatus, &
@@ -122,5 +122,13 @@ module widgets
        & s3=0._c_double, s4=0._c_double
   real(kind=c_double) :: avg, var, sdev, skew, kurt, val
   logical :: dynamic_stats = .FALSE.
+
+  ! PDF readers
+  logical :: pdf_is_init = .false.
+  character(len=80) :: pdf_reader=''
+  character(len=15), dimension(*), parameter :: pdf_readers = &
+       & [character(len=15) :: "acroread", "okular", "evince", "gv", &
+       & "kpdf", "xpdf", "kghostview"]
+  type(c_ptr) :: pwin, pchoose, pbut
 
 end module widgets

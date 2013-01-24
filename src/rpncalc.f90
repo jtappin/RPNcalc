@@ -206,6 +206,9 @@ program rpncalc
        & activate=c_funloc(set_format_make), accel_key="f"//c_null_char, &
        & accel_group=accel)
 
+  kpset = hl_gtk_menu_item_new(femenu, "Help viewer"//c_null_char, &
+       & activate=c_funloc(set_pdf_reader))
+
   khrdeg = hl_gtk_check_menu_item_new(femenu, "Display degrees"//c_null_char, &
        & toggled = c_funloc(set_dms_hms), tooltip = &
        & "Select angular or time format for HMS display"//c_null_char)

@@ -4,9 +4,9 @@
 
 \begin{document}
 \setVersion{0.1}
-\begin{Name}{1}{rpncalc}{James Tappin}{RPN Scientific Calculator}{RPNcalc\\--\\A Reverse-Polish notation scientific calculator}
+\begin{Name}{1}{RPNcalc}{James Tappin}{RPN Scientific Calculator}{RPNcalc\\--\\A Reverse-Polish notation scientific calculator}
 
-  \Prog{rpncalc} \URL{https://github.com/jtappin/RPNcalc} is a fully
+  \Prog{RPNcalc} \URL{https://github.com/jtappin/RPNcalc} is a fully
   functional scientific calculator emulator, written entirely in
   Fortran. It is both a usable tool and a demonstration of the
   gtk-fortran libraries \URL{https://github.com/jerryd/gtk-fortran}.
@@ -14,7 +14,7 @@
 
 \section{SYNOPSIS}
 
-  \Prog{rpncalc} \oOpt{options} \Dots
+  \Prog{RPNcalc} \oOpt{options} \Dots
 
   \section{DESCRIPTION}
 
@@ -123,7 +123,7 @@
     converted to a root.
   \end{enumerate}
 
-  The \textbf{Rad}, \textbf{Deg} and \textbf{Grad} radio buttons are
+  The \textbf{Rad}, \textbf{Deg} and \textbf{Grad} pull down menu
   used to select Radians, Degrees or Grads for the trigonometric
   functions.
 
@@ -263,12 +263,14 @@ these operations are also available.
 This manual can be accessed in a number of ways:
 \begin{enumerate}
 \item A manpage is generated and can be accessed using 
-\texttt{man rpncalc}.
-\item The ``Help'' item in the menu will display either the text
-  version or (if the environment variable \texttt{RPNCALC\_VIEWER} is
-  set to a PDF viewer) the PDF version.
+\texttt{man RPNcalc}.
+\item The ``Help'' item in the menu will display either the PDF version
+  of the manual if a suitable viewer can be found (the environment
+  variable \texttt{RPNCALC\_VIEWER} can be used to set a preferred
+  viewer). If no viewer is found (or if  \texttt{RPNCALC\_VIEWER} is
+  set to \texttt{text}) then a text version is displayed.
 \item The text and PDF versions are installed in the
-  \texttt{share/docs/rpncalc} subdirectory of the installation directory.
+  \texttt{share/docs/RPNcalc} subdirectory of the installation directory.
 \end{enumerate}
 
 \subsection{Accelerators:}

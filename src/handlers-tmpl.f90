@@ -1296,31 +1296,24 @@ contains
     character(len=*), parameter :: pdffile="@PDFFILE@"
     type(c_ptr) :: hscroll, hview, hquit, hbox
     character(kind=c_char), dimension(:), allocatable, save :: text
-    integer :: unit=45, iostat, textlen
+    integer :: unit, iostat, textlen
     character(len=80) :: iomsg
-    integer(kind=c_int) :: isvalid
-    type(c_ptr) :: end_point
-    character(kind=c_char), pointer :: end_char
-    character(len=256) :: pdfviewer
-    integer :: vstatus
+    character(len=80) :: pdfviewer
 
-    call get_environment_variable('RPNCALC_VIEWER', value=pdfviewer, &
-         & status=vstatus)
+    call find_pdf_reader(pdfviewer)
 
-    ! For compilers / run times that don't support execute_command_line
-    ! Comment out the next 3 lines and the closing endif
-    if (vstatus == 0) then
+    if (pdfviewer /= '') then
        call execute_command_line(trim(pdfviewer)//' '//pdffile, wait=.false.)
     else
        if (.not. allocated(text)) then
           ! Note that the easiest way to read a whole file into an array
           ! of CHAR*1 is to open it as an unformatted stream.
-          open(unit=unit, file=textfile, access='stream', action='read', &
+          open(newunit=unit, file=textfile, access='stream', action='read', &
                & iostat=iostat, iomsg=iomsg, form="unformatted")
           if (iostat /= 0) then
-             write(error_unit, *) "rpncalc: Failed to open help file: ", &
+             write(error_unit, "(2A)") "rpncalc: Failed to open help file: ", &
                   & trim(textfile)
-             write(error_unit, *) "Reason: ", trim(iomsg)
+             write(error_unit, "(2A)") "Reason: ", trim(iomsg)
              return
           end if
           inquire(unit, size=textlen)
@@ -1648,5 +1641,124 @@ contains
     end if
     maxreg = nreg-1
   end subroutine add_remove_registers
+
+ subroutine set_pdf_reader(widget, data) bind(c)
+   type(c_ptr), value :: widget, data
+
+    ! Set a pdf reader manually.
+
+    logical, dimension(size(pdf_readers)) :: isinstalled
+    integer :: i, j, nfound
+    character(len=len(pdf_readers)), dimension(:), allocatable :: list
+    type(c_ptr) :: pbase, jb, junk
+    integer(kind=c_int) :: ichoice
+
+    do i = 1, size(pdf_readers)
+       isinstalled(i) = check_command(pdf_readers(i))
+    end do
+    nfound = count(isinstalled)
+
+    if (pdf_is_init .and. pdf_reader /= '' .and. &
+         & count(pdf_reader == pdf_readers) == 0) then
+       allocate(list(nfound+2))
+       list(nfound+2) = pdf_reader
+       ichoice = nfound+2
+    else
+       allocate(list(nfound+1))
+    end if
+
+    list(1) = 'Text'
+    if (pdf_is_init .and. pdf_reader == '') ichoice = 1
+
+    if (nfound > 0) then
+       j = 2
+       do i = 1, size(pdf_readers)
+          if (isinstalled(i)) then
+             list(j) = pdf_readers(i)
+             if (list(j) == pdf_reader .and. pdf_is_init) &
+                  & ichoice = j
+             j = j+1
+          end if
+       end do
+    end if
+
+    pwin = hl_gtk_window_new("Choose PDF viewer"//c_null_char, &
+         & above=TRUE, parent=win, destroy=c_funloc(set_pdf_destroy))
+
+    pbase = hl_gtk_box_new()
+    call gtk_container_add(pwin, pbase)
+
+    jb = hl_gtk_box_new(horizontal=TRUE)
+    call hl_gtk_box_pack(pbase, jb)
+
+    junk = gtk_label_new("Viewer:"//c_null_char)
+    call hl_gtk_box_pack(jb, junk)
+
+    pchoose = hl_gtk_combo_box_new(has_entry=TRUE, &
+         & initial_choices=list, active=ichoice, &
+         & changed=c_funloc(set_pdf_pick), tooltip=&
+         & "Pick a pdf reader or enter your favourite"//c_null_char)
+    call hl_gtk_box_pack(jb, pchoose)
+
+    jb = hl_gtk_box_new(horizontal=TRUE)
+    call hl_gtk_box_pack(pbase, jb)
+    pbut = hl_gtk_button_new("Apply"//c_null_char, &
+         & sensitive=FALSE, clicked=c_funloc(set_pdf_apply), &
+         & tooltip="Apply the viewer selection"//c_null_char)
+    call hl_gtk_box_pack(jb, pbut)
+
+    junk = hl_gtk_button_new("Cancel"//c_null_char, &
+         & clicked=c_funloc(set_pdf_destroy), &
+         & tooltip="Cancel, keep the existing selection"//c_null_char)
+    call hl_gtk_box_pack(jb, junk)
+
+    call gtk_widget_show_all(pwin)
+
+  end subroutine set_pdf_reader
+
+  subroutine set_pdf_destroy(widget, data) bind(c)
+    type(c_ptr), value :: widget, data
+
+    call gtk_widget_destroy(pwin)
+
+  end subroutine set_pdf_destroy
+
+  subroutine set_pdf_apply(widget, data) bind(c)
+    type(c_ptr), value :: widget, data
+
+    integer(kind=c_int) :: idx
+    character(len=len(pdf_reader)) :: pval
+
+    if (.not.c_associated(pchoose)) return
+
+    idx = hl_gtk_combo_box_get_active(pchoose, ftext=pval)
+
+    if (pval == 'Text') then
+       pdf_reader = ''
+    else
+       pdf_reader = pval
+    end if
+    pdf_is_init = .true.
+
+    call gtk_widget_destroy(pwin)
+  end subroutine set_pdf_apply
+
+  subroutine set_pdf_pick(widget, data) bind(c)
+    type(c_ptr), value :: widget, data
+
+    integer(kind=c_int) :: idx
+    character(len=len(pdf_reader)) :: pval
+
+    if (.not.c_associated(pchoose)) return
+
+    idx = hl_gtk_combo_box_get_active(pchoose, ftext=pval)
+
+    if (idx >= 0) then
+       call gtk_widget_set_sensitive(pbut, TRUE)
+    else
+       call gtk_widget_set_sensitive(pbut, &
+            & f_c_logical(check_command(pval)))
+    end if
+  end subroutine set_pdf_pick
 
 end module handlers

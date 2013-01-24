@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=RPNCalc
-Exec=rpncalc
+Exec=RPNcalc
 Icon=accessories-calculator
 GenericName=RPN Scientific Calculator
 Terminal=false

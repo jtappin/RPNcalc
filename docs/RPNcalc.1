@@ -1,5 +1,5 @@
 '\" t
-.\" Manual page created with latex2man on Wed Aug 29 15:58:44 MDT 2012
+.\" Manual page created with latex2man on Thu Jan 24 10:05:53 MST 2013
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -10,11 +10,11 @@
 
 .fi
 ..
-.TH "RPNCALC" "1" "29 August 2012" "RPN Scientific Calculator " "RPN Scientific Calculator "
+.TH "RPNCALC" "1" "24 January 2013" "RPN Scientific Calculator " "RPN Scientific Calculator "
 .SH NAME
 
 .PP
-rpncalc
+RPNcalc
 \fBhttps://github.com/jtappin/RPNcalc\fP
 is a fully 
 functional scientific calculator emulator, written entirely in 
@@ -24,7 +24,7 @@ gtk\-fortran libraries \fBhttps://github.com/jerryd/gtk\-fortran\fP\&.
 .SH SYNOPSIS
 
 .PP
-rpncalc
+RPNcalc
 [\fBoptions\fP]
 \&...
 .PP
@@ -179,7 +179,7 @@ converted to a root.
 The \fBRad\fP,
 \fBDeg\fP
 and \fBGrad\fP
-radio buttons are 
+pull down menu 
 used to select Radians, Degrees or Grads for the trigonometric 
 functions. 
 .PP
@@ -365,17 +365,21 @@ This manual can be accessed in a number of ways:
 .TP
 1.
 A manpage is generated and can be accessed using 
-man rpncalc\&.
+man RPNcalc\&.
 .TP
 2.
-The ``Help\&'' item in the menu will display either the text 
-version or (if the environment variable RPNCALC_VIEWER
+The ``Help\&'' item in the menu will display either the PDF version 
+of the manual if a suitable viewer can be found (the environment 
+variable RPNCALC_VIEWER
+can be used to set a preferred 
+viewer). If no viewer is found (or if RPNCALC_VIEWER
 is 
-set to a PDF viewer) the PDF version. 
+set to text)
+then a text version is displayed. 
 .TP
 3.
 The text and PDF versions are installed in the 
-share/docs/rpncalc
+share/docs/RPNcalc
 subdirectory of the installation directory. 
 .PP
 .SS ACCELERATORS:

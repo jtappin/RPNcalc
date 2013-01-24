@@ -21,7 +21,7 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 cmake_minimum_required(VERSION 2.8.5)
-project(rpncalc_gtk Fortran)
+project(RPNcalc Fortran)
 
 set(NAME RPNcalc)
 
@@ -58,15 +58,15 @@ ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
 enable_testing()
 
-# Find Gtk-Fortran, if Gtk2 is preferred, then switch the order of
+# Find Gtk-Fortran, if Gtk3 is preferred, then switch the order of
 # the scans below.
 
-find_package(Gtk3Fortran)
-if (NOT GTK3FORTRAN_FOUND)
-  message(STATUS "GTK3FORTRAN not found trying GTK2FORTRAN")
-  find_package(Gtk2Fortran)
-  if (NOT GTK2FORTRAN_FOUND)
-    message (FATAL_ERROR "GTK2FORTRAN Not found either, aborting")
+find_package(Gtk2Fortran)
+if (NOT GTK2FORTRAN_FOUND)
+  message(STATUS "GTK2FORTRAN not found trying GTK3FORTRAN")
+  find_package(Gtk3Fortran)
+  if (NOT GTK3FORTRAN_FOUND)
+    message (FATAL_ERROR "GTK3FORTRAN Not found either, aborting")
   endif()
 endif()
 

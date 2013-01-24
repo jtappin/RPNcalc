@@ -435,7 +435,7 @@ contains
     type(c_ptr) :: cetext
     character(len=40) :: fetext
     real(kind=c_double) :: val
-    integer :: ios, unit=44
+    integer :: ios, unit
     integer(kind=c_int) :: i
     character(len=8) :: dformat
     character(len=80) :: iom
@@ -445,7 +445,7 @@ contains
     ! C_SIZEOF function instead).
     write(dformat, "('(Z',I0')')") 2*c_double
 
-    open(unit=unit, file=file, action="write", form="formatted", &
+    open(newunit=unit, file=file, action="write", form="formatted", &
          & iostat=ios, iomsg=iom)
     if (present(status)) status=ios
     if (ios /= 0) then
@@ -498,7 +498,7 @@ contains
     integer(kind=c_int) :: nrows, nchars, mid
     character(len=40) :: etext
     real(kind=c_double) :: val
-    integer :: ios, unit=44
+    integer :: ios, unit
     integer(kind=c_int) :: i
     character(len=5) :: tag
     character(len=8) :: dformat
@@ -509,8 +509,8 @@ contains
     ! C_SIZEOF function instead).
     write(dformat, "('(Z',I0')')") 2*c_double
 
-    open(unit, file=file, action="read", status='old', form="formatted", &
-         & iostat=ios, iomsg=iom)
+    open(newunit=unit, file=file, action="read", status='old', &
+         & form="formatted", iostat=ios, iomsg=iom)
     if (ios /= 0) then
        mid = gtk_statusbar_push(fstatus, 0_c_int, trim(iom)//c_null_char)
        if (present(status)) status=ios
@@ -593,7 +593,63 @@ contains
 
   end subroutine restore_all
 
+  function check_command(cmd)
+    logical :: check_command
+    character(len=*), intent(in) :: cmd
 
+    ! Determine if a command exists. Does not find aliases or shell built-ins
+
+    integer :: status
+
+    call execute_command_line("which "//trim(cmd)//" > /dev/null 2> /dev/null", &
+         & exitstat=status)
+    check_command = status==0
+
+  end function check_command
+
+  subroutine find_pdf_reader(reader)
+    character(len=*), intent(out) :: reader
+
+    ! Identify an available PDF reader.
+
+    integer :: vstatus, i
+    character(len=80) :: env_reader
+
+    ! First check if the user has specified a viewer, then scan the
+    ! build in list.
+
+    if (.not. pdf_is_init) then
+       call get_environment_variable('RPNCALC_VIEWER', value=env_reader, &
+            & status=vstatus)
+       if (env_reader == 'text') then
+             pdf_reader = ''
+             pdf_is_init = .true.
+       else if (env_reader /= '' .and. &
+            & vstatus == 0 .and. check_command(pdf_reader)) then
+          pdf_reader = env_reader
+          pdf_is_init = .true.
+       else
+          do i = 1, size(pdf_readers)
+             if (check_command(pdf_readers(i))) then
+                pdf_reader = pdf_readers(i)
+                pdf_is_init = .true.
+                exit
+             end if
+          end do
+       end if
+    end if
+
+    reader = pdf_reader
+
+    ! Prevent repeated scans.
+
+    if (.not. pdf_is_init) then
+       write(error_unit, "(A)") "find_pdf_reader: No PDF viewer found"
+       pdf_is_init = .true.
+    end if
+
+  end subroutine find_pdf_reader
+    
   ! Inverse hyperbolics for those Fortrans that don't support them.
 
 !!$  function asinh(x)
