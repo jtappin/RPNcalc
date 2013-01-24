@@ -36,7 +36,11 @@ link_directories(/usr/local/lib)
 
 set(TEXTFILE ${CMAKE_INSTALL_FULL_DOCDIR}/${NAME}.txt)
 set(PDFFILE ${CMAKE_INSTALL_FULL_DOCDIR}/${NAME}.pdf)
-configure_file(handlers-tmpl.f90  handlers.f90)
+add_custom_command(
+  OUTPUT handlers.f90
+  COMMAND sed -e s+\@TEXTFILE\@+${TEXTFILE}+ -e s+\@PDFFILE\@+${PDFFILE}+ ${CMAKE_CURRENT_SOURCE_DIR}/handlers-tmpl.f90 > ${CMAKE_CURRENT_BINARY_DIR}/handlers.f90
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/handlers-tmpl.f90
+  )
 
 add_executable(${NAME} ${sources} ${CMAKE_CURRENT_BINARY_DIR}/handlers.f90) 
 target_link_libraries(RPNcalc ${GTKFORTRAN_LIBRARIES})
