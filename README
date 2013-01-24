@@ -6,3 +6,8 @@ is built using the GtkFortran libraries
 
 It should work equally well with late 2.x and the 3.0 versions of Gtk+.
 
+WARNING:
+	On 24 Jan 2013, the executable name (and other name stems) were
+	changed from "rpncalc" to "RPNcalc" to avoid a clash with an
+	existing CLI calculator also called rpncalc. You are advised to
+	uninstall the old version before updating your sources.
