@@ -24,48 +24,48 @@ if (LATEX2MAN)
   message(STATUS "Generating documentation")
   
   add_custom_command(
-    OUTPUT rpncalc.1
-    COMMAND ${LATEX2MAN} ${CMAKE_CURRENT_SOURCE_DIR}/rpncalc.tex ${CMAKE_CURRENT_BINARY_DIR}/rpncalc.1
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rpncalc.tex
+    OUTPUT ${NAME}.1
+    COMMAND ${LATEX2MAN} ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.tex ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.tex
     )
 else()
   add_custom_command(
-    OUTPUT rpncalc.1
-    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/rpncalc.1 ${CMAKE_CURRENT_BINARY_DIR}/rpncalc.1
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rpncalc.1
+    OUTPUT ${NAME}.1
+    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.1 ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.1
     )
 endif()
 
 add_custom_command(
-  OUTPUT rpncalc.txt
-  COMMAND man ${CMAKE_CURRENT_BINARY_DIR}/rpncalc.1 > ${CMAKE_CURRENT_BINARY_DIR}/rpncalc.txt
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rpncalc.1
+  OUTPUT ${NAME}.txt
+  COMMAND man ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1 > ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.txt
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1
   )
 
 if (PDFLATEX)
   add_custom_command(
-    OUTPUT rpncalc.pdf
-    COMMAND ${PDFLATEX} -output-directory ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/rpncalc.tex
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rpncalc.tex
+    OUTPUT ${NAME}.pdf
+    COMMAND ${PDFLATEX} -output-directory ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.tex > /dev/null
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.tex
     )
 else()
   add_custom_command(
-    OUTPUT  rpncalc.pdf
-    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/rpncalc.pdf ${CMAKE_CURRENT_BINARY_DIR}/rpncalc.pdf
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rpncalc.pdf
+    OUTPUT  ${NAME}.pdf
+    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.pdf ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.pdf
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.pdf
     )
 endif()
 
 
-add_custom_target(helptexts ALL DEPENDS rpncalc.1 rpncalc.pdf rpncalc.txt)
+add_custom_target(helptexts ALL DEPENDS ${NAME}.1 ${NAME}.pdf ${NAME}.txt)
 
 install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/rpncalc.pdf"
-  "${CMAKE_CURRENT_BINARY_DIR}/rpncalc.txt"
+  "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.pdf"
+  "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.txt"
   DESTINATION ${CMAKE_INSTALL_DOCDIR}
 )
 install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/rpncalc.1"
+  "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1"
   DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
 )
 

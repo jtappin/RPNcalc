@@ -21,7 +21,9 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 cmake_minimum_required(VERSION 2.8.5)
-project(RPNcalc Fortran)
+project(rpncalc_gtk Fortran)
+
+set(NAME RPNcalc)
 
 # Note that we override the lib directory here because most
 # 64-bit systems don't actually work if we use the default.

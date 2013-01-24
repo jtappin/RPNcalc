@@ -1,9 +1,17 @@
 # RPNcalc Makefile
 
+# ****************************************************************************
+# *                                                                          *
+# * The use of this Makefile is now deprecated. A cmake build system is now  *
+# * available, it can find the needed programs and libraries automatically.  *
+# * This Makefile may be deleted at some point.                              *
+# *                                                                          *
+# ****************************************************************************
+
 # Where to install everything.
 #   The binaries will go into $(PREFIX)/bin
 #   The desktop file into $(PREFIX)/share/applications
-#   The man page into $(PREFIX)/man/man1
+#   The man page into $(PREFIX)/share/man/man1
 #   The text & pdf documents into $(PREFIX)/share/doc/rpncalc
 
 PREFIX=/usr/local
@@ -38,6 +46,14 @@ SUBDIRS=docs src
 CLNSUBDIRS=src
 
 all:
+	@echo "WARNING: Use of this Makefile is deprecated, please use"
+	@echo "         the cmake system in a dedicated build directory"
+	@echo "         see the file INSTALL in this directory for details"
+	@echo "         if you absolutely need to use this form, use"
+	@echo "         make old"
+	@echo "         to build the system."
+
+old:
 	for dir in $(SUBDIRS); do \
 	$(MAKE) $(MFLAGS) -C $$dir "PREFIX=$(PREFIX)" \
 	"FC=$(FC)" "QUADLIB=$(QUADLIB)" "GTKVER=$(GTKVER)" \

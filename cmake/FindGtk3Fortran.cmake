@@ -6,11 +6,16 @@
 #  (at your option) any later version.
 #
 
+# As well as returning the standard variables expected from a pkg-config based
+# find, the main variables are returned as "unversioned" forms that will allow 
+# a top-level CMakeLists.txt to select whichever version is available and
+# use that.
+
 find_package(PkgConfig)
-pkg_check_modules(GTK3FORTRAN gtk-3-fortran)
+pkg_check_modules(GTK3FORTRAN QUIET gtk-3-fortran)
+
 find_path(GTK3FORTRAN_MODULE_DIR NAMES gtk.mod 
   PATHS ${GTK3FORTRAN_INCLUDE_DIRS}) 
-message(STATUS "${GTK3FORTRAN_LIBRARY_DIRS}")
 
 # We set these to allow automatic fail-overs from Gtk3->Gtk2 or vice-versa.
 
@@ -20,8 +25,6 @@ set(GTKFORTRAN_INCLUDE_DIRS ${GTK3FORTRAN_INCLUDE_DIRS})
 set(GTKFORTRAN_MODULE_DIR ${GTK3FORTRAN_MODULE_DIR})
 
 mark_as_advanced(
-  # GTK3FORTRAN_LIBRARIES
-  # GTK3FORTRAN_INCLUDE_DIRS
   GTK3FORTRAN_MODULE_DIR
   GTKFORTRAN_LIBRARIES
   GTKFORTRAN_LIBRARY_DIRS

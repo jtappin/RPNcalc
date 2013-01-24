@@ -6,8 +6,14 @@
 #  (at your option) any later version.
 #
 
+# As well as returning the standard variables expected from a pkg-config based
+# find, the main variables are returned as "unversioned" forms that will allow 
+# a top-level CMakeLists.txt to select whichever version is available and
+# use that.
+
 find_package(PkgConfig)
-pkg_check_modules(GTK2FORTRAN gtk-2-fortran)
+pkg_check_modules(GTK2FORTRAN QUIET gtk-2-fortran)
+
 find_path(GTK2FORTRAN_MODULE_DIR NAMES gtk.mod 
   PATHS ${GTK2FORTRAN_INCLUDE_DIRS}) 
 
@@ -19,8 +25,6 @@ set(GTKFORTRAN_INCLUDE_DIRS ${GTK2FORTRAN_INCLUDE_DIRS})
 set(GTKFORTRAN_MODULE_DIR ${GTK2FORTRAN_MODULE_DIR})
 
 mark_as_advanced(
-  # GTK2FORTRAN_LIBRARIES
-  # GTK2FORTRAN_INCLUDE_DIR
   GTK2FORTRAN_MODULE_DIR
   GTKFORTRAN_LIBRARIES
   GTKFORTRAN_LIBRARY_DIRS

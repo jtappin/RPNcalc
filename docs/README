@@ -1,0 +1,6 @@
+RPNcalc documentation
+
+The primary documentation source is the latex file RPNcalc.tex, but the
+derived pages RPNcalc.1, RPNcalc.pdf and RPNcalc.txt are provided for
+the benefit of systems where some of the tools needed for generation
+are unavailable (e.g. Fedora does not have latex2man available).

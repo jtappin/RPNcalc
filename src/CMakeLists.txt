@@ -24,12 +24,9 @@ set(sources
   rpncalc.f90
   widgets.f90
   utils.f90
-  #  handlers.f90
   physics.f90
   )
 
-message(STATUS "${GTKFORTRAN_MODULE_DIR}")
-message(STATUS "${GTKFORTRAN_LIBRARY_DIRS}")
 include_directories("/usr/include")
 include_directories(${GTKFORTRAN_MODULE_DIR})
 include_directories("/usr/local/include")
@@ -37,22 +34,22 @@ include_directories("/usr/local/include")
 link_directories(${GTKFORTRAN_LIBRARY_DIRS})
 link_directories(/usr/local/lib)
 
-set(TEXTFILE ${CMAKE_INSTALL_DOCDIR}/rpncalc.txt)
-set(PDFFILE ${CMAKE_INSTALL_DOCDIR}/doc/rpncalc/rpncalc.pdf)
+set(TEXTFILE ${CMAKE_INSTALL_FULL_DOCDIR}/${NAME}.txt)
+set(PDFFILE ${CMAKE_INSTALL_FULL_DOCDIR}/${NAME}.pdf)
 
 add_custom_command(
   OUTPUT handlers.f90
-  COMMAND sed -e "s:@TEXTFILE@:$(TEXTFILE):" -e "s:@PDFFILE@:$(PDFFILE):" ${CMAKE_CURRENT_SOURCE_DIR}/handlers-tmpl.f90 > ${CMAKE_CURRENT_BINARY_DIR}/handlers.f90
+  COMMAND sed -e s+\@TEXTFILE\@+${TEXTFILE}+ -e s+\@PDFFILE\@+${PDFFILE}+ ${CMAKE_CURRENT_SOURCE_DIR}/handlers-tmpl.f90 > ${CMAKE_CURRENT_BINARY_DIR}/handlers.f90
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/handlers-tmpl.f90
 )
 
-add_executable(rpncalc ${sources} ${CMAKE_CURRENT_BINARY_DIR}/handlers.f90) 
-target_link_libraries(rpncalc ${GTKFORTRAN_LIBRARIES})
+add_executable(${NAME} ${sources} ${CMAKE_CURRENT_BINARY_DIR}/handlers.f90) 
+target_link_libraries(RPNcalc ${GTKFORTRAN_LIBRARIES})
 
 install(FILES
-  "${CMAKE_CURRENT_SOURCE_DIR}/rpncalc.desktop"
+  "${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.desktop"
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
 
 install(PROGRAMS
-  "${CMAKE_CURRENT_BINARY_DIR}/rpncalc"
+  "${CMAKE_CURRENT_BINARY_DIR}/${NAME}"
   DESTINATION ${CMAKE_INSTALL_BINDIR})

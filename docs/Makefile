@@ -5,7 +5,7 @@ PREFIX=/usr/local
 # You shouldn't normally need to change anything below here. #
 ##############################################################
 
-NAME=rpncalc$(NAME_SUFFIX)
+NAME=RPNcalc$(NAME_SUFFIX)
 SOURCE=$(NAME).tex
 MAN=$(NAME).1
 TEXT=$(NAME).txt

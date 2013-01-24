@@ -38,7 +38,7 @@ SHRDIR=$(PREFIX)/share
 APPDIR=$(SHRDIR)/applications
 
 OBJS = rpncalc.o handlers.o widgets.o utils.o physics.o
-PROG = rpncalc$(NAME_SUFFIX)
+PROG = RPNcalc$(NAME_SUFFIX)
 DESKTOP=$(PROG).desktop
 
 DOCDIR=$(SHRDIR)/doc/$(PROG)
