@@ -1662,13 +1662,14 @@ contains
          & count(pdf_reader == pdf_readers) == 0) then
        allocate(list(nfound+2))
        list(nfound+2) = pdf_reader
-       ichoice = nfound+2
+       ichoice = nfound+1
     else
        allocate(list(nfound+1))
+       ichoice = -1
     end if
 
     list(1) = 'Text'
-    if (pdf_is_init .and. pdf_reader == '') ichoice = 1
+    if (pdf_is_init .and. pdf_reader == '') ichoice = 0
 
     if (nfound > 0) then
        j = 2
@@ -1676,7 +1677,7 @@ contains
           if (isinstalled(i)) then
              list(j) = pdf_readers(i)
              if (list(j) == pdf_reader .and. pdf_is_init) &
-                  & ichoice = j
+                  & ichoice = j-1
              j = j+1
           end if
        end do
