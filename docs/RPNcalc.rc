@@ -1,0 +1,45 @@
+# .RPNcalcrc
+#
+# Specimen resource file for RPNcalc
+#  Values are specified as:
+# key = value
+#    or
+# key: value
+#
+# This file is parsed BEFORE any command line options.
+# Thus (e.g.) setting a trigonometric unit on the command line will
+# override any setting here.
+# The example settings correspond to the built-in defaults.
+
+# Formatting:
+# Specify a Fortran format (or * for list directed),
+# If the width is set to zero or omitted then for F, ES, EN or G
+# formats it will be calculated automatically (e.g. es.6e3 will be
+# expanded to ES14.6e3.
+# format = *
+
+# Leading zeroes
+# Set this to a true value (t true y yes) to show leading zeroes when
+# showing base(n) representations, or a false one (f false n no) to
+# suppress them
+# zero: no
+
+# Help viewer
+# Set the default viewer for the help system. 'text' for the simple text
+# viewer or the name of a pdf reader.
+# viewer = xpdf
+
+# Trigonometric units
+# Set to one of radians, degrees or grads
+# angles: degrees
+
+# Angle/time display
+# Set dms to a true value to show in angular format, a false value for
+# time format. (hms is an alternative key with the truth settings
+# reversed)
+# dms = false
+# hms = true
+
+# Number of registers
+# Set the number of memore registers at start up
+# registers=10

@@ -62,6 +62,7 @@ add_custom_target(helptexts ALL DEPENDS ${NAME}.1 ${NAME}.pdf ${NAME}.txt)
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.pdf"
   "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.txt"
+  "${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.rc"
   DESTINATION ${CMAKE_INSTALL_DOCDIR}
 )
 install(FILES

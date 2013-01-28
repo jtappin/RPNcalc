@@ -650,6 +650,229 @@ contains
 
   end subroutine find_pdf_reader
     
+  subroutine get_rc(file, quiet)
+    character(len=*), intent(in), optional :: file
+    logical, intent(in), optional :: quiet
+
+    ! Read a resource file.
+
+    character(len=256) :: rcfile
+    character(len=240) :: home
+    integer :: ios, unit
+    character(len=120) :: iom
+    logical :: report
+
+    character(len=160) :: inln, val
+    character(len=16) :: key
+    integer :: peq, phash, pd, pe
+    integer :: n
+    if (present(file)) then
+       rcfile = file
+    else
+       call get_environment_variable("HOME", value=home)
+       rcfile=trim(home)//'/.RPNcalcrc'
+    end if
+
+    if (present(quiet)) then
+       report = .not. quiet
+    else
+       report = .true.
+    end if
+
+    open(newunit=unit, file=rcfile, iostat=ios, iomsg=iom, &
+         & form='formatted', action='read', status='old')
+    if (ios /= 0) then
+       if (report) then
+          write(error_unit, "(A/'         ',a)") &
+               & "get_rc: Failed to open resource file", trim(iom)
+       end if
+       return
+    end if
+
+    do
+       read(unit, "(A)", iostat=ios, iomsg=iom) inln
+       if (ios == iostat_end) exit
+       if (ios /= 0) then
+          if (report) then
+             write(error_unit, "(A/'         ',a)") &
+                  & "get_rc: Error reading resource file", trim(iom)
+          end if
+          exit
+       end if
+
+       ! Strip comments and skip empty lines
+       phash = index(inln, "#")
+       if (phash > 0) inln(phash:) = ' '
+       if (inln == '') cycle
+
+       peq = scan(inln,'=:')
+       if (peq == 0) then
+          write(error_unit,  "(A/'         ',a)") &
+               & "get_rc: Invalid input line", trim(inln)
+          cycle
+       end if
+       key = lowcase(adjustl(inln(:peq-1)))
+       val = adjustl(inln(peq+1:))
+
+       select case(key)
+       case('format')
+          call parse_format(val, result_format, fmt_type, &
+               & fmt_decimal, fmt_expplaces)
+       case('zero')
+          select case(lowcase(val))
+          case('t','y','true','yes')
+             leading_zeroes = .true.
+          case('f','n','false','no')
+             leading_zeroes = .false.
+          case default
+          end select
+       case('viewer')
+          if (lowcase(val) == 'text') then
+             pdf_reader = ''
+             pdf_is_init = .true.
+          else
+             if (check_command(val)) then
+                pdf_reader = trim(val)
+                pdf_is_init = .true.
+             else
+                write(error_unit,  "(3a)") &
+                     & "get_rc: ", trim(val), " not found"
+             end if
+          end if
+       case("angles")
+          select case(lowcase(val))
+          case('radian', 'radians')
+             trigunit = 0
+          case('degree', 'degrees')
+             trigunit = 1
+          case('grad', 'grads')
+             trigunit = 2
+          end select
+
+       case("hms")
+          select case(lowcase(val))
+          case('t','y','true','yes')
+             dms_hms = .false.
+          case('f','n','false','no')
+             dms_hms = .true.
+          case default
+          end select
+       case("dms")
+          select case(lowcase(val))
+          case('t','y','true','yes')
+             dms_hms = .true.
+          case('f','n','false','no')
+             dms_hms = .false.
+          case default
+          end select
+
+       case('registers')
+          read(val,*) maxreg
+          maxreg = maxreg - 1
+
+       case default
+          write(error_unit, "(4A)") "get_rc: Unknown key: ",trim(key),&
+               & " value: ", trim(val)
+       end select
+    end do
+
+    close(unit)
+  end subroutine get_rc
+
+  elemental function lowcase(string)
+    character(len=*), intent(in) :: string
+    character(len=len(string)) :: lowcase
+
+    integer, parameter :: ucmin = iachar('A'), ucmax = iachar('Z')
+    integer, parameter :: case_diff = iachar('A')-iachar('a')
+    integer :: i, ic
+
+    lowcase = string
+    do i = 1, len(string)
+       ic = iachar(string(i:i))
+       if (ic >= ucmin .and. ic <= ucmax) lowcase(i:i) = achar(ic-case_diff)
+    end do
+  end function lowcase
+    
+  subroutine parse_format(fstr, fmt, type, ndec, nexp)
+    character(len=*), intent(in) :: fstr
+    character(len=*), intent(inout) :: fmt
+    integer(kind=c_int), intent(inout)  :: type, ndec, nexp
+
+    integer :: pl, pd, pe
+    integer(kind=c_int) :: nchar
+
+    pl= scan(fstr,'0123456789.')      ! first number
+    pd = index(fstr,'.')              ! Decimal
+    pe = scan(fstr(pl+1:),'Ee')       ! Exponent length
+    if (pe > 0) pe = pe+pl
+
+    if (pd == pl) then
+       nchar = 0
+    else
+       read(fstr(pl:pd-1),*) nchar
+    end if
+    if (pe == 0) then
+       if (pd > 0) then
+          read(fstr(pd+1:),*) ndec
+       else
+          ndec = 0
+       end if
+       nexp = 2
+    else
+       read(fstr(pd+1:pe-1),*) ndec
+       read(fstr(pe+1:),*) nexp
+    end if
+
+    select case(lowcase(fstr(:pl-1)))
+    case('f')
+       if (nchar == 0) then
+          type = 0
+          write(fmt,"('(F0.',i0')')") ndec
+       else
+          fmt = fstr
+          type = -1
+       end if
+    case('es')
+       if (nchar == 0) then
+          nchar = 5+ndec+nexp
+          write(fmt, "('(ES',i0,'.',i0,'e',i0,')')") nchar, ndec, nexp
+          type = 1
+       else
+          fmt = fstr
+          type = -1
+       end if
+    case('en')
+       if (nchar == 0) then
+          nchar = 7+ndec+nexp
+          write(fmt, "('(EN',i0,'.',i0,'e',i0,')')") nchar, ndec, nexp
+          type = 1
+       else
+          fmt = fstr
+          type = -1
+       end if
+    case('g')
+       if (nchar == 0) then
+          nchar = 5+ndec+nexp
+          write(fmt, "('(G',i0,'.',i0,'e',i0,')')") nchar, ndec, nexp
+          type = 1
+       else
+          fmt = fstr
+          type = -1
+       end if
+    case('*','')
+       type = 4
+       fmt = ''
+    case default
+       type = -1
+       fmt = fstr
+    end select
+    if (type == -1) then
+       if (index(fmt,')', back=.true.) /= len_trim(fmt)) fmt = trim(fmt)//')'
+       if (index(fmt,'(') /= 1) fmt = '('//trim(fmt)
+    end if
+
+  end subroutine parse_format
   ! Inverse hyperbolics for those Fortrans that don't support them.
 
 !!$  function asinh(x)

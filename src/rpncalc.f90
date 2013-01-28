@@ -78,6 +78,10 @@ program rpncalc
   integer(kind=c_int) :: isopen = TRUE
   character(len=200) :: restfile = '', smaxreg = ''
 
+  ! Read the resource file (if any)
+
+  call get_rc(quiet=.true.)
+
   ! Check for command line arguments
 
   narg = command_argument_count()
@@ -210,7 +214,8 @@ program rpncalc
        & activate=c_funloc(set_pdf_reader))
 
   khrdeg = hl_gtk_check_menu_item_new(femenu, "Display degrees"//c_null_char, &
-       & toggled = c_funloc(set_dms_hms), tooltip = &
+       & toggled = c_funloc(set_dms_hms), initial_state=f_c_logical(dms_hms), &
+       & tooltip = &
        & "Select angular or time format for HMS display"//c_null_char)
 
   fhmenu = hl_gtk_menu_submenu_new(fmenu, "Help"//c_null_char)

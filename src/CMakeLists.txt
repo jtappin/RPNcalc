@@ -43,7 +43,7 @@ add_custom_command(
   )
 
 add_executable(${NAME} ${sources} ${CMAKE_CURRENT_BINARY_DIR}/handlers.f90) 
-target_link_libraries(RPNcalc ${GTKFORTRAN_LIBRARIES})
+target_link_libraries(${NAME} ${GTKFORTRAN_LIBRARIES})
 
 install(FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.desktop"

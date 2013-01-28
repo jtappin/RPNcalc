@@ -63,10 +63,10 @@ enable_testing()
 
 find_package(Gtk2Fortran)
 if (NOT GTK2FORTRAN_FOUND)
-  message(STATUS "GTK2FORTRAN not found trying GTK3FORTRAN")
+  message(STATUS "Gtk2Fortran not found trying Gtk3Fortran")
   find_package(Gtk3Fortran)
   if (NOT GTK3FORTRAN_FOUND)
-    message (FATAL_ERROR "GTK3FORTRAN Not found either, aborting")
+    message (FATAL_ERROR "Gtk3Fortran Not found either, aborting")
   endif()
 endif()
 

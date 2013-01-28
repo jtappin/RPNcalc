@@ -291,6 +291,22 @@ The menu items have accerators to save mouse clicking:
 \item About gtk-fortran -- ctrl-shift-a
 \end{itemize}
 
+\subsection{Resource file}
+
+If a file \texttt{.RPNcalcrc} is present in the user's home
+directory, then it will be read and parsed. It is a key = value (or
+key: value) text file that can set the following options:
+\begin{itemize}
+\item format -- the result display format.
+\item zero -- whether to show leading zeroes in base(n) displays.
+\item hms, dms -- whether to use time or angle formats.
+\item angles -- the trigonometric units.
+\item viewer -- the preferred help viewer.
+\item registers -- the initial number of registers.
+\end{itemize}
+An specimen is available in the \texttt{share/docs/RPNcalc} as
+\texttt{RPNcalc.rc}. 
+
 \section{AUTHORS}
 
 James Tappin (jtappin at gmail dot com).

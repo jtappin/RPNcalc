@@ -1,5 +1,5 @@
 '\" t
-.\" Manual page created with latex2man on Thu Jan 24 10:05:53 MST 2013
+.\" Manual page created with latex2man on Mon Jan 28 10:35:21 MST 2013
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -10,7 +10,7 @@
 
 .fi
 ..
-.TH "RPNCALC" "1" "24 January 2013" "RPN Scientific Calculator " "RPN Scientific Calculator "
+.TH "RPNCALC" "1" "28 January 2013" "RPN Scientific Calculator " "RPN Scientific Calculator "
 .SH NAME
 
 .PP
@@ -419,6 +419,35 @@ About \-\- ctrl\-a
 .TP
 .B *
 About gtk\-fortran \-\- ctrl\-shift\-a 
+.PP
+.SS RESOURCE FILE
+.PP
+If a file \&.RPNcalcrc
+is present in the user\&'s home 
+directory, then it will be read and parsed. It is a key = value (or 
+key: value) text file that can set the following options: 
+.TP
+.B *
+format \-\- the result display format. 
+.TP
+.B *
+zero \-\- whether to show leading zeroes in base(n) displays. 
+.TP
+.B *
+hms, dms \-\- whether to use time or angle formats. 
+.TP
+.B *
+angles \-\- the trigonometric units. 
+.TP
+.B *
+viewer \-\- the preferred help viewer. 
+.TP
+.B *
+registers \-\- the initial number of registers. 
+.PP
+An specimen is available in the share/docs/RPNcalc
+as 
+RPNcalc.rc\&.
 .PP
 .SH AUTHORS
 

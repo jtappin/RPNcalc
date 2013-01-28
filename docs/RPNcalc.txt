@@ -238,11 +238,29 @@ USER'S GUIDE
 
        *      About gtk-fortran -- ctrl-shift-a
 
+   RESOURCE FILE
+       If a file .RPNcalcrc is present in the user's home directory, then it will be read and parsed. It is
+       a key = value (or key: value) text file that can set the following options:
+
+       *      format -- the result display format.
+
+       *      zero -- whether to show leading zeroes in base(n) displays.
+
+       *      hms, dms -- whether to use time or angle formats.
+
+       *      angles -- the trigonometric units.
+
+       *      viewer -- the preferred help viewer.
+
+       *      registers -- the initial number of registers.
+
+       An specimen is available in the share/docs/RPNcalc as RPNcalc.rc.
+
 AUTHORS
        James Tappin (jtappin at gmail dot com).
 
 LICENCE
-       RPNcalc  is  free  software and may be modified and redistributed under the terms of the GNU General
+       RPNcalc is free software and may be modified and redistributed under the terms of  the  GNU  General
        Public Licence Version 3.
 
-RPN Scientific Calculator                     24 January 2013                                    RPNCALC(1)
+RPN Scientific Calculator                     28 January 2013                                    RPNCALC(1)
