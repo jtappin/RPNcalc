@@ -28,11 +28,32 @@ if (LATEX2MAN)
     COMMAND ${LATEX2MAN} ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.tex ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.tex
     )
+
+  if (PDFLATEX)
+    add_custom_command(
+      OUTPUT ${NAME}.pdf
+      COMMAND ${PDFLATEX} -output-directory ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.tex > /dev/null
+      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.tex
+      )
+  else()
+    add_custom_command(
+      OUTPUT  ${NAME}.pdf
+      COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.pdf ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.pdf
+      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.pdf
+      )
+  endif()
+
 else()
   add_custom_command(
     OUTPUT ${NAME}.1
     COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.1 ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.1
+    )
+
+  add_custom_command(
+    OUTPUT  ${NAME}.pdf
+    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.pdf ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.pdf
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.pdf
     )
 endif()
 
@@ -42,20 +63,6 @@ add_custom_command(
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1
   )
 
-if (PDFLATEX)
-  add_custom_command(
-    OUTPUT ${NAME}.pdf
-    COMMAND ${PDFLATEX} -output-directory ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.tex > /dev/null
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.tex
-    )
-else()
-  add_custom_command(
-    OUTPUT  ${NAME}.pdf
-    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.pdf ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.pdf
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.pdf
-    )
-endif()
-
 
 add_custom_target(helptexts ALL DEPENDS ${NAME}.1 ${NAME}.pdf ${NAME}.txt)
 
@@ -64,9 +71,9 @@ install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.txt"
   "${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.rc"
   DESTINATION ${CMAKE_INSTALL_DOCDIR}
-)
+  )
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.1"
   DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
-)
+  )
 

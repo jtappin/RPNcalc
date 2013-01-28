@@ -72,7 +72,7 @@ endif()
 
 find_program(LATEX2MAN latex2man)
 if (NOT LATEX2MAN)
-  message(WARNING "latex2man not found cannot regenerate manpage")
+  message(WARNING "latex2man not found cannot regenerate documentation")
 endif()
 
 find_program(PDFLATEX pdflatex)
