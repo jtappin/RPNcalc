@@ -25,7 +25,7 @@ module widgets
 
   ! Enumerators for operations and functions
 
-  enum, bind(c)  ! Operator identifiers
+  enum, bind(c)  ! Operator identifiers (and 2 argument functions)
      enumerator :: OP_NONE
      enumerator :: OP_PLUS
      enumerator :: OP_MINUS
@@ -34,6 +34,8 @@ module widgets
      enumerator :: OP_POWER
      enumerator :: FUN_ATAN2      ! Behaves like an operator (2 args)
      enumerator :: FUN_MOD	  ! Ditto
+     enumerator :: FUN_HCF
+     enumerator :: FUN_LCM
   end enum
 
   enum, bind(c)  ! Function identifiers
@@ -80,7 +82,7 @@ module widgets
 
   ! The pulldown menu for "obscure" functions
   type(c_ptr) :: menu, pull, kabs, kaint, kfrac, katan2, kfact, kmod, &
-       & khex, koct, kbin, kanint
+       & khex, koct, kbin, kanint, khcf, klcm
 
   ! The physics constants pulldown
   type(c_ptr) :: phys, fconst, k_c, k_e, k_h, k_hb, k_k, k_g, k_e0, k_m0, &

@@ -23,6 +23,11 @@ Step 2:
      cmake ..
      This will check that all needed software is present and create the
      needed Makefiles.
+     To select between GTK2 and GTK3 use:
+     cmake -DGTK=2 ..
+     or
+     cmake -DGTK=3 ..
+     (The default behaviour is to check GTK2 first then GTK3).
      Possible problems:
      1) Can't find the gtk-fortran pkg-config file.
       a) pkg-config does not look in /usr/local, solution:

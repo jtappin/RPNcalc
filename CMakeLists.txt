@@ -59,14 +59,26 @@ ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 enable_testing()
 
 # Find Gtk-Fortran, if Gtk3 is preferred, then switch the order of
-# the scans below.
+# the scans below, or to use only one version use -DGTK=2 or -DGTK=3.
 
-find_package(Gtk2Fortran)
-if (NOT GTK2FORTRAN_FOUND)
-  message(STATUS "Gtk2Fortran not found trying Gtk3Fortran")
+if (GTK EQUAL 2)
+  find_package(Gtk2Fortran)
+  if (NOT GTK2FORTRAN_FOUND)
+    message (FATAL_ERROR "Gtk2Fortran not found, aborting")
+  endif()
+elseif (GTK EQUAL 3) 
   find_package(Gtk3Fortran)
   if (NOT GTK3FORTRAN_FOUND)
-    message (FATAL_ERROR "Gtk3Fortran Not found either, aborting")
+    message (FATAL_ERROR "Gtk3Fortran not found, aborting")
+  endif()
+else ()
+  find_package(Gtk2Fortran)
+  if (NOT GTK2FORTRAN_FOUND)
+    message(STATUS "Gtk2Fortran not found trying Gtk3Fortran")
+    find_package(Gtk3Fortran)
+    if (NOT GTK3FORTRAN_FOUND)
+      message (FATAL_ERROR "Gtk3Fortran Not found either, aborting")
+    endif()
   endif()
 endif()
 

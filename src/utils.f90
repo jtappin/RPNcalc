@@ -87,7 +87,8 @@ contains
     integer(kind=c_int), target :: flen
 
     flen = int(gtk_entry_get_text_length(fentry), c_int)
-    call gtk_editable_insert_text(fentry, chr//c_null_char, -1_c_int, c_loc(flen))
+    call gtk_editable_insert_text(fentry, chr//c_null_char, &
+         & -1_c_int, c_loc(flen))
 
   end subroutine append_char_entry
 
@@ -873,6 +874,46 @@ contains
     end if
 
   end subroutine parse_format
+
+  function is_int(x)
+    logical :: is_int
+    real(kind=c_double), intent(in) :: x
+
+    is_int = x == aint(x)
+
+  end function is_int
+
+  function hcf(i1, i2) result(i0)
+    integer(kind=c_long) :: i0
+    integer(kind=c_long), intent(in) :: i1, i2
+
+    integer(kind=c_long) :: j1, j2
+
+    i0 = max(abs(i1), abs(i2))
+    j1 = min(abs(i1), abs(i2))
+
+    do
+       if (j1 == 0) exit
+       j2 = j1
+       j1 = mod(i0, j2)
+       i0 = j2
+    end do
+    if (i0 == 0) i0 = 1
+  end function hcf
+
+  function lcm(i1, i2) result(i0)
+    integer(kind=c_long) :: i0
+    integer(kind=c_long), intent(in) :: i1, i2
+
+    if (i1 == 0 .or. i2 == 0) then
+       i0 = 0
+    else if (i1 == i2) then
+       i0 = i1
+    else
+       i0 = (i1 / hcf(i1, i2)) * i2
+    end if
+  end function lcm
+
   ! Inverse hyperbolics for those Fortrans that don't support them.
 
 !!$  function asinh(x)

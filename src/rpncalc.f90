@@ -52,7 +52,7 @@ program rpncalc
   character, dimension(10), target :: pnum
   integer(kind=c_int), target :: pplus= OP_PLUS, pminus=OP_MINUS, &
        & ptimes=OP_TIMES, pdiv=OP_DIVIDE, ppow=OP_POWER, patan2=FUN_ATAN2, &
-       & pmod = FUN_MOD
+       & pmod = FUN_MOD, phcf = FUN_HCF, plcm = FUN_LCM
 
   integer(kind=c_int), target :: psin=FUN_SIN, pcos=FUN_COS, ptan=FUN_TAN,&
        & pln=FUN_LN, psqrt=FUN_SQRT, psinh=FUN_SINH, pcosh=FUN_COSH, &
@@ -435,8 +435,14 @@ program rpncalc
        & activate=c_funloc(funpress), data=c_loc(pfact), &
        & tooltip="X factorial"//c_null_char)
   kmod = hl_gtk_menu_item_new(pull, "mod"//c_null_char, &
-       & activate=c_funloc(oppress), data=c_loc(pmod),&
+       & activate=c_funloc(oppress), data=c_loc(pmod), &
        & tooltip = "Remainder of y/x"//c_null_char)
+  khcf = hl_gtk_menu_item_new(pull, "HCF"//c_null_char, &
+       & activate=c_funloc(oppress), data=c_loc(phcf), &
+       & tooltip="Highest common factor of x & y"//c_null_char)
+  klcm = hl_gtk_menu_item_new(pull, "LCM"//c_null_char, &
+       & activate=c_funloc(oppress), data=c_loc(plcm), &
+       & tooltip="Lowest common multiple of x & y"//c_null_char)
   junk = hl_gtk_menu_item_new(pull)
   khms= hl_gtk_menu_item_new(pull, "HMS"//c_null_char, &
        & activate=c_funloc(hmspress), &

@@ -566,7 +566,7 @@ contains
   end subroutine duppress
 
   subroutine oppress(widget, gdata) bind(c)
-    ! One of the operators (including ATAN2). Gdata is a pointer
+    ! One of the operators (including ATAN2, LCM, HCF). Gdata is a pointer
     ! to the operation code
 
     type(c_ptr), value :: widget, gdata
@@ -615,7 +615,7 @@ contains
        ! If the inverse flag is set and the operation was initiated by
        ! the power button (rather than the ^ keystroke) take the root
        if (isinv .and. c_associated(widget)) x = 1._c_double/x
-       if (x == aint(x)) then  ! integer power safe for all signs
+       if (is_int(x)) then  ! integer power safe for all signs
           z = y**int(x)
 
        else if (y < 0._c_double) then ! real power of a negative value
@@ -645,6 +645,30 @@ contains
        end select
     case (FUN_MOD)
        z = modulo(y, x)
+    case (FUN_HCF)
+       if (.not. (is_int(x))) then
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
+               & "X-Value is not an integer."//c_null_char)
+          return
+       end if
+       if (.not. (is_int(y))) then
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
+               & "Y-Value is not an integer."//c_null_char)
+          return
+       end if
+       z = real(hcf(int(x, c_long), int(y, c_long)), c_double)
+    case (FUN_LCM)
+       if (.not. (is_int(x))) then
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
+               & "X-Value is not an integer."//c_null_char)
+          return
+       end if
+       if (.not. (is_int(y))) then
+          mid = gtk_statusbar_push(fstatus, 0_c_int, &
+               & "Y-Value is not an integer."//c_null_char)
+          return
+       end if
+       z = real(lcm(int(x, c_long), int(y, c_long)), c_double)
     end select
 
     call push_stack(z)
@@ -987,7 +1011,7 @@ contains
     case(FUN_FRAC)
        z = x - aint(x)
     case(FUN_FACTORIAL)
-       if (x == aint(x) .and. x >= 0) then
+       if (is_int(x) .and. x >= 0) then
           z = 1._c_double
           do i = 2, int(x)
              z = z*real(i, c_double)
@@ -1057,7 +1081,7 @@ contains
        if (.not. status) return
     end if
 
-    if (val /= aint(val)) then
+    if (.not. is_int(val)) then
        mid = gtk_statusbar_push(fstatus, 0_c_int, &
             & "Value is not an integer."//c_null_char)
        return
