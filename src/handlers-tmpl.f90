@@ -36,7 +36,8 @@ module handlers
        & gtk_toggle_button_get_active, gtk_toggle_button_set_active, &
        & gtk_widget_destroy, gtk_widget_grab_focus, gtk_widget_set_sensitive, &
        & gtk_widget_show_all, gtk_window_set_transient_for, &
-       & gtk_combo_box_get_active, TRUE, FALSE
+       & gtk_combo_box_get_active, gtk_spin_button_get_value_as_int, &
+       & TRUE, FALSE
 
   use iso_fortran_env, only: error_unit
 
@@ -1522,23 +1523,23 @@ contains
 
     select case(fmt_type)
     case(0)                ! Fixed
-       fmt_decimal = int(hl_gtk_spin_button_get_value(fmt_precision), c_int)
+       fmt_decimal = gtk_spin_button_get_value_as_int(fmt_precision)
        write(result_format,"('(F0.',i0')')") fmt_decimal
     case(1)                ! Scientific
-       fmt_decimal = int(hl_gtk_spin_button_get_value(fmt_precision), c_int)
-       fmt_expplaces = int(hl_gtk_spin_button_get_value(fmt_expsize), c_int)
+       fmt_decimal = gtk_spin_button_get_value_as_int(fmt_precision)
+       fmt_expplaces = gtk_spin_button_get_value_as_int(fmt_expsize)
        nchars = 5+fmt_decimal+fmt_expplaces
        write(result_format, "('(ES',i0,'.',i0,'e',i0,')')") nchars, &
             & fmt_decimal, fmt_expplaces
     case(2)                ! Engineering
-       fmt_decimal = int(hl_gtk_spin_button_get_value(fmt_precision), c_int)
-       fmt_expplaces = int(hl_gtk_spin_button_get_value(fmt_expsize), c_int)
+       fmt_decimal = gtk_spin_button_get_value_as_int(fmt_precision)
+       fmt_expplaces = gtk_spin_button_get_value_as_int(fmt_expsize)
        nchars = 7+fmt_decimal+fmt_expplaces
        write(result_format, "('(EN',i0,'.',i0,'e',i0,')')") nchars, &
             & fmt_decimal, fmt_expplaces
     case(3)                ! General
-       fmt_decimal = int(hl_gtk_spin_button_get_value(fmt_precision), c_int)
-       fmt_expplaces = int(hl_gtk_spin_button_get_value(fmt_expsize), c_int)
+       fmt_decimal = gtk_spin_button_get_value_as_int(fmt_precision)
+       fmt_expplaces = gtk_spin_button_get_value_as_int(fmt_expsize)
        nchars = 5+fmt_decimal+fmt_expplaces
        write(result_format, "('(G',i0,'.',i0,'e',i0,')')") nchars, &
             & fmt_decimal, fmt_expplaces
