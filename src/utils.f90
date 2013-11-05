@@ -665,8 +665,7 @@ contains
 
     character(len=160) :: inln, val
     character(len=16) :: key
-    integer :: peq, phash, pd, pe
-    integer :: n
+    integer :: peq, phash
     if (present(file)) then
        rcfile = file
     else

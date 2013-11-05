@@ -85,7 +85,7 @@ contains
     integer(kind=c_int) :: nentry
     type(c_ptr) :: cetext
     integer(kind=c_int), pointer :: ipos
-    integer :: i, j, iloc
+    integer :: i, j
     integer(kind=c_int) :: mid
     logical :: dflag, eflag, svalid
     integer(kind=c_int), target :: opcode
@@ -301,7 +301,7 @@ contains
     type(c_ptr) :: cetext
     integer(kind=c_int) :: nchars
     character(len=40) :: etext
-    integer :: iloc, ilocs
+    integer :: iloc
 
     nchars = gtk_entry_get_text_length(widget)
     cetext = gtk_entry_get_text(widget)
@@ -730,10 +730,7 @@ contains
     type(c_ptr), value :: widget, gdata
 
     integer(kind=c_int) :: nchars, mid
-    type(c_ptr) :: ctext
     character(len=40) :: ftext
-    character(len=80) :: iom
-    integer :: ios
     real(kind=c_double) :: x, y
     logical :: status, sflag
 
@@ -1525,23 +1522,23 @@ contains
 
     select case(fmt_type)
     case(0)                ! Fixed
-       fmt_decimal = hl_gtk_spin_button_get_value(fmt_precision)
+       fmt_decimal = int(hl_gtk_spin_button_get_value(fmt_precision), c_int)
        write(result_format,"('(F0.',i0')')") fmt_decimal
     case(1)                ! Scientific
-       fmt_decimal = hl_gtk_spin_button_get_value(fmt_precision)
-       fmt_expplaces = hl_gtk_spin_button_get_value(fmt_expsize)
+       fmt_decimal = int(hl_gtk_spin_button_get_value(fmt_precision), c_int)
+       fmt_expplaces = int(hl_gtk_spin_button_get_value(fmt_expsize), c_int)
        nchars = 5+fmt_decimal+fmt_expplaces
        write(result_format, "('(ES',i0,'.',i0,'e',i0,')')") nchars, &
             & fmt_decimal, fmt_expplaces
     case(2)                ! Engineering
-       fmt_decimal = hl_gtk_spin_button_get_value(fmt_precision)
-       fmt_expplaces = hl_gtk_spin_button_get_value(fmt_expsize)
+       fmt_decimal = int(hl_gtk_spin_button_get_value(fmt_precision), c_int)
+       fmt_expplaces = int(hl_gtk_spin_button_get_value(fmt_expsize), c_int)
        nchars = 7+fmt_decimal+fmt_expplaces
        write(result_format, "('(EN',i0,'.',i0,'e',i0,')')") nchars, &
             & fmt_decimal, fmt_expplaces
     case(3)                ! General
-       fmt_decimal = hl_gtk_spin_button_get_value(fmt_precision)
-       fmt_expplaces = hl_gtk_spin_button_get_value(fmt_expsize)
+       fmt_decimal = int(hl_gtk_spin_button_get_value(fmt_precision), c_int)
+       fmt_expplaces = int(hl_gtk_spin_button_get_value(fmt_expsize), c_int)
        nchars = 5+fmt_decimal+fmt_expplaces
        write(result_format, "('(G',i0,'.',i0,'e',i0,')')") nchars, &
             & fmt_decimal, fmt_expplaces
