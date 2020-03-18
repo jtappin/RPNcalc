@@ -120,7 +120,7 @@ contains
     end if
 
     ctext = gtk_entry_get_text(fentry)
-    call convert_c_string(ctext, int(nchars), ftext)
+    call convert_c_string(ctext, ftext)
 
     read(ftext,*, iostat=ios, iomsg=iom) val
     if (ios /= 0) then
@@ -157,7 +157,7 @@ contains
     end if
 
     ctext = gtk_entry_get_text(fentry)
-    call convert_c_string(ctext, int(nchars), ftext)
+    call convert_c_string(ctext, ftext)
 
     read(ftext,*, iostat=ios, iomsg=iom) val
     if (ios /= 0) then
@@ -457,7 +457,7 @@ contains
     nchars=gtk_entry_get_text_length(fentry)
     if (nchars > 0) then
        cetext = gtk_entry_get_text(fentry)
-       call convert_c_string(cetext, int(nchars), fetext)
+       call convert_c_string(cetext, fetext)
        write(unit, "(A/I0/A)") "Entry",nchars,fetext
     else
        write(unit, "(A/I0)") "Entry",0

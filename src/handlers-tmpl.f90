@@ -101,13 +101,13 @@ contains
 
     integer :: error_code
 
-    call convert_c_string(ctext, int(nchars), itext)
+    call convert_c_string(ctext, itext)
     call c_f_pointer(ppos, ipos)
     if (ipos == 0) itext=adjustl(itext)
 
     nentry = gtk_entry_get_text_length(widget)
     cetext = gtk_entry_get_text(widget)
-    call convert_c_string(cetext, int(nentry), etext)
+    call convert_c_string(cetext, etext)
 
     eflag=.false.
     dflag=.false.
@@ -308,7 +308,7 @@ contains
     cetext = gtk_entry_get_text(widget)
 
     if (iend < 0) iend = nchars-1
-    call convert_c_string(cetext, int(nchars), etext)
+    call convert_c_string(cetext, etext)
 
     ! Was there an exponent marker in the deleted segment?
     iloc = scan(etext(istart+1:iend+1), "EeDd")
@@ -410,7 +410,7 @@ contains
     nchars = int(gtk_entry_get_text_length(fentry), c_int)
     if (exponent_present) then
        ctext = gtk_entry_get_text(fentry)
-       call convert_c_string(ctext, int(nchars), alltext)
+       call convert_c_string(ctext, alltext)
        idx = max(index(alltext, 'E'), index(alltext,'e'), &
             & index(alltext, 'D'), index(alltext, 'd'))
        if (idx == 0) then
@@ -429,7 +429,7 @@ contains
        end if
     else if (nchars > 0) then
        ctext = gtk_editable_get_chars(fentry, 0_c_int, 1_c_int)
-       call convert_c_string(ctext, 1, ftext)
+       call convert_c_string(ctext, ftext)
        pos = 0
        select case(ftext)
        case ('+')
@@ -524,7 +524,7 @@ contains
     if (nchars == 0) return
 
     clast = gtk_editable_get_chars(fentry, nchars-1_c_int, nchars)
-    call convert_c_string(clast, 1, last)
+    call convert_c_string(clast, last)
     call gtk_editable_delete_text(fentry, nchars-1_c_int, nchars)
 
     select case(last)
@@ -794,7 +794,7 @@ contains
        if (nchars == 0) return ! No action of entry is empty
 
        ctext = gtk_entry_get_text(fentry)
-       call convert_c_string(ctext, int(nchars), ftext)
+       call convert_c_string(ctext, ftext)
        read(ftext, *, iostat=ios, iomsg=iom) x
        if (ios /= 0) then
           mid = gtk_statusbar_push(fstatus, 0_c_int, trim(iom)//c_null_char)
