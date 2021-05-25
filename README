@@ -2,7 +2,7 @@ RPNcalc
 
 rpncalc is a Revese Polish logic scientific calculator application that
 is built using the GtkFortran libraries
-<https://github.com/jerryd/gtk-fortran/wiki>.
+<https://github.com/vmagnin/gtk-fortran/wiki>.
 
 It should work equally well with late 2.x and the 3.0 versions of Gtk+.
 
